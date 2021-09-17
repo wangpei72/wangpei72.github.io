@@ -107,5 +107,5 @@ markdown:
 ## Docs: https://hexo.io/docs/one-command-deployment
 deploy:
   type: git
-  repo: git@github.com:wangpe72/wangpei72.github.io
+  repo: git@github.com:wangpei72/wangpei72.github.io
   branch: gh-pages

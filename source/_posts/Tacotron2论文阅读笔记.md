@@ -10,6 +10,7 @@ mathjax: true
 NATURAL TTS SYNTHESIS BY CONDITIONING WAVENET ON MEL SPECTROGRAM PREDICTIONS论文阅读笔记
 
 <!-- more -->
+
 先推荐一篇比较好的翻译，但不完整[机器之心Tacotron2](https://www.jiqizhixin.com/articles/2017-12-20-3)
 
 #### 简介
