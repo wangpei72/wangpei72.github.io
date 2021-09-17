@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  
+  <title>Tacotron2论文阅读笔记 | Hexo</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="description" content="Tacotron2 NATURAL TTS SYNTHESIS BY CONDITIONING WAVENET ON MEL SPECTROGRAM PREDICTIONS论文阅读笔记">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Tacotron2论文阅读笔记">
+<meta property="og:url" content="http://example.com/2021/05/28/Tacotron2%E8%AE%BA%E6%96%87%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="Tacotron2 NATURAL TTS SYNTHESIS BY CONDITIONING WAVENET ON MEL SPECTROGRAM PREDICTIONS论文阅读笔记">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="http://example.com/2021/05/28/Tacotron2%E8%AE%BA%E6%96%87%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0/1.jpg">
+<meta property="og:image" content="http://example.com/2021/05/28/Tacotron2%E8%AE%BA%E6%96%87%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0/20200728200416736.png">
+<meta property="og:image" content="http://example.com/2021/05/28/Tacotron2%E8%AE%BA%E6%96%87%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0/2.jpg">
+<meta property="og:image" content="http://example.com/2021/05/28/Tacotron2%E8%AE%BA%E6%96%87%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0/3.jpg">
+<meta property="og:image" content="http://example.com/2021/05/28/Tacotron2%E8%AE%BA%E6%96%87%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0/4.jpg">
+<meta property="article:published_time" content="2021-05-28T09:08:23.000Z">
+<meta property="article:modified_time" content="2021-09-17T08:37:35.121Z">
+<meta property="article:author" content="John Doe">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/2021/05/28/Tacotron2%E8%AE%BA%E6%96%87%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0/1.jpg">
+  
+    <link rel="alternate" href="/atom.xml" title="Hexo" type="application/atom+xml">
+  
+  
+    <link rel="shortcut icon" href="/favicon.png">
+  
+  
+    
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/typeface-source-code-pro@0.0.71/index.min.css">
+
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+    
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.min.css">
+
+  
+<!-- hexo injector head_end start -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.css">
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/hexo-math@4.0.0/dist/style.css">
+<!-- hexo injector head_end end --><meta name="generator" content="Hexo 5.4.0"></head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">Hexo</a>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="Search"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://example.com"></form>
+      </div>
+    </div>
+  </div>
+</header>
+
+      <div class="outer">
+        <section id="main"><article id="post-Tacotron2论文阅读笔记" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2021/05/28/Tacotron2%E8%AE%BA%E6%96%87%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0/" class="article-date">
+  <time class="dt-published" datetime="2021-05-28T09:08:23.000Z" itemprop="datePublished">2021-05-28</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="p-name article-title" itemprop="headline name">
+      Tacotron2论文阅读笔记
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <h1 id="tacotron2">Tacotron2</h1>
+<p>NATURAL TTS SYNTHESIS BY CONDITIONING WAVENET ON MEL SPECTROGRAM PREDICTIONS论文阅读笔记</p>
+<span id="more"></span>
+<p>先推荐一篇比较好的翻译，但不完整<a target="_blank" rel="noopener" href="https://www.jiqizhixin.com/articles/2017-12-20-3">机器之心Tacotron2</a></p>
+<h4 id="简介">简介</h4>
+<ol type="1">
+<li><p>历史回顾：</p>
+<ul>
+<li>前期方法：级联合成 、统计参量</li>
+<li>特点：低沉不自然</li>
+<li>方法：Wavenet 时域波形生成模型</li>
+<li>特点：音质提高但是输入繁杂</li>
+</ul></li>
+<li><p>Tacotron2</p>
+<ul>
+<li><p>seq2seq 从字符序列到soectrograms，简化了语言声学特征产生的步骤</p></li>
+<li><p>vocoder : tacotron1--使用短时傅立叶逆变换 &lt; wavenet</p></li>
+<li><p>对比其余网络： Deep Voice3--主观评估低 Char2Wav--使用传统的中间表示形式</p></li>
+</ul></li>
+</ol>
+<h4 id="模型简介">模型简介</h4>
+<ul>
+<li><p>系统组件：</p>
+<ol type="1">
+<li>注意力机制循环序列到序列特征预测network -- 从字符序列预测mel谱图</li>
+<li><pre><code>Wavenet优化版本 -- 基于mel谱图生成时域波形样本</code></pre></li>
+</ol></li>
+<li><p>中间特征代表选择</p>
+<ol type="1">
+<li>mel蘋谱图：在较低的频率中强调细节；使用低频率细节，不强调摩擦音和噪声突发所站主导地位的高频细节。</li>
+<li>选择原因：线性频谱图会丢失相位信息，griffinlim(tacotron1)可以估计该丢弃信息，并且进行短时傅立叶逆变换进行时域转换；mel频谱图会丢弃更多信息，但是与其他声学或者语言特征相比，mel铺图失忆症更简单的低级声学表示，改进的wavenet框架可以从mel频谱中生成高质量的音频</li>
+</ol></li>
+<li><p>频谱图预测网络</p>
+<ol type="1">
+<li>模仿tacotron1,使用50ms帧12.5ms帧跳和Hann窗函数的傅立叶变换；使用5ms帧跳进行试验，以匹配原始wavenet中的条件输入的频率，时间分辨率的提高导致了发音问题增多</li>
+<li>使用125HZ to 7.6kHz 80通道的mel滤波器组将STFT幅度转化为mel标度，之后进行对数动态范围压缩（取log）</li>
+<li>网络结构
+<ul>
+<li>编码器 --将字符序列转换为隐藏的特征表示形式</li>
+<li>解码器 --解析隐藏特征表示形式以预测频谱图</li>
+</ul></li>
+<li>WaveNet Vocoder</li>
+</ol></li>
+</ul>
+<h4 id="预测网络详细介绍">预测网络详细介绍</h4>
+<ul>
+<li><p>编码器</p>
+<ol type="1">
+<li>输入字符：学习的<strong>512维字符嵌入表示</strong>,字符序列经过3层每层512个5*1的过滤器的卷积层，即每个过滤器跨越5个字符，之后批归一化（batch ）和RELU激活函数；卷积层对上下文进行建模，最终输出传递到包含512个单位的<strong>单个双向LSTM层</strong>（前后两个方向各256个）</li>
+<li>编码器的输出被注意力网络解析，解码器将完整的编码序列总结为<strong>固定长度的上下文向量</strong>；使用<strong>位置敏感注意力机制</strong>，将来自先前解码器一定时间步长的累积注意力权重作为附加特征,这有助于模型顺着输入不停向前进行预测，减少了子序列被解码器重复或者忽略的故障模式</li>
+<li>输入和位置特征被投影到128维的隐藏表示形式后可计算出注意力概率；而位置特征是通过32个一维长为31的卷积滤波计算的</li>
+</ol></li>
+<li><p>解码器</p>
+<ol type="1">
+<li><p>解码器由一个自回归RNN，将来自编码器的输入序列每次一帧地预测一幅mel频谱图；来自上一步的预测首先通过一个包含256个隐藏relu单元的2层全连接层的小型<strong>预网</strong>（pre-net），预网的输出和注意力内容向量被连接并且投入2个具有1024单位的<strong>单向LSTM层</strong></p></li>
+<li><p>单向LSTM层的输出和注意力内容向量被连接之后通过线性变换进行投影，来以此预测目标频谱图帧</p></li>
+<li><p>最后，预测的mel频谱图通过5层卷积的post-net(后网)，该网络预测了要加到预测中的<strong>残差</strong>以提高整体性能，后网由512个5×1的过滤器组成，并且进行批归一化，之后在除了最后一层以外的所有层上tanh激活函数</p></li>
+</ol>
+<figure>
+<img src="1.jpg" alt="tc2模型结构" /><figcaption aria-hidden="true">tc2模型结构</figcaption>
+</figure></li>
+<li><p>损失函数</p>
+<p>最小化<strong>经过后网之前和之后的MSE之和</strong>来帮助收敛</p></li>
+<li><p>与预测频谱图并行的是将LSTM输出和注意上下文被投影到一个标量，并通过S型激活来预测输出序列完成的可能性，允许模型动态却仍<strong>何时终止生成</strong>，具体我恶言，生成将在此概率值&gt;0.5的第一帧处完成</p></li>
+<li><p>编码器：网络中的卷积层使用概率为0.5的dropout,LSTM层使用概率为0.1的zoneout；解码器：为引入推断时的输出变化，概率为0.5的丢失仅用于自回归解码器的prenet层中</p>
+<table>
+<thead>
+<tr class="header">
+<th>Tacotron1</th>
+<th>Tacotron2</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>使用CBHG和GRU（LSTM变体）模块</td>
+<td>使用原始的LSTM和卷积层</td>
+</tr>
+<tr class="even">
+<td>结构较为复杂</td>
+<td>架结构更加简单</td>
+</tr>
+<tr class="odd">
+<td>使用griffin lim，减少因子</td>
+<td>不使用减少因子，每个解码器步骤对应于单个频谱图</td>
+</tr>
+</tbody>
+</table></li>
+</ul>
+<h4 id="wavenet声码器">wavenet声码器</h4>
+<ul>
+<li>tacotron2的声码器部分使用的是优化后的wavenet，将mel频谱图转换为时域的波形样本，与原始体系一样，具有30个膨胀卷积层，被分为了三个膨胀周期，第k层的膨胀率为<span class="math inline">\(2^k\)</span> ；为适应mel频谱12.5ms的帧跳，调节堆栈中的的上采样层只有两层而不是三层</li>
+<li>使用logistic分布的10分量混合生成24khz的16位样本，为计算逻辑混合分布，wavenet输出通过relu激活，之后进行线性投影，以预测每个分量组的各个参数（包括平均值、对数刻度、混合物权重）</li>
+<li>损失选择为对于ground truth样本的负对数似然率</li>
+</ul>
+<h4 id="实验与结果">实验与结果</h4>
+<ul>
+<li><p>预测网络训练–teacher-forcing模式，解码器输入正确的输出而非预测的输出，可以确保预测帧与目标波形样本的对齐</p>
+<ul>
+<li>单个gpu上batch size 64</li>
+<li>Adam优化器 <span class="math inline">\(\epsilon = 10^{-6}\)</span></li>
+<li>学习率0.001 50000次迭代后降至0.00001</li>
+<li>L2正则化 权重<span class="math inline">\(10^{-6}\)</span></li>
+</ul></li>
+<li><p>声码器训练</p>
+<ul>
+<li>基于ground truth 批大小128 32GPUS 同步更新</li>
+<li>Adam优化器 <span class="math inline">\(\epsilon = 10^{-8}\)</span></li>
+<li>固定学习率<span class="math inline">\(10^{-4}\)</span></li>
+<li>波形目标缩放127.5倍以加速收敛</li>
+</ul></li>
+<li><p>数据集</p></li>
+<li><p>一名专业女发言人24.6小时的演讲时间，所有文本均已阐明</p></li>
+<li><p>结果</p></li>
+</ul>
+<figure>
+<img src="20200728200416736.png" alt="MOS评测结果" /><figcaption aria-hidden="true">MOS评测结果</figcaption>
+</figure>
+<ul>
+<li>局限–尽管我们的系统能够可靠地处理整个输入，但韵律模型仍有改进的空间</li>
+<li>局限–时会遇到发音困难，例如在处理名称时。这一结果表明了端到端方法的挑战-他们需要对涵盖预期用途的数据进行培训</li>
+<li>优点–神经系统倾向于生成更自然，更像人类的语音</li>
+</ul>
+<h4 id="更多角度评价">更多角度评价</h4>
+<p>对比在预测值和ground truth上声码器的表现对比</p>
+<figure>
+<img src="2.jpg" alt="在这里插入图片描述" /><figcaption aria-hidden="true">在这里插入图片描述</figcaption>
+</figure>
+<p>对比使用线性频谱和mel频谱作为声码器输入</p>
+<figure>
+<img src="3.jpg" alt="在这里插入图片描述" /><figcaption aria-hidden="true">在这里插入图片描述</figcaption>
+</figure>
+<p>对比简化wavenet</p>
+<figure>
+<img src="4.jpg" alt="在这里插入图片描述" /><figcaption aria-hidden="true">在这里插入图片描述</figcaption>
+</figure>
+<h4 id="总结">总结</h4>
+<p>本文介绍了Tacotron 2，这是一种全神经TTS系统，该系统结合了序列到序列的递归网络，并通过改进的WaveNet声码器来关注预测梅尔谱图。 最终的系统将语音合成为Tacotron级韵律和WaveNet级音频质量。 该系统可以直接从数据中进行训练，而无需依赖复杂的特征工程，并且可以实现接近自然人语音的最新音质。</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://example.com/2021/05/28/Tacotron2%E8%AE%BA%E6%96%87%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0/" data-id="ckto5p15x0000y85ugqh3fr7c" data-title="Tacotron2论文阅读笔记" class="article-share-link">Share</a>
+      
+      
+      
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/2021/08/10/%E5%AD%A6%E4%B9%A0%E7%BD%91%E7%BB%9C%E5%BA%93SDK/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          学习网络库SDK
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2021/05/28/COLMAP%E8%AE%BA%E6%96%87%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0-sfm%E7%AE%97%E6%B3%95/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">COLMAP论文阅读笔记-sfm算法</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tags</h3>
+    <div class="widget">
+      <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/leetcodeEveryDay/" rel="tag">leetcodeEveryDay</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tag Cloud</h3>
+    <div class="widget tagcloud">
+      <a href="/tags/leetcodeEveryDay/" style="font-size: 10px;">leetcodeEveryDay</a>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archives</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/09/">September 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/08/">August 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/05/">May 2021</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Recent Posts</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2021/09/17/hello-world/">Hello World</a>
+          </li>
+        
+          <li>
+            <a href="/2021/08/10/%E5%AD%A6%E4%B9%A0%E7%BD%91%E7%BB%9C%E5%BA%93SDK/">学习网络库SDK</a>
+          </li>
+        
+          <li>
+            <a href="/2021/05/28/Tacotron2%E8%AE%BA%E6%96%87%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0/">Tacotron2论文阅读笔记</a>
+          </li>
+        
+          <li>
+            <a href="/2021/05/28/COLMAP%E8%AE%BA%E6%96%87%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0-sfm%E7%AE%97%E6%B3%95/">COLMAP论文阅读笔记-sfm算法</a>
+          </li>
+        
+          <li>
+            <a href="/2021/05/28/%E8%A7%86%E8%A7%89slam7-1-%E8%A7%86%E8%A7%89%E9%87%8C%E7%A8%8B%E8%AE%A1%EF%BC%9A%E4%BD%BF%E7%94%A8%E7%9B%B8%E6%9C%BA%E8%BF%90%E5%8A%A8%E4%BC%B0%E8%AE%A1%E8%A7%86%E8%A7%89%E7%AE%97%E6%B3%95/">视觉slam7.1-视觉里程计：使用相机运动估计视觉算法</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      
+      &copy; 2021 John Doe<br>
+      Powered by <a href="https://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+
+<script src="/js/jquery-3.4.1.min.js"></script>
+
+
+
+  
+<script src="/fancybox/jquery.fancybox.min.js"></script>
+
+
+
+
+<script src="/js/script.js"></script>
+
+
+
+
+
+  </div>
+</body>
+</html>
