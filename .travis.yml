@@ -1,4 +1,3 @@
-os: linux
 language: node_js 
 node_js:
   - 10  # 使用 nodejs LTS v10
@@ -12,6 +11,7 @@ before_script: ## 根据你所用的主题和自定义的不同，这里会有�
   - npm install -g hexo-cli # 在 CI 环境内安装 Hexo
   - npm install # 在根目录安装站点需要的依赖 
 script: 
+  - hexo clean
   - hexo generate # generate static files
 deploy: # 根据个人情况，这里会有所不同
   provider: pages
@@ -22,4 +22,18 @@ deploy: # 根据个人情况，这里会有所不同
   on:
     branch: source # hexo 站点源文件所在的 branch
   local_dir: public 
-  target_branch: master # 存放生成站点文件的 branch，使用 username.github.io 必须是 master
+  target_branch: gh-pages # 存放生成站点文件的 branch，使用 username.github.io 必须是 master
+
+
+after_script:
+    - cd ./public
+    - git init
+    - git config user.name "wangpei72" # 修改name
+    - git config user.email "m17375069764@163.com" # 修改email
+    - git add .
+    - git commit -m "Travis CI Auto Builder"
+    - git push --force --quiet "https://${GH_TOKEN}@${GH_REF}" master:master # GH_TOKEN是在Travis中配置token的名称
+
+env:
+    global:
+        - GH_REF: github.com/wangpei72/wangpei72.github.io.git #设置GH_REF，注意更改yourname
