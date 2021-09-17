@@ -99,9 +99,9 @@ ignore:
 ## Themes: https://hexo.io/themes/
 theme: landscape
 
-markdown:
-  plugins:
-    - hexo-math
+# markdown:
+##  plugins:
+##    - hexo-math
 
 # Deployment
 ## Docs: https://hexo.io/docs/one-command-deployment
