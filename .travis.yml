@@ -1,6 +1,6 @@
 language: node_js 
 node_js:
-  - 10  # 使用 nodejs LTS v10
+  - 12  # 使用 nodejs LTS v10
 branches:
   only:
     - source # 只监控 source 的 branch
@@ -24,7 +24,6 @@ deploy: # 根据个人情况，这里会有所不同
   local_dir: public 
   target_branch: gh-pages # 存放生成站点文件的 branch，使用 username.github.io 必须是 master
 
-
 after_script:
     - cd ./public
     - git init
@@ -32,7 +31,7 @@ after_script:
     - git config user.email "m17375069764@163.com" # 修改email
     - git add .
     - git commit -m "Travis CI Auto Builder"
-    - git push --force --quiet "https://${GH_TOKEN}@${GH_REF}" master:master # GH_TOKEN是在Travis中配置token的名称
+    - git push --force --quiet "https://${GH_TOKEN}@${GH_REF}" master:gh-pages # GH_TOKEN是在Travis中配置token的名称
 
 env:
     global:
