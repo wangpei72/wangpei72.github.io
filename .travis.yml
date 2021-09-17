@@ -11,7 +11,6 @@ before_install:
     - export TZ='Asia/Shanghai'    
 before_script: ## 根据你所用的主题和自定义的不同，这里会有所不同
   - npm install -g hexo-cli # 在 CI 环境内安装 Hexo
-  - mkdir themes # 由于我们没有将 themes/ 上传，所以我们需要新建一个
   - git clone https://github.com/next-theme/hexo-theme-next themes/next #从 Github 上拉取 Suka 主题
   - cd themes/next
   - npm install --production # 安装 Suka 主题的依赖
