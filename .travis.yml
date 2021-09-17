@@ -27,7 +27,7 @@ deploy: # 根据个人情况，这里会有所不同
 after_script:
     - git clone https://${GH_REF} .deploy_git
     - cd .deploy_git
-    - git checkout master
+    - git checkout gh-pages
     - cd ../
     - mv .deploy_git/.git/ ./public/
     - cd ./public
@@ -35,7 +35,7 @@ after_script:
     - git config user.email "m17375069764@163.com"
     - git add .
     - git commit -m "Travis CI Auto Builder"
-    - git push --force --quiet "https://${GH_TOKEN}@${GH_REF}" master:gh-pages
+    - git push --force --quiet "https://${GH_TOKEN}@${GH_REF}" gh-pages
 
 env:
     global:
