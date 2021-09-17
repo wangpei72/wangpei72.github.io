@@ -28,13 +28,17 @@ deploy: # 根据个人情况，这里会有所不同
   target_branch: gh-pages # 存放生成站点文件的 branch，使用 username.github.io 必须是 master
 
 after_script:
+    - git clone https://${GH_REF} .deploy_git
+    - cd .deploy_git
+    - git checkout master
+    - cd ../
+    - mv .deploy_git/.git/ ./public/
     - cd ./public
-    - git init
-    - git config user.name "wangpei72" # 修改name
-    - git config user.email "m17375069764@163.com" # 修改email
+    - git config user.name "wangpei72"
+    - git config user.email "m17375069764@163.com"
     - git add .
     - git commit -m "Travis CI Auto Builder"
-    - git push --force --quiet "https://${GH_TOKEN}@${GH_REF}" master:gh-pages # GH_TOKEN是在Travis中配置token的名称
+    - git push --force --quiet "https://${GH_TOKEN}@${GH_REF}" master:gh-pages
 
 env:
     global:
