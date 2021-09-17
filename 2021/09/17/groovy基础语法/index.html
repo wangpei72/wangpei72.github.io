@@ -1,0 +1,695 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  
+  <title>groovy基础语法 | Hexo</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="description" content="GROOVY基础入门概要groovy基于JVM（java虚拟机）的敏捷开发语言，结合了Python，Ruby和Smalltalk许多强大的特性。groovy代码能够与java代码很好地结合，也能够用于扩展现有代码。groovy可以使用java代码编写的库。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="groovy基础语法">
+<meta property="og:url" content="http://example.com/2021/09/17/groovy%E5%9F%BA%E7%A1%80%E8%AF%AD%E6%B3%95/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="GROOVY基础入门概要groovy基于JVM（java虚拟机）的敏捷开发语言，结合了Python，Ruby和Smalltalk许多强大的特性。groovy代码能够与java代码很好地结合，也能够用于扩展现有代码。groovy可以使用java代码编写的库。">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2021-09-17T19:30:20.000Z">
+<meta property="article:modified_time" content="2021-09-17T12:39:28.861Z">
+<meta property="article:author" content="John Doe">
+<meta property="article:tag" content="groovy">
+<meta name="twitter:card" content="summary">
+  
+    <link rel="alternate" href="/atom.xml" title="Hexo" type="application/atom+xml">
+  
+  
+    <link rel="shortcut icon" href="/favicon.png">
+  
+  
+    
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/typeface-source-code-pro@0.0.71/index.min.css">
+
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+    
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.min.css">
+
+  
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">Hexo</a>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="Search"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://example.com"></form>
+      </div>
+    </div>
+  </div>
+</header>
+
+      <div class="outer">
+        <section id="main"><article id="post-groovy基础语法" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2021/09/17/groovy%E5%9F%BA%E7%A1%80%E8%AF%AD%E6%B3%95/" class="article-date">
+  <time class="dt-published" datetime="2021-09-17T19:30:20.000Z" itemprop="datePublished">2021-09-17</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="p-name article-title" itemprop="headline name">
+      groovy基础语法
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <h1 id="GROOVY基础入门"><a href="#GROOVY基础入门" class="headerlink" title="GROOVY基础入门"></a>GROOVY基础入门</h1><h2 id="概要"><a href="#概要" class="headerlink" title="概要"></a>概要</h2><p>groovy基于JVM（java虚拟机）的敏捷开发语言，结合了Python，Ruby和Smalltalk许多强大的特性。groovy代码能够与java代码很好地结合，也能够用于扩展现有代码。groovy可以使用java代码编写的库。</p>
+<span id="more"></span>
+
+<h2 id="特点"><a href="#特点" class="headerlink" title="特点"></a>特点</h2><ul>
+<li>java之外的特性支持 </li>
+<li>支持dsl（领域定义语言）</li>
+<li>有原生类型、有面向对象，ant dsl，编写脚本很简单</li>
+<li>开发web，gui，数据库或者控制台程序时通过减少框架性代码提高编码效率</li>
+<li>直接编译成java字节码，可以在任何用java的地方直接用groovy</li>
+<li>支持函数式编程，不需要main函数</li>
+<li>新的运算符，默认导入常用的包，支持单元测试和模拟</li>
+<li>类不支持default作用域，默认作用域为public</li>
+<li>groovy基本类型也是对象，可以直接调用对象的方法</li>
+</ul>
+<h2 id="重要特性"><a href="#重要特性" class="headerlink" title="重要特性"></a>重要特性</h2><ol>
+<li><p>动态类型</p>
+<p>类型对于变量，属性，方法，闭包的参数以及方法的返回类型都是可有可无的，都是在给变量赋值的时候才决定它的类型， 不同的类型会在后面用到，任何类型都可以被使用,即使是基本类型 (通过自动包装（autoboxing）). 当需要时，很多类型之间的转换都会自动发生，比如在这些类型之间的转换: 字符串（String），基本类型(如int) 和类型的包装类 (如Integer)之间，可以把不同的基本类型添加到同一数组（collections）中。</p>
+</li>
+<li><p>闭包</p>
+<p>可以使用参数的代码片段，每个闭包会被编译成继承groovy.lang.Closure类的类，这个类有一个叫call方法，通过该方法可以传递参数并调用这个闭包.它们可以访问并修改在闭包创建的范围内的变量，在闭包内创建的变量在闭包被调用的范围内同样可以被引用， 闭包可以保存在变量中并被作为参数传递到方法中。</p>
+</li>
+<li><p>语法</p>
+<p>可以将它想像成 Java 语言的一种更加简单、表达能力更强的变体。Groovy 和 Java 语言的主要区别是：完成同样的任务所需的 Groovy 代码比 Java 代码更少。</p>
+</li>
+<li><p>类</p>
+<p>Groovy类和java类一样，完全可以用标准java bean的语法定义一个Groovy类。但作为另一种语言，可以使用更Groovy的方式定义类，这样的好处是，可以少写一半以上的javabean代码。</p>
+<p><strong>（1）不需public修饰符</strong></p>
+<p>如前面所言，Groovy的默认访问修饰符就是public，如果Groovy类成员需要public修饰，则根本不用写它。</p>
+<p><strong>（2）不需要类型说明</strong></p>
+<p>同样前面也说过，Groovy也不关心变量和方法参数的具体类型。</p>
+<p><strong>（3）不需要getter/setter方法</strong></p>
+<p>在很多ide（如eclipse）早就可以为程序员自动产生getter/setter方法了，在Groovy中，不需要getter/setter方法–所有类成员（如果是默认的public）根本不用通过getter/setter方法引用它们（当然，如果一定要通过getter/setter方法访问成员属性，Groovy也提供了它们）。</p>
+<p><strong>（4）不需要构造函数</strong></p>
+<p>不再需要程序员声明任何构造函数，因为实际上只需要两个构造函数（1个不带参数的默认构造函数，1个只带一个map参数的构造函数–由于是map类型，通过这个参数可以构造对象时任意初始化它的成员变量）。</p>
+<p><strong>（5）不需要return</strong></p>
+<p>Groovy中，方法不需要return来返回值。</p>
+<p><strong>（6）不需要（）</strong></p>
+<p>Groovy中方法调用可以省略（）（构造函数除外）。</p>
+</li>
+</ol>
+<h2 id="基本语法"><a href="#基本语法" class="headerlink" title="基本语法"></a>基本语法</h2><p>​    <strong>导入</strong> 默认导入以下库</p>
+<figure class="highlight groovy"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> java.lang.* </span><br><span class="line"><span class="keyword">import</span> java.util.* </span><br><span class="line"><span class="keyword">import</span> java.io.* </span><br><span class="line"><span class="keyword">import</span> java.net.* </span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> groovy.lang.* </span><br><span class="line"><span class="keyword">import</span> groovy.util.* </span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> java.math.BigInteger </span><br><span class="line"><span class="keyword">import</span> java.math.BigDecimal</span><br></pre></td></tr></table></figure>
+
+<p>导入其他库时可以这么导</p>
+<figure class="highlight groovy"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> groovy.xml.MarkupBuilder </span><br><span class="line"><span class="keyword">def</span> xml = <span class="keyword">new</span> MarkupBuilder() </span><br></pre></td></tr></table></figure>
+
+<p><strong>分号</strong></p>
+<figure class="highlight groovy"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Example</span> &#123;</span></span><br><span class="line">   <span class="keyword">static</span> <span class="keyword">void</span> main(String[] args) &#123;</span><br><span class="line">      <span class="comment">// One can see the use of a semi-colon after each statement</span></span><br><span class="line">      <span class="keyword">def</span> x = <span class="number">5</span>;</span><br><span class="line">      println(<span class="string">&#x27;Hello World&#x27;</span>);  </span><br><span class="line">   &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><strong>身份标识</strong>  标识符被用来定义变量，函数或其他用户定义的变量。标识符以字母开头，美元或下划线。他们不能以数字开头。</p>
+<figure class="highlight groovy"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> employeename </span><br><span class="line"><span class="keyword">def</span> student1 </span><br><span class="line"><span class="keyword">def</span> student_name</span><br></pre></td></tr></table></figure>
+
+<p>def是用来定义标识符的关键字</p>
+<p><strong>关键词</strong></p>
+<table>
+<thead>
+<tr>
+<th>as</th>
+<th>assert</th>
+<th>break</th>
+<th>case</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>catch</td>
+<td>class</td>
+<td>const</td>
+<td>continue</td>
+</tr>
+<tr>
+<td>def</td>
+<td>default</td>
+<td>do</td>
+<td>else</td>
+</tr>
+<tr>
+<td>enum</td>
+<td>extends</td>
+<td>false</td>
+<td>Finally</td>
+</tr>
+<tr>
+<td>for</td>
+<td>goto</td>
+<td>if</td>
+<td>implements</td>
+</tr>
+<tr>
+<td>import</td>
+<td>in</td>
+<td>instanceof</td>
+<td>interface</td>
+</tr>
+<tr>
+<td>new</td>
+<td>pull</td>
+<td>package</td>
+<td>return</td>
+</tr>
+<tr>
+<td>super</td>
+<td>switch</td>
+<td>this</td>
+<td>throw</td>
+</tr>
+<tr>
+<td>throws</td>
+<td>trait</td>
+<td>true</td>
+<td>try</td>
+</tr>
+<tr>
+<td>while</td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+</tbody></table>
+<p><strong>空白</strong> 告诉编译器如何分割不同声明的部分</p>
+<p><strong>文字</strong> 文字表示固定值的符号，符号整数，浮点数，字符和字符串</p>
+<figure class="highlight groovy"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="number">12</span> </span><br><span class="line"><span class="number">1.45</span> </span><br><span class="line">‘a’ </span><br><span class="line">“aa”</span><br></pre></td></tr></table></figure>
+
+<h2 id="groovy数据类型"><a href="#groovy数据类型" class="headerlink" title="groovy数据类型"></a>groovy数据类型</h2><p>内置类型：byte short int  long float double char Boolean String</p>
+<table>
+<thead>
+<tr>
+<th>byte</th>
+<th>-128到127</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>short</td>
+<td>-32,768到32,767</td>
+</tr>
+<tr>
+<td>int</td>
+<td>2,147,483,648 到,147,483,647</td>
+</tr>
+<tr>
+<td>long</td>
+<td>-9,223,372,036,854,775,808到+9,223,372,036,854,775,807</td>
+</tr>
+<tr>
+<td>float</td>
+<td>1.40129846432481707e-45到3.40282346638528860e + 38</td>
+</tr>
+<tr>
+<td>double</td>
+<td>4.94065645841246544e-324d 到1.79769313486231570e + 308d</td>
+</tr>
+</tbody></table>
+<p>支持高精度计算的累（java包装类）</p>
+<table>
+<thead>
+<tr>
+<th>名称</th>
+<th>描述</th>
+<th>例如</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>java.math.BigInteger</td>
+<td>不可变的任意精度的有符号整数数字</td>
+<td>30g</td>
+</tr>
+<tr>
+<td>java.math.BigDecimal</td>
+<td>不可变的任意精度的有符号十进制数</td>
+<td>3.5g</td>
+</tr>
+</tbody></table>
+<h2 id="运算符"><a href="#运算符" class="headerlink" title="运算符"></a>运算符</h2><p>特别注意的运算符</p>
+<p>范围运算符 .. </p>
+<figure class="highlight groovy"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> range = <span class="number">0.</span><span class="number">.5</span></span><br></pre></td></tr></table></figure>
+
+<p>表示一个整数范围，下限0上限5，具体案例：</p>
+<figure class="highlight groovy"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Example</span> &#123;</span> </span><br><span class="line">   <span class="keyword">static</span> <span class="keyword">void</span> main(String[] args) &#123; </span><br><span class="line">      <span class="keyword">def</span> range = <span class="number">5.</span><span class="number">.10</span>; </span><br><span class="line">      println(range); </span><br><span class="line">      println(range.get(<span class="number">2</span>)); </span><br><span class="line">   &#125; </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>get语句会从定义的范围中获取一个对象，将索引值作为参数</p>
+<p>优先级</p>
+<table>
+<thead>
+<tr>
+<th>运算符</th>
+<th>名称</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>++ - + -</td>
+<td>预增/减，一元加，一元减</td>
+</tr>
+<tr>
+<td>* / ％</td>
+<td>乘法，除法，取模</td>
+</tr>
+<tr>
+<td>+ -</td>
+<td>加法，减法</td>
+</tr>
+<tr>
+<td>==！= &lt;=&gt;</td>
+<td>等于，不等于，比较</td>
+</tr>
+<tr>
+<td>＆</td>
+<td>二进制/位运算符与</td>
+</tr>
+<tr>
+<td>^</td>
+<td>二进制/位异或</td>
+</tr>
+<tr>
+<td>|</td>
+<td>二进制/按位或</td>
+</tr>
+<tr>
+<td>&amp;&amp;</td>
+<td>逻辑和</td>
+</tr>
+<tr>
+<td>||</td>
+<td>逻辑或</td>
+</tr>
+<tr>
+<td>= ** = * = / =％= + = - = &lt;&lt; = &gt;&gt; = &gt;&gt;&gt; = = ^ = | =</td>
+<td>各种赋值运算符</td>
+</tr>
+</tbody></table>
+<h2 id="循环"><a href="#循环" class="headerlink" title="循环"></a>循环</h2><p>break continue语句用于改变循环里的控制流 break还可以用于改变switch语句内的控制流</p>
+<figure class="highlight groovy"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">while</span>(condition) &#123; </span><br><span class="line">   statement #<span class="number">1</span> </span><br><span class="line">   statement #<span class="number">2</span> </span><br><span class="line">   ... </span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">for</span>(variable declaration;expression;Increment) &#123; </span><br><span class="line">   statement #<span class="number">1</span> </span><br><span class="line">   statement #<span class="number">2</span> </span><br><span class="line">   … </span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">for</span>(variable <span class="keyword">in</span> range) &#123; </span><br><span class="line">   statement #<span class="number">1</span> </span><br><span class="line">   statement #<span class="number">2</span> </span><br><span class="line">   … </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="条件语句"><a href="#条件语句" class="headerlink" title="条件语句"></a>条件语句</h2><p><strong>if</strong> if/else 嵌套if  switch  嵌套switch</p>
+<h2 id="方法"><a href="#方法" class="headerlink" title="方法"></a>方法</h2><p>Groovy 中的方法是使用返回类型或使用 def 关键字定义的。方法可以接收任意数量的参数。定义参数时，不必显式定义类型。可以添加修饰符，如 public，private 和 protected。默认情况下，如果未提供可见性修饰符，则该方法为 public。</p>
+<p><strong>默认参数：</strong>默认参数在参数列表的末尾定义</p>
+<figure class="highlight groovy"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> someMethod(parameter1, parameter2 = <span class="number">0</span>, parameter3 = <span class="number">0</span>) &#123;    <span class="comment">// Method code goes here &#125; </span></span><br></pre></td></tr></table></figure>
+
+<p><strong>返回值：</strong> </p>
+<figure class="highlight groovy"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">static</span> <span class="keyword">int</span> sum(<span class="keyword">int</span> a,<span class="keyword">int</span> b = <span class="number">5</span>) &#123;      <span class="keyword">int</span> c = a+b;      <span class="keyword">return</span> c;   &#125; </span><br></pre></td></tr></table></figure>
+
+<p><strong>实例方法：</strong></p>
+<p><strong>本地参数和外部参数</strong>：</p>
+<figure class="highlight groovy"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Example</span> &#123;</span> <span class="comment">// x是全局的属性   static int x = 100; 	   public static int getX() &#123;       // lx是内部属性      int lx = 200;       println(lx);       return x;    &#125; 	   static void main(String[] args) &#123;       println getX()    &#125;  &#125;</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>方法属性：</strong></p>
+<p>groovy 可以使用 this 关键字访问它的实例成员。</p>
+<h2 id="可选类型"><a href="#可选类型" class="headerlink" title="可选类型"></a>可选类型</h2><p>与Java相比，Java是一种“强”类型的语言，由此编译器知道每个变量的所有类型，并且可以在编译时理解和尊重合同。这意味着方法调用能够在编译时确定。</p>
+<p>Groovy中编写代码时，开发人员可以灵活地提供类型或不是类型。可选类型通过def关键字键入，可以用于声明一些基本类型或者是包装类。</p>
+<p>为了避免想要使用可选类型提供的灵活性同时兼顾后期开发阶段的可维护性，可以采用鸭式编程的方式。</p>
+<figure class="highlight groovy"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> aint = <span class="number">100</span>;       println(aint); 		      <span class="comment">// Example of an float using def       def bfloat = 100.10;       println(bfloat); 		      // Example of an Double using def       def cDouble = 100.101;       println(cDouble);		      // Example of an String using def       def dString = &quot;HelloWorld&quot;;       println(dString); </span></span><br></pre></td></tr></table></figure>
+
+<h2 id="列表"><a href="#列表" class="headerlink" title="列表"></a>列表</h2><p>List 中的对象引用占据序列中的位置，并通过整数索引来区分。</p>
+<p>列表文字表示为一系列用逗号分隔并用方括号括起来的对象。</p>
+<p>groovy 列表使用索引操作符 [] 索引。列表索引从 0 开始，指第一个元素。</p>
+<p>groovy 中的一个列表中的数据可以是任意类型。这 java 下集合列表有些不同，java 下的列表是同种类型的数据集合。</p>
+<p>groovy 列表可以嵌套列表。groovy 列表内置有反转方法 reverse()。groovy 列表内置有排序方法 sort()。空列表表示为 [] 声明一个空集合：</p>
+<figure class="highlight groovy"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> list1 = []  <span class="keyword">def</span> list2 = [<span class="number">1</span>,<span class="number">2</span>,<span class="number">3</span>,<span class="number">4</span>]  list2.add(<span class="number">12</span>)  list2.add(<span class="number">12</span>)  println list1.size()</span><br></pre></td></tr></table></figure>
+
+<p><strong>添加</strong></p>
+<figure class="highlight groovy"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> list1 = [<span class="number">100</span>, <span class="number">101</span>]<span class="keyword">def</span> list2 = [ <span class="number">99</span>,<span class="number">98</span>,<span class="number">1</span>]println list2.plus(list1)<span class="comment">//输出结果： [100, 101, 99, 98,1]// list2.plus(list1) 也可以写成 list2 + list1</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>删除</strong></p>
+<figure class="highlight groovy"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> list1 = [<span class="number">12</span>, <span class="number">13</span>]<span class="keyword">def</span> list2 = [<span class="number">11</span>, <span class="number">2</span>, <span class="number">33</span>, <span class="number">12</span>, <span class="number">13</span>, <span class="number">16</span>]println list2.minus(list1) <span class="comment">//输出结果： [11, 2, 33, 16]//list2.minus(list1) 也可以写成 list2 - list1</span></span><br></pre></td></tr></table></figure>
+
+<table>
+<thead>
+<tr>
+<th>序号</th>
+<th align="center">方法和描述</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>1</td>
+<td align="center"><a target="_blank" rel="noopener" href="https://www.w3cschool.cn/groovy/groovy_add.html">add()</a>将新值附加到此列表的末尾。</td>
+</tr>
+<tr>
+<td>2</td>
+<td align="center"><a target="_blank" rel="noopener" href="https://www.w3cschool.cn/groovy/groovy_lists_contains.html">contains()</a>如果此列表包含指定的值，则返回 true。</td>
+</tr>
+<tr>
+<td>3</td>
+<td align="center"><a target="_blank" rel="noopener" href="https://www.w3cschool.cn/groovy/groovy_lists_get.html">get()</a>返回此列表中指定位置的元素。</td>
+</tr>
+<tr>
+<td>4</td>
+<td align="center"><a target="_blank" rel="noopener" href="https://www.w3cschool.cn/groovy/groovy_isempty.html">isEmpty()</a>如果此列表不包含元素，则返回 true</td>
+</tr>
+<tr>
+<td>5</td>
+<td align="center"><a target="_blank" rel="noopener" href="https://www.w3cschool.cn/groovy/groovy_lists_minus.html">minus()</a>创建一个由原始元素组成的新列表，而不是集合中指定的元素。</td>
+</tr>
+<tr>
+<td>6</td>
+<td align="center"><a target="_blank" rel="noopener" href="https://www.w3cschool.cn/groovy/groovy_lists_plus.html">plus()</a>创建由原始元素和集合中指定的元素组成的新列表。</td>
+</tr>
+<tr>
+<td>7</td>
+<td align="center"><a target="_blank" rel="noopener" href="https://www.w3cschool.cn/groovy/groovy_pop.html">pop()</a>从此列表中删除最后一个项目</td>
+</tr>
+<tr>
+<td>8</td>
+<td align="center"><a target="_blank" rel="noopener" href="https://www.w3cschool.cn/groovy/groovy_remove.html">remove()</a>删除此列表中指定位置的元素。</td>
+</tr>
+<tr>
+<td>9</td>
+<td align="center"><a target="_blank" rel="noopener" href="https://www.w3cschool.cn/groovy/groovy_reverse.html">reverse()</a>创建与原始列表的元素相反的新列表</td>
+</tr>
+<tr>
+<td>10</td>
+<td align="center"><a target="_blank" rel="noopener" href="https://www.w3cschool.cn/groovy/groovy_lists_size.html">size()</a>获取此列表中的元素数。</td>
+</tr>
+<tr>
+<td>11</td>
+<td align="center"><a target="_blank" rel="noopener" href="https://www.w3cschool.cn/groovy/groovy_sort.html">sort()</a>返回原始列表的排序副本。</td>
+</tr>
+</tbody></table>
+<h2 id="映射"><a href="#映射" class="headerlink" title="映射"></a>映射</h2><p>映射（也称为关联数组，字典，表和散列）是对象引用的无序集合。Map集合中的元素由键值访问。 Map中使用的键可以是任何类。当我们插入到Map集合中时，需要两个值：键和值。</p>
+<ul>
+<li>[‘TopicName’：’Lists’，’TopicName’：’Maps’] - 具有TopicName作为键的键值对的集合及其相应的值。</li>
+<li>[：] - 空映射。</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>序号</th>
+<th align="center">方法和描述</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>1</td>
+<td align="center"><a target="_blank" rel="noopener" href="https://www.w3cschool.cn/groovy/groovy_containskey.html">containsKey()</a>此映射是否包含此键？</td>
+</tr>
+<tr>
+<td>2</td>
+<td align="center"><a target="_blank" rel="noopener" href="https://www.w3cschool.cn/groovy/groovy_maps_get.html">get()</a>查找此Map中的键并返回相应的值。如果此映射中没有键的条目，则返回null。</td>
+</tr>
+<tr>
+<td>3</td>
+<td align="center"><a target="_blank" rel="noopener" href="https://www.w3cschool.cn/groovy/groovy_keyset.html">keySet()</a>获取此映射中的一组键。</td>
+</tr>
+<tr>
+<td>4</td>
+<td align="center"><a target="_blank" rel="noopener" href="https://www.w3cschool.cn/groovy/groovy_put.html">put()</a>将指定的值与此映射中的指定键相关联。如果此映射先前包含此键的映射，则旧值将替换为指定的值。</td>
+</tr>
+<tr>
+<td>5</td>
+<td align="center"><a target="_blank" rel="noopener" href="https://www.w3cschool.cn/groovy/groovy_maps_size.html">size()</a>返回此地图中的键值映射的数量。</td>
+</tr>
+<tr>
+<td>6</td>
+<td align="center"><a target="_blank" rel="noopener" href="https://www.w3cschool.cn/groovy/groovy_values.html">values()</a>返回此地图中包含的值的集合视图。</td>
+</tr>
+</tbody></table>
+<h2 id="异常"><a href="#异常" class="headerlink" title="异常"></a>异常</h2><p>**捕获异常： **try和catch关键字的组合捕获异常。 try / catch块放置在可能生成异常的代码周围。</p>
+<figure class="highlight groovy"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">try</span> &#123;    <span class="comment">//Protected code &#125; catch(ExceptionName e1) &#123;   //Catch block &#125;</span></span><br></pre></td></tr></table></figure>
+
+<p>**多个捕获块： ** 对具体类型的异常做不同的处理</p>
+<p><strong>finally块</strong> 跟在try块或catch块之后。代码的finally块总是执行，而不管异常的发生。</p>
+<h2 id="面向对象"><a href="#面向对象" class="headerlink" title="面向对象"></a>面向对象</h2><p><strong>扩展</strong>  extends用于继承累的属性的关键字</p>
+<p><strong>内部类</strong> 内部类在另一个类中定义。封闭类可以像往常一样使用内部类。另一方面，内部类可以访问其封闭类的成员，即使它们是私有的。不允许除封闭类之外的类访问内部类。</p>
+<figure class="highlight groovy"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Outer</span> &#123;</span>    String name;	   <span class="keyword">def</span> callInnerMethod() &#123;       <span class="keyword">new</span> Inner().methodA()    &#125; 	   <span class="class"><span class="keyword">class</span> <span class="title">Inner</span> &#123;</span>      <span class="keyword">def</span> methodA() &#123;          println(name);       &#125;    &#125; &#125;  </span><br></pre></td></tr></table></figure>
+
+<p><strong>抽象类 ** 表示通用概念，因此，它们</strong>不能被实例化**，被创建为子类化。成员包括字段/属性和抽象或具体方法。抽象方法没有实现，必须通过具体子类来实现。抽象类必须用抽象关键字声明。抽象方法也必须用抽象关键字声明。</p>
+<figure class="highlight groovy"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">abstract</span> <span class="class"><span class="keyword">class</span> <span class="title">Person</span> &#123;</span>    <span class="keyword">public</span> String name;    <span class="keyword">public</span> Person() &#123; &#125;    <span class="keyword">abstract</span> <span class="keyword">void</span> DisplayMarks();&#125; <span class="class"><span class="keyword">class</span> <span class="title">Student</span> <span class="keyword">extends</span> <span class="title">Person</span> &#123;</span>    <span class="keyword">int</span> StudentID    <span class="keyword">int</span> Marks1; 	   <span class="keyword">public</span> Student() &#123;       <span class="built_in">super</span>();    &#125; 	   <span class="keyword">void</span> DisplayMarks() &#123;       println(Marks1);    &#125;  &#125; </span><br></pre></td></tr></table></figure>
+
+<p>**接口 ** 接口仅定义需要实现的方法的列表，但是不定义方法实现。需要使用interface关键字声明接口。接口仅定义方法签名。接口的方法总是公开的。在接口中使用受保护或私有方法是一个错误。</p>
+<figure class="highlight groovy"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">interface</span> <span class="title">Marks</span> &#123;</span>    <span class="keyword">void</span> DisplayMarks(); &#125; <span class="class"><span class="keyword">class</span> <span class="title">Student</span> <span class="keyword">implements</span> <span class="title">Marks</span> &#123;</span>   <span class="keyword">int</span> StudentID   <span class="keyword">int</span> Marks1;	   <span class="keyword">void</span> DisplayMarks() &#123;      println(Marks1);   &#125;&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="泛型"><a href="#泛型" class="headerlink" title="泛型"></a>泛型</h2><p>以下是一个泛型类的实例：</p>
+<figure class="highlight groovy"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">ListType</span>&lt;<span class="title">T</span>&gt; &#123;</span>   <span class="keyword">private</span> T localt;	   <span class="keyword">public</span> T get() &#123;      <span class="keyword">return</span> <span class="built_in">this</span>.localt;   &#125;	   <span class="keyword">public</span> <span class="keyword">void</span> set(T plocal) &#123;      <span class="built_in">this</span>.localt = plocal;   &#125; &#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="特征"><a href="#特征" class="headerlink" title="特征"></a>特征</h2><p>特征是语言的结构构造，允许 -</p>
+<ul>
+<li>行为的组成。</li>
+<li>接口的运行时实现。</li>
+<li>与静态类型检查/编译的兼容性</li>
+</ul>
+<p>可看作是承载默认实现和状态的接口。使用trait关键字定义 trait。</p>
+<figure class="highlight groovy"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">trait</span> <span class="title">Marks</span> &#123;</span>    <span class="keyword">void</span> DisplayMarks() &#123;      println(<span class="string">&quot;Display Marks&quot;</span>);   &#125; &#125; <span class="class"><span class="keyword">class</span> <span class="title">Student</span> <span class="keyword">implements</span> <span class="title">Marks</span> &#123;</span>    <span class="keyword">int</span> StudentID   <span class="keyword">int</span> Marks1;&#125;</span><br></pre></td></tr></table></figure>
+
+<p><strong>实现接口</strong></p>
+<p>Traits 可以实现接口，在这种情况下，使用 interface 关键字声明接口。下</p>
+<ul>
+<li>接口 Total 使用方法 DisplayTotal 定义。</li>
+<li>特征 Marks 实现了 Total 接口，因此需要为 DisplayTotal 方法提供一个实现。</li>
+</ul>
+<figure class="highlight groovy"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">interface</span> <span class="title">Total</span> &#123;</span>   <span class="keyword">void</span> DisplayTotal() &#125; <span class="class"><span class="keyword">trait</span> <span class="title">Marks</span> <span class="keyword">implements</span> <span class="title">Total</span> &#123;</span>   <span class="keyword">void</span> DisplayMarks() &#123;      println(<span class="string">&quot;Display Marks&quot;</span>);   &#125;	   <span class="keyword">void</span> DisplayTotal() &#123;      println(<span class="string">&quot;Display Total&quot;</span>);    &#125; &#125; <span class="class"><span class="keyword">class</span> <span class="title">Student</span> <span class="keyword">implements</span> <span class="title">Marks</span> &#123;</span>    <span class="keyword">int</span> StudentID   <span class="keyword">int</span> Marks1;  &#125; </span><br></pre></td></tr></table></figure>
+
+<p><strong>属性</strong> 特征可以定义属性。</p>
+<figure class="highlight groovy"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">interface</span> <span class="title">Total</span> &#123;</span>      <span class="keyword">void</span> DisplayTotal()    &#125; 	   <span class="class"><span class="keyword">trait</span> <span class="title">Marks</span> <span class="keyword">implements</span> <span class="title">Total</span> &#123;</span>      <span class="keyword">int</span> Marks1;		      <span class="keyword">void</span> DisplayMarks() &#123;         <span class="built_in">this</span>.Marks1 = <span class="number">10</span>;         println(<span class="built_in">this</span>.Marks1);      &#125;		      <span class="keyword">void</span> DisplayTotal() &#123;         println(<span class="string">&quot;Display Total&quot;</span>);      &#125;    &#125; 	   <span class="class"><span class="keyword">class</span> <span class="title">Student</span> <span class="keyword">implements</span> <span class="title">Marks</span> &#123;</span>      <span class="keyword">int</span> StudentID    &#125;</span><br></pre></td></tr></table></figure>
+
+<p><strong>行为的构成</strong></p>
+<p>特征可以用于以受控的方式实现多重继承，避免钻石问题。</p>
+<figure class="highlight groovy"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">trait</span> <span class="title">Marks</span> &#123;</span>   <span class="keyword">void</span> DisplayMarks() &#123;      println(<span class="string">&quot;Marks1&quot;</span>);   &#125; &#125; <span class="class"><span class="keyword">trait</span> <span class="title">Total</span> &#123;</span>   <span class="keyword">void</span> DisplayTotal() &#123;       println(<span class="string">&quot;Total&quot;</span>);   &#125; &#125;  <span class="comment">//Student扩展了两个特征，可以访问这两种方法class Student implements Marks,Total &#123;   int StudentID &#125;   </span></span><br></pre></td></tr></table></figure>
+
+<p><strong>扩展特征</strong> 特征可能扩展另一个特征，在这种情况下，必须使用extends关键字。在下面的代码示例中，我们使用 Marks trait 扩展了 Total trait。</p>
+<figure class="highlight groovy"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Example</span> &#123;</span>   <span class="keyword">static</span> <span class="keyword">void</span> main(String[] args) &#123;      Student st = <span class="keyword">new</span> Student();      st.StudentID = <span class="number">1</span>;      println(st.DisplayMarks());<span class="comment">// 输出Total   &#125; &#125; trait Marks &#123;   void DisplayMarks() &#123;      println(&quot;Marks1&quot;);   &#125; &#125; trait Total extends Marks &#123;   void DisplayMarks() &#123;      println(&quot;Total&quot;);   &#125; &#125;  class Student implements Total &#123;   int StudentID &#125;</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="闭包"><a href="#闭包" class="headerlink" title="闭包"></a>闭包</h2><p>短的匿名代码段</p>
+<figure class="highlight groovy"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> clos = &#123;println <span class="string">&quot;Hello World&quot;</span>&#125;;clos.call();</span><br></pre></td></tr></table></figure>
+
+<p><strong>形式参数：</strong> 使用$ {param}，这导致closure接受一个参数。当通过clos.call语句调用闭包时，我们现在可以选择将一个参数传递给闭包。</p>
+<figure class="highlight groovy"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> clos = &#123;param-&gt;println <span class="string">&quot;Hello $&#123;param&#125;&quot;</span>&#125;;clos.call(<span class="string">&quot;World&quot;</span>);</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight groovy"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> clos = &#123;println <span class="string">&quot;Hello $&#123;it&#125;&quot;</span>&#125;;clos.call(<span class="string">&quot;World&quot;</span>);<span class="comment">//和上一个例子是同样的结果，it是关键字</span></span><br></pre></td></tr></table></figure>
+
+<p>**闭包和变量： **闭包可以在定义闭包时引用变量</p>
+<figure class="highlight groovy"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> str1 = <span class="string">&quot;Hello&quot;</span>;<span class="keyword">def</span> clos = &#123;param -&gt; println <span class="string">&quot;$&#123;str1&#125; $&#123;param&#125;&quot;</span>&#125;clos.call(<span class="string">&quot;World&quot;</span>);<span class="comment">//Hello Worldstr1 = &quot;Welcome&quot;;clos.call(&quot;World&quot;);//Welcome World</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>在方法中使用闭包</strong> 闭包也可以用作方法的参数</p>
+<figure class="highlight groovy"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="keyword">static</span> Display(clo) &#123;      <span class="comment">// This time the $param parameter gets replaced by the string &quot;Inner&quot;               clo.call(&quot;Inner&quot;);   &#125; static void main(String[] args) &#123;      def str1 = &quot;Hello&quot;;      def clos = &#123; param -&gt; println &quot;$&#123;str1&#125; $&#123;param&#125;&quot; &#125;      clos.call(&quot;World&quot;);      // Passing our closure to a method      Example.Display(clos);   &#125; </span></span><br></pre></td></tr></table></figure>
+
+<p><strong>集合和字符串中的闭包</strong> list Map String 方法接收一个闭包作为参数</p>
+<figure class="highlight groovy"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> lst = [<span class="number">11</span>, <span class="number">12</span>, <span class="number">13</span>, <span class="number">14</span>];lst.each &#123;println it&#125;</span><br></pre></td></tr></table></figure>
+
+<p><strong>使用映射闭包</strong> </p>
+<figure class="highlight groovy"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> mp = [<span class="string">&quot;TopicName&quot;</span> : <span class="string">&quot;Maps&quot;</span>, <span class="string">&quot;TopicDescription&quot;</span> : <span class="string">&quot;Methods in Maps&quot;</span>]             mp.each &#123;println it&#125;mp.each &#123;println <span class="string">&quot;$&#123;it.key&#125; maps to: $&#123;it.value&#125;&quot;</span>&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight groovy"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">lst.each&#123;num -&gt; <span class="keyword">if</span>(num % <span class="number">2</span> == <span class="number">0</span>) println num&#125;</span><br></pre></td></tr></table></figure>
+
+<p><strong>闭包本身使用的方法</strong></p>
+<table>
+<thead>
+<tr>
+<th>序号</th>
+<th align="center">方法和描述</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>1</td>
+<td align="center"><a target="_blank" rel="noopener" href="https://www.w3cschool.cn/groovy/groovy_find.html">find()</a>find方法查找集合中与某个条件匹配的第一个值。</td>
+</tr>
+<tr>
+<td>2</td>
+<td align="center"><a target="_blank" rel="noopener" href="https://www.w3cschool.cn/groovy/groovy_findall.html">findAll（）</a>它找到接收对象中与闭合条件匹配的所有值。</td>
+</tr>
+<tr>
+<td>3</td>
+<td align="center"><a target="_blank" rel="noopener" href="https://www.w3cschool.cn/groovy/groovy_any_every.html">any() &amp; every()</a>方法any迭代集合的每个元素，检查布尔谓词是否对至少一个元素有效。</td>
+</tr>
+<tr>
+<td>4</td>
+<td align="center"><a target="_blank" rel="noopener" href="https://www.w3cschool.cn/groovy/groovy_collect.html">collect()</a>该方法通过集合收集迭代，使用闭包作为变换器将每个元素转换为新值。</td>
+</tr>
+</tbody></table>
+<figure class="highlight groovy"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">value = lst.find &#123;element -&gt; element &gt; <span class="number">2</span>&#125; value = lst.findAll &#123;element -&gt; element &gt; <span class="number">2</span>&#125;<span class="comment">// Is there any value above 2value = lst.any&#123;element -&gt; element &gt; 2&#125;println(value);//true// Are all value above 2value = lst.every&#123;element -&gt; element &gt; 2&#125;println(value);//falsenewlst = lst.collect &#123;element -&gt; return element * element&#125;println(newlst);</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="DSLS"><a href="#DSLS" class="headerlink" title="DSLS"></a>DSLS</h2><p>Groovy允许在顶层语句的方法调用的参数周围省略括号。这被称为“命令链”功能。这个扩展的工作原理是允许一个人链接这种无括号的方法调用，在参数周围不需要括号，也不需要链接调用之间的点。</p>
+<figure class="highlight groovy"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">EmailDsl</span> &#123;</span>     String toText    String fromText    String body 	   <span class="comment">/**    * This method accepts a closure which is essentially the DSL. Delegate the    * closure methods to    * the DSL class so the calls can be processed    */</span>       <span class="keyword">def</span> <span class="keyword">static</span> make(closure) &#123;       EmailDsl emailDsl = <span class="keyword">new</span> EmailDsl()       <span class="comment">// any method called in closure will be delegated to the EmailDsl class       closure.delegate = emailDsl      closure()    &#125;      /**    * Store the parameter as a variable and use it later to output a memo    */ 	   def to(String toText) &#123;       this.toText = toText    &#125;      def from(String fromText) &#123;       this.fromText = fromText    &#125;      def body(String bodyText) &#123;       this.body = bodyText    &#125; &#125;EmailDsl.make &#123;    to &quot;Nirav Assar&quot;    from &quot;Barack Obama&quot;    body &quot;How are things? We are doing well. Take care&quot; &#125;</span></span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>使用接受闭包的静态方法。这是一个很麻烦的方式来实现DSL。</li>
+<li>在电子邮件示例中，类EmailDsl具有make方法。它创建一个实例，并将闭包中的所有调用委派给实例。这是一种机制，其中“to”和“from”节结束了EmailDsl类中的执行方法。</li>
+<li>一旦to（）方法被调用，我们将文本存储在实例中以便以后格式化。</li>
+<li>我们现在可以使用易于为最终用户理解的简单语言调用EmailDSL方法。</li>
+</ul>
+<h2 id="shebang"><a href="#shebang" class="headerlink" title="shebang"></a>shebang</h2><p>除了单行注释外, 还有一种被特别的行注释, 通常被称作shebang行，它通常在UNIX系统中被认知，它容许脚本直接在命令行中运行那些你已经安装的Groovy和那些已经在PATH中可用的groovy命令。</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#!/usr/bin/env groovyprintln &quot;Hello from the shebang line&quot;</span></span><br></pre></td></tr></table></figure>
+
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://example.com/2021/09/17/groovy%E5%9F%BA%E7%A1%80%E8%AF%AD%E6%B3%95/" data-id="cktocn28y0006a3gah0qo2azy" data-title="groovy基础语法" class="article-share-link">Share</a>
+      
+      
+      
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/groovy/" rel="tag">groovy</a></li></ul>
+
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+  
+    <a href="/2021/09/17/hello-world/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">Hello World</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tags</h3>
+    <div class="widget">
+      <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/groovy/" rel="tag">groovy</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/leetcodeEveryDay/" rel="tag">leetcodeEveryDay</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tag Cloud</h3>
+    <div class="widget tagcloud">
+      <a href="/tags/groovy/" style="font-size: 10px;">groovy</a> <a href="/tags/leetcodeEveryDay/" style="font-size: 10px;">leetcodeEveryDay</a>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archives</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/09/">September 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/08/">August 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/05/">May 2021</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Recent Posts</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2021/09/17/groovy%E5%9F%BA%E7%A1%80%E8%AF%AD%E6%B3%95/">groovy基础语法</a>
+          </li>
+        
+          <li>
+            <a href="/2021/09/17/hello-world/">Hello World</a>
+          </li>
+        
+          <li>
+            <a href="/2021/08/10/%E5%AD%A6%E4%B9%A0%E7%BD%91%E7%BB%9C%E5%BA%93SDK/">学习网络库SDK</a>
+          </li>
+        
+          <li>
+            <a href="/2021/05/28/Tacotron2%E8%AE%BA%E6%96%87%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0/">Tacotron2论文阅读笔记</a>
+          </li>
+        
+          <li>
+            <a href="/2021/05/28/COLMAP%E8%AE%BA%E6%96%87%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0-sfm%E7%AE%97%E6%B3%95/">COLMAP论文阅读笔记-sfm算法</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      
+      &copy; 2021 John Doe<br>
+      Powered by <a href="https://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+
+<script src="/js/jquery-3.4.1.min.js"></script>
+
+
+
+  
+<script src="/fancybox/jquery.fancybox.min.js"></script>
+
+
+
+
+<script src="/js/script.js"></script>
+
+
+
+
+
+  </div>
+</body>
+</html>
