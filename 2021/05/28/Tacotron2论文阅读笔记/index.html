@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width">
@@ -19,31 +19,31 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.15.4/css/all.min.css" integrity="sha256-mUZM63G8m73Mcidfrv5E+Y61y7a12O5mW4ezU3bxqW4=" crossorigin="anonymous">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/animate.css@3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
 
-<script class="next-config" data-name="main" type="application/json">{"hostname":"example.com","root":"/","images":"/images","scheme":"Muse","darkmode":false,"version":"8.7.1","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":false,"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"Searching...","empty":"We didn't find any results for the search: ${query}","hits_time":"${hits} results found in ${time} ms","hits":"${hits} results found"}}</script><script src="/js/config.js"></script>
+<script class="next-config" data-name="main" type="application/json">{"hostname":"koukoustar.cn","root":"/","images":"/images","scheme":"Muse","darkmode":false,"version":"8.7.1","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":false,"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"}}</script><script src="/js/config.js"></script>
 <meta name="description" content="Tacotron2NATURAL TTS SYNTHESIS BY CONDITIONING WAVENET ON MEL SPECTROGRAM PREDICTIONS论文阅读笔记">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Tacotron2论文阅读笔记">
-<meta property="og:url" content="http://example.com/2021/05/28/Tacotron2%E8%AE%BA%E6%96%87%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0/index.html">
+<meta property="og:url" content="http://koukoustar.cn/2021/05/28/Tacotron2%E8%AE%BA%E6%96%87%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0/index.html">
 <meta property="og:site_name" content="Welcome to koukouStar&#39;s Blog">
 <meta property="og:description" content="Tacotron2NATURAL TTS SYNTHESIS BY CONDITIONING WAVENET ON MEL SPECTROGRAM PREDICTIONS论文阅读笔记">
-<meta property="og:locale" content="en_US">
-<meta property="og:image" content="http://example.com/2021/05/28/Tacotron2%E8%AE%BA%E6%96%87%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0/1.jpg">
-<meta property="og:image" content="http://example.com/2021/05/28/Tacotron2%E8%AE%BA%E6%96%87%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0/20200728200416736.png">
-<meta property="og:image" content="http://example.com/2021/05/28/Tacotron2%E8%AE%BA%E6%96%87%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0/2.jpg">
-<meta property="og:image" content="http://example.com/2021/05/28/Tacotron2%E8%AE%BA%E6%96%87%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0/3.jpg">
-<meta property="og:image" content="http://example.com/2021/05/28/Tacotron2%E8%AE%BA%E6%96%87%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0/4.jpg">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://koukoustar.cn/2021/05/28/Tacotron2%E8%AE%BA%E6%96%87%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0/1.jpg">
+<meta property="og:image" content="http://koukoustar.cn/2021/05/28/Tacotron2%E8%AE%BA%E6%96%87%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0/20200728200416736.png">
+<meta property="og:image" content="http://koukoustar.cn/2021/05/28/Tacotron2%E8%AE%BA%E6%96%87%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0/2.jpg">
+<meta property="og:image" content="http://koukoustar.cn/2021/05/28/Tacotron2%E8%AE%BA%E6%96%87%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0/3.jpg">
+<meta property="og:image" content="http://koukoustar.cn/2021/05/28/Tacotron2%E8%AE%BA%E6%96%87%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0/4.jpg">
 <meta property="article:published_time" content="2021-05-28T09:08:23.000Z">
-<meta property="article:modified_time" content="2021-09-18T07:06:13.673Z">
+<meta property="article:modified_time" content="2021-09-18T09:02:54.932Z">
 <meta property="article:author" content="koukoustar">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="http://example.com/2021/05/28/Tacotron2%E8%AE%BA%E6%96%87%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0/1.jpg">
+<meta name="twitter:image" content="http://koukoustar.cn/2021/05/28/Tacotron2%E8%AE%BA%E6%96%87%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0/1.jpg">
 
 
-<link rel="canonical" href="http://example.com/2021/05/28/Tacotron2%E8%AE%BA%E6%96%87%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0/">
+<link rel="canonical" href="http://koukoustar.cn/2021/05/28/Tacotron2%E8%AE%BA%E6%96%87%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0/">
 
 
 
-<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"en","comments":true,"permalink":"http://example.com/2021/05/28/Tacotron2%E8%AE%BA%E6%96%87%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0/","path":"2021/05/28/Tacotron2论文阅读笔记/","title":"Tacotron2论文阅读笔记"}</script>
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"http://koukoustar.cn/2021/05/28/Tacotron2%E8%AE%BA%E6%96%87%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0/","path":"2021/05/28/Tacotron2论文阅读笔记/","title":"Tacotron2论文阅读笔记"}</script>
 
 <script class="next-config" data-name="calendar" type="application/json">""</script>
 <title>Tacotron2论文阅读笔记 | Welcome to koukouStar's Blog</title>
@@ -64,7 +64,7 @@
     <header class="header" itemscope itemtype="http://schema.org/WPHeader">
       <div class="header-inner"><div class="site-brand-container">
   <div class="site-nav-toggle">
-    <div class="toggle" aria-label="Toggle navigation bar" role="button">
+    <div class="toggle" aria-label="切换导航栏" role="button">
     </div>
   </div>
 
@@ -103,10 +103,10 @@
     <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
       <ul class="sidebar-nav">
         <li class="sidebar-nav-toc">
-          Table of Contents
+          文章目录
         </li>
         <li class="sidebar-nav-overview">
-          Overview
+          站点概览
         </li>
       </ul>
 
@@ -127,12 +127,12 @@
       <div class="site-state-item site-state-posts">
         <a href="/archives/">
           <span class="site-state-item-count">8</span>
-          <span class="site-state-item-name">posts</span>
+          <span class="site-state-item-name">日志</span>
         </a>
       </div>
       <div class="site-state-item site-state-tags">
-        <span class="site-state-item-count">2</span>
-        <span class="site-state-item-name">tags</span>
+        <span class="site-state-item-count">3</span>
+        <span class="site-state-item-name">标签</span>
       </div>
   </nav>
 </div>
@@ -163,7 +163,7 @@
     </header>
 
     
-  <div class="back-to-top" role="button" aria-label="Back to top">
+  <div class="back-to-top" role="button" aria-label="返回顶部">
     <i class="fa fa-arrow-up"></i>
     <span>0%</span>
   </div>
@@ -183,8 +183,8 @@
   
   
 
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="en">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2021/05/28/Tacotron2%E8%AE%BA%E6%96%87%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0/">
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://koukoustar.cn/2021/05/28/Tacotron2%E8%AE%BA%E6%96%87%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/avatar.gif">
@@ -206,16 +206,16 @@
       <span class="post-meta-item-icon">
         <i class="far fa-calendar"></i>
       </span>
-      <span class="post-meta-item-text">Posted on</span>
+      <span class="post-meta-item-text">发表于</span>
 
-      <time title="Created: 2021-05-28 17:08:23" itemprop="dateCreated datePublished" datetime="2021-05-28T17:08:23+08:00">2021-05-28</time>
+      <time title="创建时间：2021-05-28 17:08:23" itemprop="dateCreated datePublished" datetime="2021-05-28T17:08:23+08:00">2021-05-28</time>
     </span>
       <span class="post-meta-item">
         <span class="post-meta-item-icon">
           <i class="far fa-calendar-check"></i>
         </span>
-        <span class="post-meta-item-text">Edited on</span>
-        <time title="Modified: 2021-09-18 15:06:13" itemprop="dateModified" datetime="2021-09-18T15:06:13+08:00">2021-09-18</time>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2021-09-18 17:02:54" itemprop="dateModified" datetime="2021-09-18T17:02:54+08:00">2021-09-18</time>
       </span>
 
   
@@ -303,7 +303,7 @@
 <li><p>最后，预测的mel频谱图通过5层卷积的post-net(后网)，该网络预测了要加到预测中的<strong>残差</strong>以提高整体性能，后网由512个5×1的过滤器组成，并且进行批归一化，之后在除了最后一层以外的所有层上tanh激活函数</p>
 </li>
 </ol>
-<p><img src="1.jpg" alt="tc2模型结构"></p>
+<p><img src="/2021/05/28/Tacotron2%E8%AE%BA%E6%96%87%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0/1.jpg" alt="tc2模型结构"></p>
 </li>
 </ul>
 <ul>
@@ -364,18 +364,18 @@
 <li><p>结果</p>
 </li>
 </ul>
-<p><img src="20200728200416736.png" alt="MOS评测结果"></p>
+<p><img src="/2021/05/28/Tacotron2%E8%AE%BA%E6%96%87%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0/20200728200416736.png" alt="MOS评测结果"></p>
 <ul>
 <li>局限–尽管我们的系统能够可靠地处理整个输入，但韵律模型仍有改进的空间</li>
 <li>局限–时会遇到发音困难，例如在处理名称时。这一结果表明了端到端方法的挑战-他们需要对涵盖预期用途的数据进行培训</li>
 <li>优点–神经系统倾向于生成更自然，更像人类的语音</li>
 </ul>
 <h4 id="更多角度评价"><a href="#更多角度评价" class="headerlink" title="更多角度评价"></a>更多角度评价</h4><p>对比在预测值和ground truth上声码器的表现对比</p>
-<p><img src="2.jpg" alt="在这里插入图片描述"></p>
+<p><img src="/2021/05/28/Tacotron2%E8%AE%BA%E6%96%87%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0/2.jpg" alt="在这里插入图片描述"></p>
 <p>对比使用线性频谱和mel频谱作为声码器输入</p>
-<p><img src="3.jpg" alt="在这里插入图片描述"></p>
+<p><img src="/2021/05/28/Tacotron2%E8%AE%BA%E6%96%87%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0/3.jpg" alt="在这里插入图片描述"></p>
 <p>对比简化wavenet</p>
-<p><img src="4.jpg" alt="在这里插入图片描述"></p>
+<p><img src="/2021/05/28/Tacotron2%E8%AE%BA%E6%96%87%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0/4.jpg" alt="在这里插入图片描述"></p>
 <h4 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h4><p>本文介绍了Tacotron 2，这是一种全神经TTS系统，该系统结合了序列到序列的递归网络，并通过改进的WaveNet声码器来关注预测梅尔谱图。 最终的系统将语音合成为Tacotron级韵律和WaveNet级音频质量。 该系统可以直接从数据中进行训练，而无需依赖复杂的特征工程，并且可以实现接近自然人语音的最新音质。</p>
 
     </div>
@@ -424,7 +424,7 @@
   </span>
   <span class="author" itemprop="copyrightHolder">koukoustar</span>
 </div>
-  <div class="powered-by">Powered by <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/muse/" rel="noopener" target="_blank">NexT.Muse</a>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/muse/" rel="noopener" target="_blank">NexT.Muse</a> 强力驱动
   </div>
 
     </div>
