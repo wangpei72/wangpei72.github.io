@@ -8,14 +8,15 @@ cache:
   directories:
     - node_modules # 缓存 node_modules 加快构建速度
 before_install:
-  # - git submodule set-url themes/next https://${GH_TOKEN}@github.com/wangpei72/hexo-theme-next.git 
+
   - export TZ='Asia/Shanghai'    
 before_script: ## 根据你所用的主题和自定义的不同，这里会有所不同
   - npm install -g hexo-cli # 在 CI 环境内安装 Hexo
-  #从 Github 上拉取 Suka 主题
-  # - cd themes/next
-  # - npm install --production # 安装 Suka 主题的依赖
-  # - cd ../.. # 返回站点根目录
+  - git clone https://${GH_TOKEN}@github.com/wangpei72/hexo-theme-next-1.git themes/next
+  #从 Github 上拉取 next 主题
+  - cd themes/next
+  - npm install --production # 安装 Suka 主题的依赖
+  - cd ../.. # 返回站点根目录
   - npm install # 在根目录安装站点需要的依赖 
 script: 
   - hexo clean
