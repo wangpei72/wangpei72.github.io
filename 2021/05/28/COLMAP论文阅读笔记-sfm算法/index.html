@@ -2,9 +2,11 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="viewport" content="width=device-width">
 <meta name="theme-color" content="#222">
 <meta name="generator" content="Hexo 5.4.0">
+
+
   <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
   <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
   <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
@@ -13,14 +15,12 @@
 <link rel="stylesheet" href="/css/main.css">
 
 
-<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
 
-<script id="hexo-configurations">
-    var NexT = window.NexT || {};
-    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Muse","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}}};
-  </script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.15.4/css/all.min.css" integrity="sha256-mUZM63G8m73Mcidfrv5E+Y61y7a12O5mW4ezU3bxqW4=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/animate.css@3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
 
-  <meta name="description" content="structure from motion  revisitedSfm是对三维重建算法的统称，incremental sfm则表示他是增量式的，在鲁棒性准确性方面有巨大进步；但是灵活性、完整性以及可伸缩性仍然是打破技术壁垒的关键问题。论文后半部分讲述完整的重建流程。sfm 是一系列不同角度拍摄的图像的投影来重建3的结构的过程。">
+<script class="next-config" data-name="main" type="application/json">{"hostname":"example.com","root":"/","images":"/images","scheme":"Muse","darkmode":false,"version":"8.7.1","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":false,"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"Searching...","empty":"We didn't find any results for the search: ${query}","hits_time":"${hits} results found in ${time} ms","hits":"${hits} results found"}}</script><script src="/js/config.js"></script>
+<meta name="description" content="structure from motion  revisitedSfm是对三维重建算法的统称，incremental sfm则表示他是增量式的，在鲁棒性准确性方面有巨大进步；但是灵活性、完整性以及可伸缩性仍然是打破技术壁垒的关键问题。论文后半部分讲述完整的重建流程。sfm 是一系列不同角度拍摄的图像的投影来重建3的结构的过程。">
 <meta property="og:type" content="article">
 <meta property="og:title" content="COLMAP论文阅读笔记-sfm算法">
 <meta property="og:url" content="http://example.com/2021/05/28/COLMAP%E8%AE%BA%E6%96%87%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0-sfm%E7%AE%97%E6%B3%95/index.html">
@@ -28,76 +28,46 @@
 <meta property="og:description" content="structure from motion  revisitedSfm是对三维重建算法的统称，incremental sfm则表示他是增量式的，在鲁棒性准确性方面有巨大进步；但是灵活性、完整性以及可伸缩性仍然是打破技术壁垒的关键问题。论文后半部分讲述完整的重建流程。sfm 是一系列不同角度拍摄的图像的投影来重建3的结构的过程。">
 <meta property="og:locale" content="en_US">
 <meta property="article:published_time" content="2021-05-28T09:07:14.000Z">
-<meta property="article:modified_time" content="2021-09-18T06:20:48.145Z">
+<meta property="article:modified_time" content="2021-09-18T07:06:13.673Z">
 <meta property="article:author" content="koukoustar">
 <meta name="twitter:card" content="summary">
+
 
 <link rel="canonical" href="http://example.com/2021/05/28/COLMAP%E8%AE%BA%E6%96%87%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0-sfm%E7%AE%97%E6%B3%95/">
 
 
-<script id="page-configurations">
-  // https://hexo.io/docs/variables.html
-  CONFIG.page = {
-    sidebar: "",
-    isHome : false,
-    isPost : true,
-    lang   : 'en'
-  };
-</script>
 
-  <title>COLMAP论文阅读笔记-sfm算法 | Welcome to koukouStar's Blog</title>
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"en","comments":true,"permalink":"http://example.com/2021/05/28/COLMAP%E8%AE%BA%E6%96%87%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0-sfm%E7%AE%97%E6%B3%95/","path":"2021/05/28/COLMAP论文阅读笔记-sfm算法/","title":"COLMAP论文阅读笔记-sfm算法"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>COLMAP论文阅读笔记-sfm算法 | Welcome to koukouStar's Blog</title>
   
 
 
 
 
-
-
   <noscript>
-  <style>
-  .use-motion .brand,
-  .use-motion .menu-item,
-  .sidebar-inner,
-  .use-motion .post-block,
-  .use-motion .pagination,
-  .use-motion .comments,
-  .use-motion .post-header,
-  .use-motion .post-body,
-  .use-motion .collection-header { opacity: initial; }
-
-  .use-motion .site-title,
-  .use-motion .site-subtitle {
-    opacity: initial;
-    top: initial;
-  }
-
-  .use-motion .logo-line-before i { left: initial; }
-  .use-motion .logo-line-after i { right: initial; }
-  </style>
-</noscript>
-
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
 </head>
 
-<body itemscope itemtype="http://schema.org/WebPage">
-  <div class="container use-motion">
-    <div class="headband"></div>
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
 
+  <main class="main">
     <header class="header" itemscope itemtype="http://schema.org/WPHeader">
       <div class="header-inner"><div class="site-brand-container">
   <div class="site-nav-toggle">
-    <div class="toggle" aria-label="Toggle navigation bar">
-      <span class="toggle-line toggle-line-first"></span>
-      <span class="toggle-line toggle-line-middle"></span>
-      <span class="toggle-line toggle-line-last"></span>
+    <div class="toggle" aria-label="Toggle navigation bar" role="button">
     </div>
   </div>
 
   <div class="site-meta">
 
     <a href="/" class="brand" rel="start">
-      <span class="logo-line-before"><i></i></span>
+      <i class="logo-line"></i>
       <h1 class="site-title">Welcome to koukouStar's Blog</h1>
-      <span class="logo-line-after"><i></i></span>
+      <i class="logo-line"></i>
     </a>
   </div>
 
@@ -110,34 +80,104 @@
 
 
 
-<nav class="site-nav">
-</nav>
-
 
 
 
 </div>
+        
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#structure-from-motion-revisited"><span class="nav-number">1.</span> <span class="nav-text">structure from motion  revisited</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%AC%AC%E4%B8%80%E6%AD%A5-%E5%AF%B9%E5%BA%94%E7%82%B9%E6%90%9C%E7%B4%A2"><span class="nav-number">1.1.</span> <span class="nav-text">第一步 对应点搜索</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%89%B9%E5%BE%81%E6%8F%90%E5%8F%96feature-extraction"><span class="nav-number">1.1.1.</span> <span class="nav-text">特征提取feature extraction</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8C%B9%E9%85%8Dmatching"><span class="nav-number">1.1.2.</span> <span class="nav-text">匹配matching</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%87%A0%E4%BD%95%E9%AA%8C%E8%AF%81geometric-verification"><span class="nav-number">1.1.3.</span> <span class="nav-text">几何验证geometric verification</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%A2%9E%E9%87%8F%E5%BC%8F%E9%87%8D%E5%BB%BA"><span class="nav-number">1.2.</span> <span class="nav-text">增量式重建</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%88%9D%E5%A7%8B%E5%8C%96"><span class="nav-number">1.2.1.</span> <span class="nav-text">初始化</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9B%BE%E5%83%8F%E9%85%8D%E5%87%86"><span class="nav-number">1.2.2.</span> <span class="nav-text">图像配准</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%89%E8%A7%92%E5%89%96%E5%88%86triangulation"><span class="nav-number">1.2.3.</span> <span class="nav-text">三角剖分triangulation</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#BA"><span class="nav-number">1.2.4.</span> <span class="nav-text">BA</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%9D%A2%E4%B8%B4%E7%9A%84%E6%8C%91%E6%88%98"><span class="nav-number">1.3.</span> <span class="nav-text">面临的挑战</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%B4%A1%E7%8C%AE"><span class="nav-number">1.4.</span> <span class="nav-text">贡献</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9C%BA%E6%99%AF%E5%9B%BE%E5%A2%9E%E5%BC%BA"><span class="nav-number">1.5.</span> <span class="nav-text">场景图增强</span></a></li></ol></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author site-overview-item animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">koukoustar</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap site-overview-item animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">8</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-tags">
+        <span class="site-state-item-count">2</span>
+        <span class="site-state-item-name">tags</span>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author site-overview-item animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/wangpei72" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;wangpei72" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:wpkkstr@gmail.com" title="E-Mail → mailto:wpkkstr@gmail.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://weibo.com/u/6624315543" title="Weibo → https:&#x2F;&#x2F;weibo.com&#x2F;u&#x2F;6624315543" rel="noopener" target="_blank"><i class="fab fa-weibo fa-fw"></i>Weibo</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://twitter.com/koukoustar3" title="Twitter → https:&#x2F;&#x2F;twitter.com&#x2F;koukoustar3" rel="noopener" target="_blank"><i class="fab fa-twitter fa-fw"></i>Twitter</a>
+      </span>
+  </div>
+
+
+
+        </div>
+      </div>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
     </header>
 
     
-  <div class="back-to-top">
+  <div class="back-to-top" role="button" aria-label="Back to top">
     <i class="fa fa-arrow-up"></i>
     <span>0%</span>
   </div>
 
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
 
-    <main class="main">
-      <div class="main-inner">
-        <div class="content-wrap">
-          
 
-          <div class="content post posts-expand">
-            
+    <div class="main-inner post posts-expand">
 
-    
+
+  
+
+
+<div class="post-block">
   
   
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="en">
     <link itemprop="mainEntityOfPage" href="http://example.com/2021/05/28/COLMAP%E8%AE%BA%E6%96%87%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0-sfm%E7%AE%97%E6%B3%95/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -154,24 +194,26 @@
           COLMAP论文阅读笔记-sfm算法
         </h1>
 
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">Posted on</span>
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">Posted on</span>
 
-              <time title="Created: 2021-05-28 17:07:14" itemprop="dateCreated datePublished" datetime="2021-05-28T17:07:14+08:00">2021-05-28</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2021-09-18 14:20:48" itemprop="dateModified" datetime="2021-09-18T14:20:48+08:00">2021-09-18</time>
-              </span>
+      <time title="Created: 2021-05-28 17:07:14" itemprop="dateCreated datePublished" datetime="2021-05-28T17:07:14+08:00">2021-05-28</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">Edited on</span>
+        <time title="Modified: 2021-09-18 15:06:13" itemprop="dateModified" datetime="2021-09-18T15:06:13+08:00">2021-09-18</time>
+      </span>
 
-          
+  
+</div>
 
         </div>
       </header>
@@ -180,8 +222,6 @@
     
     
     <div class="post-body" itemprop="articleBody">
-
-      
         <h1 id="structure-from-motion-revisited"><a href="#structure-from-motion-revisited" class="headerlink" title="structure from motion  revisited"></a>structure from motion  revisited</h1><p>Sfm是对三维重建算法的统称，incremental sfm则表示他是增量式的，在鲁棒性准确性方面有巨大进步；但是灵活性、完整<br>性以及可伸缩性仍然是打破技术壁垒的关键问题。论文后半部分讲述完整的重建流程。sfm 是一系列不同角度拍摄的图像的<br>投影来重建3的结构的过程。                                    </p>
 <p>本文探讨的增量式sfm是具有迭代重构组件的顺序处理管道（一系列工序）。通常是先进行feature提取和匹配没然后进行几何验证。生成的场景图是重建的基础，之后模型讲植入仔细选择的双视角重建（重建作为一个名词，我还不能给出具体的形式），然后再递增注册新图像之前，将对场景中的点进行三角剖分（啥是三角剖分triangulating），过滤异常值，并且使用<br>ba对重建进行优化。</p>
 <p>详细介绍：</p>
@@ -253,137 +293,39 @@
     
     
 
-      <footer class="post-footer">
+    <footer class="post-footer">
 
         
 
-
-        
-    <div class="post-nav">
-      <div class="post-nav-item">
-    <a href="/2021/05/28/%E8%A7%86%E8%A7%89slam7-1-%E8%A7%86%E8%A7%89%E9%87%8C%E7%A8%8B%E8%AE%A1%EF%BC%9A%E4%BD%BF%E7%94%A8%E7%9B%B8%E6%9C%BA%E8%BF%90%E5%8A%A8%E4%BC%B0%E8%AE%A1%E8%A7%86%E8%A7%89%E7%AE%97%E6%B3%95/" rel="prev" title="视觉slam7.1-视觉里程计：使用相机运动估计视觉算法">
-      <i class="fa fa-chevron-left"></i> 视觉slam7.1-视觉里程计：使用相机运动估计视觉算法
-    </a></div>
-      <div class="post-nav-item">
-    <a href="/2021/05/28/Tacotron2%E8%AE%BA%E6%96%87%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0/" rel="next" title="Tacotron2论文阅读笔记">
-      Tacotron2论文阅读笔记 <i class="fa fa-chevron-right"></i>
-    </a></div>
-    </div>
-      </footer>
-    
-  </article>
-  
-  
-  
-
-
-
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2021/05/28/%E8%A7%86%E8%A7%89slam7-1-%E8%A7%86%E8%A7%89%E9%87%8C%E7%A8%8B%E8%AE%A1%EF%BC%9A%E4%BD%BF%E7%94%A8%E7%9B%B8%E6%9C%BA%E8%BF%90%E5%8A%A8%E4%BC%B0%E8%AE%A1%E8%A7%86%E8%A7%89%E7%AE%97%E6%B3%95/" rel="prev" title="视觉slam7.1-视觉里程计：使用相机运动估计视觉算法">
+                  <i class="fa fa-chevron-left"></i> 视觉slam7.1-视觉里程计：使用相机运动估计视觉算法
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2021/05/28/Tacotron2%E8%AE%BA%E6%96%87%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0/" rel="next" title="Tacotron2论文阅读笔记">
+                  Tacotron2论文阅读笔记 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
           </div>
-          
-
-<script>
-  window.addEventListener('tabs:register', () => {
-    let { activeClass } = CONFIG.comments;
-    if (CONFIG.comments.storage) {
-      activeClass = localStorage.getItem('comments_active') || activeClass;
-    }
-    if (activeClass) {
-      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
-      if (activeTab) {
-        activeTab.click();
-      }
-    }
-  });
-  if (CONFIG.comments.storage) {
-    window.addEventListener('tabs:click', event => {
-      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
-      let commentClass = event.target.classList[1];
-      localStorage.setItem('comments_active', commentClass);
-    });
-  }
-</script>
-
-        </div>
-          
-  
-  <div class="toggle sidebar-toggle">
-    <span class="toggle-line toggle-line-first"></span>
-    <span class="toggle-line toggle-line-middle"></span>
-    <span class="toggle-line toggle-line-last"></span>
-  </div>
-
-  <aside class="sidebar">
-    <div class="sidebar-inner">
-
-      <ul class="sidebar-nav motion-element">
-        <li class="sidebar-nav-toc">
-          Table of Contents
-        </li>
-        <li class="sidebar-nav-overview">
-          Overview
-        </li>
-      </ul>
-
-      <!--noindex-->
-      <div class="post-toc-wrap sidebar-panel">
-          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#structure-from-motion-revisited"><span class="nav-number">1.</span> <span class="nav-text">structure from motion  revisited</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%AC%AC%E4%B8%80%E6%AD%A5-%E5%AF%B9%E5%BA%94%E7%82%B9%E6%90%9C%E7%B4%A2"><span class="nav-number">1.1.</span> <span class="nav-text">第一步 对应点搜索</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%89%B9%E5%BE%81%E6%8F%90%E5%8F%96feature-extraction"><span class="nav-number">1.1.1.</span> <span class="nav-text">特征提取feature extraction</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8C%B9%E9%85%8Dmatching"><span class="nav-number">1.1.2.</span> <span class="nav-text">匹配matching</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%87%A0%E4%BD%95%E9%AA%8C%E8%AF%81geometric-verification"><span class="nav-number">1.1.3.</span> <span class="nav-text">几何验证geometric verification</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%A2%9E%E9%87%8F%E5%BC%8F%E9%87%8D%E5%BB%BA"><span class="nav-number">1.2.</span> <span class="nav-text">增量式重建</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%88%9D%E5%A7%8B%E5%8C%96"><span class="nav-number">1.2.1.</span> <span class="nav-text">初始化</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9B%BE%E5%83%8F%E9%85%8D%E5%87%86"><span class="nav-number">1.2.2.</span> <span class="nav-text">图像配准</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%89%E8%A7%92%E5%89%96%E5%88%86triangulation"><span class="nav-number">1.2.3.</span> <span class="nav-text">三角剖分triangulation</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#BA"><span class="nav-number">1.2.4.</span> <span class="nav-text">BA</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%9D%A2%E4%B8%B4%E7%9A%84%E6%8C%91%E6%88%98"><span class="nav-number">1.3.</span> <span class="nav-text">面临的挑战</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%B4%A1%E7%8C%AE"><span class="nav-number">1.4.</span> <span class="nav-text">贡献</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9C%BA%E6%99%AF%E5%9B%BE%E5%A2%9E%E5%BC%BA"><span class="nav-number">1.5.</span> <span class="nav-text">场景图增强</span></a></li></ol></li></ol></div>
-      </div>
-      <!--/noindex-->
-
-      <div class="site-overview-wrap sidebar-panel">
-        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
-  <p class="site-author-name" itemprop="name">koukoustar</p>
-  <div class="site-description" itemprop="description"></div>
+    </footer>
+  </article>
 </div>
-<div class="site-state-wrap motion-element">
-  <nav class="site-state">
-      <div class="site-state-item site-state-posts">
-          <a href="/archives">
-          <span class="site-state-item-count">8</span>
-          <span class="site-state-item-name">posts</span>
-        </a>
-      </div>
-      <div class="site-state-item site-state-tags">
-        <span class="site-state-item-count">2</span>
-        <span class="site-state-item-name">tags</span>
-      </div>
-  </nav>
+
+
+
+
+
+
 </div>
-  <div class="links-of-author motion-element">
-      <span class="links-of-author-item">
-        <a href="https://github.com/wangpei72" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;wangpei72" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
-      </span>
-      <span class="links-of-author-item">
-        <a href="mailto:wpkkstr@gmail.com" title="E-Mail → mailto:wpkkstr@gmail.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
-      </span>
-      <span class="links-of-author-item">
-        <a href="https://weibo.com/u/6624315543" title="Weibo → https:&#x2F;&#x2F;weibo.com&#x2F;u&#x2F;6624315543" rel="noopener" target="_blank"><i class="fab fa-weibo fa-fw"></i>Weibo</a>
-      </span>
-      <span class="links-of-author-item">
-        <a href="https://twitter.com/koukoustar3" title="Twitter → https:&#x2F;&#x2F;twitter.com&#x2F;koukoustar3" rel="noopener" target="_blank"><i class="fab fa-twitter fa-fw"></i>Twitter</a>
-      </span>
-  </div>
+  </main>
 
+  <footer class="footer">
+    <div class="footer-inner">
 
-
-      </div>
-
-    </div>
-  </aside>
-  <div id="sidebar-dimmer"></div>
-
-
-      </div>
-    </main>
-
-    <footer class="footer">
-      <div class="footer-inner">
-        
-
-        
 
 <div class="copyright">
-  
   &copy; 
   <span itemprop="copyrightYear">2021</span>
   <span class="with-love">
@@ -391,36 +333,18 @@
   </span>
   <span class="author" itemprop="copyrightHolder">koukoustar</span>
 </div>
-  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://muse.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/muse/" rel="noopener" target="_blank">NexT.Muse</a>
   </div>
 
-        
-
-
-
-
-
-
-
-
-      </div>
-    </footer>
-  </div>
+    </div>
+  </footer>
 
   
-  <script src="/lib/anime.min.js"></script>
-  <script src="/lib/velocity/velocity.min.js"></script>
-  <script src="/lib/velocity/velocity.ui.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/animejs@3.2.1/lib/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/schemes/muse.js"></script><script src="/js/next-boot.js"></script>
 
-<script src="/js/utils.js"></script>
+  
 
-<script src="/js/motion.js"></script>
-
-
-<script src="/js/schemes/muse.js"></script>
-
-
-<script src="/js/next-boot.js"></script>
 
 
 
@@ -430,20 +354,6 @@
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-  
-
-  
 
 </body>
 </html>
