@@ -1,37 +1,540 @@
-{% extends '_layout.swig' %}
-{% import '_macro/post.swig' as post_template %}
-{% import '_macro/sidebar.swig' as sidebar_template %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
 
 
-{% block title %}{{ page.title }} | {{ config.title }}{% endblock %}
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
 
-{% block page_class %}page-post-detail{% endblock %}
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Muse","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}}};
+  </script>
+
+  <meta name="description" content="Tacotron2NATURAL TTS SYNTHESIS BY CONDITIONING WAVENET ON MEL SPECTROGRAM PREDICTIONS论文阅读笔记">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Tacotron2论文阅读笔记">
+<meta property="og:url" content="http://example.com/2021/05/28/Tacotron2%E8%AE%BA%E6%96%87%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0/index.html">
+<meta property="og:site_name" content="Welcome to koukouStar&#39;s Blog">
+<meta property="og:description" content="Tacotron2NATURAL TTS SYNTHESIS BY CONDITIONING WAVENET ON MEL SPECTROGRAM PREDICTIONS论文阅读笔记">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="http://example.com/2021/05/28/Tacotron2%E8%AE%BA%E6%96%87%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0/1.jpg">
+<meta property="og:image" content="http://example.com/2021/05/28/Tacotron2%E8%AE%BA%E6%96%87%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0/20200728200416736.png">
+<meta property="og:image" content="http://example.com/2021/05/28/Tacotron2%E8%AE%BA%E6%96%87%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0/2.jpg">
+<meta property="og:image" content="http://example.com/2021/05/28/Tacotron2%E8%AE%BA%E6%96%87%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0/3.jpg">
+<meta property="og:image" content="http://example.com/2021/05/28/Tacotron2%E8%AE%BA%E6%96%87%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0/4.jpg">
+<meta property="article:published_time" content="2021-05-28T09:08:23.000Z">
+<meta property="article:modified_time" content="2021-09-18T06:04:13.577Z">
+<meta property="article:author" content="koukoustar">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/2021/05/28/Tacotron2%E8%AE%BA%E6%96%87%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0/1.jpg">
+
+<link rel="canonical" href="http://example.com/2021/05/28/Tacotron2%E8%AE%BA%E6%96%87%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0/">
 
 
-{% block content %}
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'en'
+  };
+</script>
 
-  <div id="posts" class="posts-expand">
-    {{ post_template.render(page) }}
+  <title>Tacotron2论文阅读笔记 | Welcome to koukouStar's Blog</title>
+  
 
-    <div class="post-spread">
-      {% if theme.jiathis %}
-        {% include '_partials/share/jiathis.swig' %}
-      {% elseif theme.baidushare %}
-        {% include '_partials/share/baidushare.swig' %}
-      {% elseif theme.add_this_id %}
-        {% include '_partials/share/add-this.swig' %}
-      {% elseif theme.duoshuo_shortname and theme.duoshuo_share %}
-        {% include '_partials/share/duoshuo_share.swig' %}
-      {% endif %}
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
     </div>
   </div>
 
-{% endblock %}
+  <div class="site-meta">
 
-{% block sidebar %}
-  {{ sidebar_template.render(true) }}
-{% endblock %}
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Welcome to koukouStar's Blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
 
-{% block script_extra %}
-  {% include '_scripts/pages/post-details.swig' %}
-{% endblock %}
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/05/28/Tacotron2%E8%AE%BA%E6%96%87%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="koukoustar">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Welcome to koukouStar's Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Tacotron2论文阅读笔记
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2021-05-28 17:08:23" itemprop="dateCreated datePublished" datetime="2021-05-28T17:08:23+08:00">2021-05-28</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">Edited on</span>
+                <time title="Modified: 2021-09-18 14:04:13" itemprop="dateModified" datetime="2021-09-18T14:04:13+08:00">2021-09-18</time>
+              </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1 id="Tacotron2"><a href="#Tacotron2" class="headerlink" title="Tacotron2"></a>Tacotron2</h1><p>NATURAL TTS SYNTHESIS BY CONDITIONING WAVENET ON MEL SPECTROGRAM PREDICTIONS论文阅读笔记</p>
+<span id="more"></span>
+
+<p>先推荐一篇比较好的翻译，但不完整<a target="_blank" rel="noopener" href="https://www.jiqizhixin.com/articles/2017-12-20-3">机器之心Tacotron2</a></p>
+<h4 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h4><ol>
+<li><p>历史回顾：</p>
+<ul>
+<li>前期方法：级联合成 、统计参量</li>
+<li>特点：低沉不自然</li>
+<li>方法：Wavenet 时域波形生成模型</li>
+<li>特点：音质提高但是输入繁杂</li>
+</ul>
+</li>
+<li><p>Tacotron2</p>
+<ul>
+<li><p>seq2seq 从字符序列到soectrograms，简化了语言声学特征产生的步骤</p>
+</li>
+<li><p>vocoder  : tacotron1–使用短时傅立叶逆变换  &lt; wavenet</p>
+</li>
+<li><p>对比其余网络： Deep Voice3–主观评估低 Char2Wav–使用传统的中间表示形式</p>
+</li>
+</ul>
+</li>
+</ol>
+<h4 id="模型简介"><a href="#模型简介" class="headerlink" title="模型简介"></a>模型简介</h4><ul>
+<li><p>系统组件：</p>
+<ol>
+<li><pre><code>注意力机制循环序列到序列特征预测network -- 从字符序列预测mel谱图
+</code></pre>
+</li>
+<li><pre><code>Wavenet优化版本 -- 基于mel谱图生成时域波形样本
+</code></pre>
+</li>
+</ol>
+</li>
+<li><p>中间特征代表选择</p>
+<ol>
+<li>mel蘋谱图：在较低的频率中强调细节；使用低频率细节，不强调摩擦音和噪声突发所站主导地位的高频细节。</li>
+<li>选择原因：线性频谱图会丢失相位信息，griffinlim(tacotron1)可以估计该丢弃信息，并且进行短时傅立叶逆变换进行时域转换；mel频谱图会丢弃更多信息，但是与其他声学或者语言特征相比，mel铺图失忆症更简单的低级声学表示，改进的wavenet框架可以从mel频谱中生成高质量的音频</li>
+</ol>
+</li>
+<li><p>频谱图预测网络</p>
+<ol>
+<li><p>模仿tacotron1,使用50ms帧12.5ms帧跳和Hann窗函数的傅立叶变换；使用5ms帧跳进行试验，以匹配原始wavenet中的条件输入的频率，时间分辨率的提高导致了发音问题增多</p>
+</li>
+<li><p>使用125HZ to 7.6kHz 80通道的mel滤波器组将STFT幅度转化为mel标度，之后进行对数动态范围压缩（取log）</p>
+</li>
+<li><p>网络结构</p>
+<ul>
+<li>编码器 –将字符序列转换为隐藏的特征表示形式</li>
+<li>解码器 –解析隐藏特征表示形式以预测频谱图</li>
+</ul>
+</li>
+<li><p>WaveNet Vocoder</p>
+</li>
+</ol>
+</li>
+</ul>
+<h4 id="预测网络详细介绍"><a href="#预测网络详细介绍" class="headerlink" title="预测网络详细介绍"></a>预测网络详细介绍</h4><ul>
+<li><p>编码器</p>
+<ol>
+<li>输入字符：学习的<strong>512维字符嵌入表示</strong>,字符序列经过3层每层512个5*1的过滤器的卷积层，即每个过滤器跨越5个字符，之后批归一化（batch ）和RELU激活函数；卷积层对上下文进行建模，最终输出传递到包含512个单位的<strong>单个双向LSTM层</strong>（前后两个方向各256个）</li>
+<li>编码器的输出被注意力网络解析，解码器将完整的编码序列总结为<strong>固定长度的上下文向量</strong>；使用<strong>位置敏感注意力机制</strong>，将来自先前解码器一定时间步长的累积注意力权重作为附加特征,这有助于模型顺着输入不停向前进行预测，减少了子序列被解码器重复或者忽略的故障模式</li>
+<li>输入和位置特征被投影到128维的隐藏表示形式后可计算出注意力概率；而位置特征是通过32个一维长为31的卷积滤波计算的</li>
+</ol>
+</li>
+<li><p>解码器</p>
+<ol>
+<li><p>解码器由一个自回归RNN，将来自编码器的输入序列每次一帧地预测一幅mel频谱图；来自上一步的预测首先通过一个包含256个隐藏relu单元的2层全连接层的小型<strong>预网</strong>（pre-net），预网的输出和注意力内容向量被连接并且投入2个具有1024单位的<strong>单向LSTM层</strong></p>
+</li>
+<li><p>单向LSTM层的输出和注意力内容向量被连接之后通过线性变换进行投影，来以此预测目标频谱图帧</p>
+</li>
+<li><p>最后，预测的mel频谱图通过5层卷积的post-net(后网)，该网络预测了要加到预测中的<strong>残差</strong>以提高整体性能，后网由512个5×1的过滤器组成，并且进行批归一化，之后在除了最后一层以外的所有层上tanh激活函数</p>
+</li>
+</ol>
+<p><img src="1.jpg" alt="tc2模型结构"></p>
+</li>
+</ul>
+<ul>
+<li><p>损失函数</p>
+<p>最小化<strong>经过后网之前和之后的MSE之和</strong>来帮助收敛</p>
+</li>
+<li><p>与预测频谱图并行的是将LSTM输出和注意上下文被投影到一个标量，并通过S型激活来预测输出序列完成的可能性，允许模型动态却仍<strong>何时终止生成</strong>，具体我恶言，生成将在此概率值&gt;0.5的第一帧处完成</p>
+</li>
+<li><p>编码器：网络中的卷积层使用概率为0.5的dropout,LSTM层使用概率为0.1的zoneout；解码器：为引入推断时的输出变化，概率为0.5的丢失仅用于自回归解码器的prenet层中</p>
+<table>
+<thead>
+<tr>
+<th>Tacotron1</th>
+<th>Tacotron2</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>使用CBHG和GRU（LSTM变体）模块</td>
+<td>使用原始的LSTM和卷积层</td>
+</tr>
+<tr>
+<td>结构较为复杂</td>
+<td>架结构更加简单</td>
+</tr>
+<tr>
+<td>使用griffin lim，减少因子</td>
+<td>不使用减少因子，每个解码器步骤对应于单个频谱图</td>
+</tr>
+</tbody></table>
+</li>
+</ul>
+<h4 id="wavenet声码器"><a href="#wavenet声码器" class="headerlink" title="wavenet声码器"></a>wavenet声码器</h4><ul>
+<li>tacotron2的声码器部分使用的是优化后的wavenet，将mel频谱图转换为时域的波形样本，与原始体系一样，具有30个膨胀卷积层，被分为了三个膨胀周期，第k层的膨胀率为$2^k$ ；为适应mel频谱12.5ms的帧跳，调节堆栈中的的上采样层只有两层而不是三层</li>
+<li>使用logistic分布的10分量混合生成24khz的16位样本，为计算逻辑混合分布，wavenet输出通过relu激活，之后进行线性投影，以预测每个分量组的各个参数（包括平均值、对数刻度、混合物权重）</li>
+<li>损失选择为对于ground truth样本的负对数似然率</li>
+</ul>
+<h4 id="实验与结果"><a href="#实验与结果" class="headerlink" title="实验与结果"></a>实验与结果</h4><ul>
+<li><p>预测网络训练–teacher-forcing模式，解码器输入正确的输出而非预测的输出，可以确保预测帧与目标波形样本的对齐</p>
+<ul>
+<li>单个gpu上batch size 64</li>
+<li>Adam优化器 $\epsilon = 10^{-6}$</li>
+<li>学习率0.001 50000次迭代后降至0.00001</li>
+<li>L2正则化 权重$10^{-6}$</li>
+</ul>
+</li>
+<li><p>声码器训练</p>
+<ul>
+<li>基于ground truth 批大小128 32GPUS 同步更新</li>
+<li>Adam优化器 $\epsilon = 10^{-8}$</li>
+<li>固定学习率$10^{-4}$</li>
+<li>波形目标缩放127.5倍以加速收敛</li>
+</ul>
+</li>
+<li><p>数据集</p>
+</li>
+<li><p>一名专业女发言人24.6小时的演讲时间，所有文本均已阐明</p>
+</li>
+<li><p>结果</p>
+</li>
+</ul>
+<p><img src="20200728200416736.png" alt="MOS评测结果"></p>
+<ul>
+<li>局限–尽管我们的系统能够可靠地处理整个输入，但韵律模型仍有改进的空间</li>
+<li>局限–时会遇到发音困难，例如在处理名称时。这一结果表明了端到端方法的挑战-他们需要对涵盖预期用途的数据进行培训</li>
+<li>优点–神经系统倾向于生成更自然，更像人类的语音</li>
+</ul>
+<h4 id="更多角度评价"><a href="#更多角度评价" class="headerlink" title="更多角度评价"></a>更多角度评价</h4><p>对比在预测值和ground truth上声码器的表现对比</p>
+<p><img src="2.jpg" alt="在这里插入图片描述"></p>
+<p>对比使用线性频谱和mel频谱作为声码器输入</p>
+<p><img src="3.jpg" alt="在这里插入图片描述"></p>
+<p>对比简化wavenet</p>
+<p><img src="4.jpg" alt="在这里插入图片描述"></p>
+<h4 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h4><p>本文介绍了Tacotron 2，这是一种全神经TTS系统，该系统结合了序列到序列的递归网络，并通过改进的WaveNet声码器来关注预测梅尔谱图。 最终的系统将语音合成为Tacotron级韵律和WaveNet级音频质量。 该系统可以直接从数据中进行训练，而无需依赖复杂的特征工程，并且可以实现接近自然人语音的最新音质。</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2021/05/28/COLMAP%E8%AE%BA%E6%96%87%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0-sfm%E7%AE%97%E6%B3%95/" rel="prev" title="COLMAP论文阅读笔记-sfm算法">
+      <i class="fa fa-chevron-left"></i> COLMAP论文阅读笔记-sfm算法
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2021/08/10/%E5%AD%A6%E4%B9%A0%E7%BD%91%E7%BB%9C%E5%BA%93SDK/" rel="next" title="学习网络库SDK">
+      学习网络库SDK <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Tacotron2"><span class="nav-number">1.</span> <span class="nav-text">Tacotron2</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%AE%80%E4%BB%8B"><span class="nav-number">1.0.0.1.</span> <span class="nav-text">简介</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%A8%A1%E5%9E%8B%E7%AE%80%E4%BB%8B"><span class="nav-number">1.0.0.2.</span> <span class="nav-text">模型简介</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%A2%84%E6%B5%8B%E7%BD%91%E7%BB%9C%E8%AF%A6%E7%BB%86%E4%BB%8B%E7%BB%8D"><span class="nav-number">1.0.0.3.</span> <span class="nav-text">预测网络详细介绍</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#wavenet%E5%A3%B0%E7%A0%81%E5%99%A8"><span class="nav-number">1.0.0.4.</span> <span class="nav-text">wavenet声码器</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%AE%9E%E9%AA%8C%E4%B8%8E%E7%BB%93%E6%9E%9C"><span class="nav-number">1.0.0.5.</span> <span class="nav-text">实验与结果</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%9B%B4%E5%A4%9A%E8%A7%92%E5%BA%A6%E8%AF%84%E4%BB%B7"><span class="nav-number">1.0.0.6.</span> <span class="nav-text">更多角度评价</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%80%BB%E7%BB%93"><span class="nav-number">1.0.0.7.</span> <span class="nav-text">总结</span></a></li></ol></li></ol></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">koukoustar</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives">
+          <span class="site-state-item-count">8</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-tags">
+        <span class="site-state-item-count">2</span>
+        <span class="site-state-item-name">tags</span>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/wangpei72" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;wangpei72" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:wpkkstr@gmail.com" title="E-Mail → mailto:wpkkstr@gmail.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://weibo.com/u/6624315543" title="Weibo → https:&#x2F;&#x2F;weibo.com&#x2F;u&#x2F;6624315543" rel="noopener" target="_blank"><i class="fab fa-weibo fa-fw"></i>Weibo</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://twitter.com/koukoustar3" title="Twitter → https:&#x2F;&#x2F;twitter.com&#x2F;koukoustar3" rel="noopener" target="_blank"><i class="fab fa-twitter fa-fw"></i>Twitter</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">koukoustar</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://muse.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a>
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>
