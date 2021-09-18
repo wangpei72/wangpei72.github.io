@@ -1,6 +1,6 @@
 language: node_js 
 node_js:
-  - 12  # 使用 nodejs LTS v10
+  - 12  # 使用 nodejs LTS v12
 branches:
   only:
     - source # 只监控 source 的 branch
@@ -12,11 +12,11 @@ before_install:
   - export TZ='Asia/Shanghai'    
 before_script: ## 根据你所用的主题和自定义的不同，这里会有所不同
   - npm install -g hexo-cli # 在 CI 环境内安装 Hexo
-  - git clone https://github.com/wangpei72/hexo-theme-next-1.git themes/next
+  - git clone https://github.com/next-theme/hexo-theme-next.git themes/next
   #从 Github 上拉取 next 主题
-  - cd themes/next
-  - npm install --production # 安装 Suka 主题的依赖
-  - cd ../.. # 返回站点根目录
+  # - cd themes/next
+  # - npm install --production # 安装 Suka 主题的依赖
+  # - cd ../.. # 返回站点根目录
   - npm install # 在根目录安装站点需要的依赖 
 script: 
   - hexo clean
