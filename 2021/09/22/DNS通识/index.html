@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.15.4/css/all.min.css" integrity="sha256-mUZM63G8m73Mcidfrv5E+Y61y7a12O5mW4ezU3bxqW4=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/animate.css@3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"koukoustar.cn","root":"/","images":"/images","scheme":"Muse","darkmode":false,"version":"8.7.1","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":false,"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"}}</script><script src="/js/config.js"></script>
+<meta name="description" content="网络库深入1–应用层网络通识DNSDNS学习">
+<meta property="og:type" content="article">
+<meta property="og:title" content="DNS通识">
+<meta property="og:url" content="http://koukoustar.cn/2021/09/22/DNS%E9%80%9A%E8%AF%86/index.html">
+<meta property="og:site_name" content="Welcome to koukouStar&#39;s Blog">
+<meta property="og:description" content="网络库深入1–应用层网络通识DNSDNS学习">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://koukoustar.cn/2021/09/22/DNS%E9%80%9A%E8%AF%86/1628248431001-29d2849b-b5d7-4f2b-90fb-bb3311c2e932.png">
+<meta property="og:image" content="http://koukoustar.cn/2021/09/22/DNS%E9%80%9A%E8%AF%86/1628249090099-94f9b370-85fc-4e86-8370-d7af0dd52801.png">
+<meta property="og:image" content="http://koukoustar.cn/2021/09/22/DNS%E9%80%9A%E8%AF%86/1628249399477-07b29959-6b24-4fcb-bc07-b208cd3631d7.png">
+<meta property="og:image" content="http://koukoustar.cn/2021/09/22/DNS%E9%80%9A%E8%AF%86/1628249983365-da1d0986-2004-4e57-ade4-4c16efebf1f1.png">
+<meta property="og:image" content="http://koukoustar.cn/2021/09/22/DNS%E9%80%9A%E8%AF%86/1628250100043-bc8e6d05-21e0-4463-8ad0-09bacc800cb4.png">
+<meta property="og:image" content="http://koukoustar.cn/2021/09/22/DNS%E9%80%9A%E8%AF%86/1628564546601-36683c54-f272-45dd-a1a8-75f8a1edc0bc.png">
+<meta property="og:image" content="http://koukoustar.cn/2021/09/22/DNS%E9%80%9A%E8%AF%86/1628577021152-1a8d6459-0bd2-41d9-9a40-78151a080262.png">
+<meta property="article:published_time" content="2021-09-22T06:36:18.000Z">
+<meta property="article:modified_time" content="2021-09-23T09:10:57.208Z">
+<meta property="article:author" content="koukoustar">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://koukoustar.cn/2021/09/22/DNS%E9%80%9A%E8%AF%86/1628248431001-29d2849b-b5d7-4f2b-90fb-bb3311c2e932.png">
+
+
+<link rel="canonical" href="http://koukoustar.cn/2021/09/22/DNS%E9%80%9A%E8%AF%86/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"http://koukoustar.cn/2021/09/22/DNS%E9%80%9A%E8%AF%86/","path":"2021/09/22/DNS通识/","title":"DNS通识"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>DNS通识 | Welcome to koukouStar's Blog</title>
+  
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <h1 class="site-title">Welcome to koukouStar's Blog</h1>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+
+
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E7%BD%91%E7%BB%9C%E5%BA%93%E6%B7%B1%E5%85%A51%E2%80%93%E5%BA%94%E7%94%A8%E5%B1%82%E7%BD%91%E7%BB%9C%E9%80%9A%E8%AF%86DNS"><span class="nav-number">1.</span> <span class="nav-text">网络库深入1–应用层网络通识DNS</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#DNS%E5%AD%A6%E4%B9%A0"><span class="nav-number">1.1.</span> <span class="nav-text">DNS学习</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BD%BF%E7%94%A8dig%E6%9F%A5%E6%89%BE%E5%9F%9F%E5%90%8D%E6%9C%8D%E5%8A%A1%E5%99%A8"><span class="nav-number">1.1.1.</span> <span class="nav-text">使用dig查找域名服务器</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9F%A5%E6%89%BE%E6%A0%B9%E5%9F%9F%E5%90%8D%E6%9C%8D%E5%8A%A1%E5%99%A8%E5%9C%B0%E5%9D%80"><span class="nav-number">1.1.2.</span> <span class="nav-text">查找根域名服务器地址</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9F%A5%E6%89%BEcom%E5%9F%9F%E5%90%8D%E6%9C%8D%E5%8A%A1%E5%99%A8"><span class="nav-number">1.1.3.</span> <span class="nav-text">查找com域名服务器</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9F%A5%E6%89%BE163-com%E5%9F%9F%E5%90%8D%E6%9C%8D%E5%8A%A1%E5%99%A8"><span class="nav-number">1.1.4.</span> <span class="nav-text">查找163.com域名服务器</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9F%A5%E6%89%BE%E6%9C%80%E7%BB%88IP%E5%9C%B0%E5%9D%80%E6%88%96%E8%80%85cname%E5%9C%B0%E5%9D%80"><span class="nav-number">1.1.5.</span> <span class="nav-text">查找最终IP地址或者cname地址</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%80%9A%E8%BF%87cname%E6%89%BE%E5%88%B0%E5%AF%B9%E4%BA%8E%E7%9A%84ip"><span class="nav-number">1.1.6.</span> <span class="nav-text">通过cname找到对于的ip</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%8A%BD%E8%B1%A1%E5%87%BADNS%E7%9A%84%E5%B1%82%E7%BA%A7%E7%BB%93%E6%9E%84"><span class="nav-number">1.2.</span> <span class="nav-text">抽象出DNS的层级结构</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%A0%B9%E5%9F%9F%E5%90%8D-ROOT"><span class="nav-number">1.2.1.</span> <span class="nav-text">根域名.ROOT</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%A1%B6%E7%BA%A7%E5%9F%9F%E5%90%8D"><span class="nav-number">1.2.2.</span> <span class="nav-text">顶级域名</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#DNS%E5%88%86%E7%BA%A7%E6%9F%A5%E6%89%BE"><span class="nav-number">1.3.</span> <span class="nav-text">DNS分级查找</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AE%9A%E4%B9%89"><span class="nav-number">1.3.1.</span> <span class="nav-text">定义</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9F%A5%E6%89%BE%E6%AD%A5%E9%AA%A4"><span class="nav-number">1.3.2.</span> <span class="nav-text">查找步骤</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#DNS%E8%AE%B0%E5%BD%95%E7%B1%BB%E5%9E%8B"><span class="nav-number">1.3.3.</span> <span class="nav-text">DNS记录类型</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BD%BF%E7%94%A8DNS%E7%9A%84%E5%A5%BD%E5%A4%84"><span class="nav-number">1.4.</span> <span class="nav-text">使用DNS的好处</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BD%BF%E7%94%A8DNS%E7%9A%84%E9%A3%8E%E9%99%A9"><span class="nav-number">1.5.</span> <span class="nav-text">使用DNS的风险</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#HTTP-DNS"><span class="nav-number">1.6.</span> <span class="nav-text">HTTP DNS</span></a></li></ol></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author site-overview-item animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">koukoustar</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap site-overview-item animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">10</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-tags">
+        <span class="site-state-item-count">3</span>
+        <span class="site-state-item-name">标签</span>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author site-overview-item animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/wangpei72" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;wangpei72" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:wpkkstr@gmail.com" title="E-Mail → mailto:wpkkstr@gmail.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://weibo.com/u/6624315543" title="Weibo → https:&#x2F;&#x2F;weibo.com&#x2F;u&#x2F;6624315543" rel="noopener" target="_blank"><i class="fab fa-weibo fa-fw"></i>Weibo</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://plus.google.com/wpkkstr" title="Google → https:&#x2F;&#x2F;plus.google.com&#x2F;wpkkstr" rel="noopener" target="_blank"><i class="fab fa-google fa-fw"></i>Google</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://twitter.com/koukoustar3" title="Twitter → https:&#x2F;&#x2F;twitter.com&#x2F;koukoustar3" rel="noopener" target="_blank"><i class="fab fa-twitter fa-fw"></i>Twitter</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://www.facebook.com/pei.wang.1466126" title="FB Page → https:&#x2F;&#x2F;www.facebook.com&#x2F;pei.wang.1466126" rel="noopener" target="_blank"><i class="fab fa-facebook fa-fw"></i>FB Page</a>
+      </span>
+  </div>
+
+
+
+        </div>
+      </div>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://koukoustar.cn/2021/09/22/DNS%E9%80%9A%E8%AF%86/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="koukoustar">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Welcome to koukouStar's Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          DNS通识
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2021-09-22 14:36:18" itemprop="dateCreated datePublished" datetime="2021-09-22T14:36:18+08:00">2021-09-22</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2021-09-23 17:10:57" itemprop="dateModified" datetime="2021-09-23T17:10:57+08:00">2021-09-23</time>
+      </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <h1 id="网络库深入1–应用层网络通识DNS"><a href="#网络库深入1–应用层网络通识DNS" class="headerlink" title="网络库深入1–应用层网络通识DNS"></a>网络库深入1–应用层网络通识DNS</h1><h2 id="DNS学习"><a href="#DNS学习" class="headerlink" title="DNS学习"></a>DNS学习</h2><span id="more"></span>
+
+<h3 id="使用dig查找域名服务器"><a href="#使用dig查找域名服务器" class="headerlink" title="使用dig查找域名服务器"></a>使用dig查找域名服务器</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">dig +trace www.163.com @8.8.8.8</span><br></pre></td></tr></table></figure>
+
+<h3 id="查找根域名服务器地址"><a href="#查找根域名服务器地址" class="headerlink" title="查找根域名服务器地址"></a>查找根域名服务器地址</h3><p><img src="/2021/09/22/DNS%E9%80%9A%E8%AF%86/1628248431001-29d2849b-b5d7-4f2b-90fb-bb3311c2e932.png" alt="img"></p>
+<p>google8.8.8.8域名服务器查找根域名服务器，返回13台.根域名服务器（a.<em>.net-m.</em>.net），客户端可以使用其中高的一台去查找顶级域名服务器。</p>
+<p>此时如果dig <em>.root-servers.net可以获得</em>根域名服务器的A记录.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">b.root-servers.net.	54421	IN	A	199.9.14.201</span><br></pre></td></tr></table></figure>
+
+<h3 id="查找com域名服务器"><a href="#查找com域名服务器" class="headerlink" title="查找com域名服务器"></a>查找com域名服务器</h3><p>j.root-servers.net告诉client com域名服务器，一共13台com域名服务器。client可以使用其中一台com域名服务器超找163.com域名服务器</p>
+<p><img src="/2021/09/22/DNS%E9%80%9A%E8%AF%86/1628249090099-94f9b370-85fc-4e86-8370-d7af0dd52801.png" alt="img"></p>
+<h3 id="查找163-com域名服务器"><a href="#查找163-com域名服务器" class="headerlink" title="查找163.com域名服务器"></a>查找163.com域名服务器</h3><p>client选择了com域名服务器m.gtld-servers.net去查找<a target="_blank" rel="noopener" href="http://www.163.com的ip地址,所以需要找一台163.com域名服务器/">www.163.com的ip地址，所以需要找一台163.com域名服务器</a></p>
+<p><img src="/2021/09/22/DNS%E9%80%9A%E8%AF%86/1628249399477-07b29959-6b24-4fcb-bc07-b208cd3631d7.png" alt="img"></p>
+<h3 id="查找最终IP地址或者cname地址"><a href="#查找最终IP地址或者cname地址" class="headerlink" title="查找最终IP地址或者cname地址"></a>查找最终IP地址或者cname地址</h3><p>通过找的163.com域名服务器（3.nease.net)找到了<a target="_blank" rel="noopener" href="http://www.163.com的cname记录./">www.163.com的cname记录。</a></p>
+<p><img src="/2021/09/22/DNS%E9%80%9A%E8%AF%86/1628249983365-da1d0986-2004-4e57-ade4-4c16efebf1f1.png" alt="img"></p>
+<h3 id="通过cname找到对于的ip"><a href="#通过cname找到对于的ip" class="headerlink" title="通过cname找到对于的ip"></a>通过cname找到对于的ip</h3><p>可以看到如下对应的A记录。</p>
+<p><img src="/2021/09/22/DNS%E9%80%9A%E8%AF%86/1628250100043-bc8e6d05-21e0-4463-8ad0-09bacc800cb4.png" alt="img"></p>
+<h2 id="抽象出DNS的层级结构"><a href="#抽象出DNS的层级结构" class="headerlink" title="抽象出DNS的层级结构"></a>抽象出DNS的层级结构</h2><p>树形结构最为贴切，root就是根域名，再向左右两边长出枝干，按照层级对应顶级域名、一级域名、二级域名。</p>
+<p><img src="/2021/09/22/DNS%E9%80%9A%E8%AF%86/1628564546601-36683c54-f272-45dd-a1a8-75f8a1edc0bc.png" alt="img"></p>
+<h3 id="根域名-ROOT"><a href="#根域名-ROOT" class="headerlink" title="根域名.ROOT"></a>根域名.ROOT</h3><p>最高以及域名节点，whole world 有13组根域名服务器，a.root-servers.net ～ m.root-servers.net，其中一个主根服务器在US，其余12个为辅根服务器，9in US，2 in UKand 瑞典，1in Japan。</p>
+<p>13组根域名服务器由12个组织运营，Verisign管理2组根域名服务器，A J两个服务器，每家公司为例保证根域名服务器的稳定性，会部署多个节点，Verisign公司不熟练104台根域名服务器，根域名服务器个数至少有500多台。</p>
+<p>.root域名一般被省略，所有域名查询都需要先访问根域名。</p>
+<h3 id="顶级域名"><a href="#顶级域名" class="headerlink" title="顶级域名"></a>顶级域名</h3><p>.com .net .edu .us .cn诸如此类域名，由美国加州ICANN公司管理，ICANN负责规定顶级域名的名字范围，不负责管理域名，每个顶级域名委托给托管商，比如.cn域名的托管商是中国互联网络信息中心(CNNIC)，它决定了.cn域名的各种政策，目前最大的顶级域名托管商是Verisign，拖管了.com .net .name .gov四个一般性顶级域名以及.cc .tv国别级顶级域名。</p>
+<h2 id="DNS分级查找"><a href="#DNS分级查找" class="headerlink" title="DNS分级查找"></a>DNS分级查找</h2><h3 id="定义"><a href="#定义" class="headerlink" title="定义"></a>定义</h3><p>分级查询，根域名开始，依次查询每一级域名的NS记录，直到查到最终IP。每一级域名都有自己的NS记录，NS记录指向该级域名的域名服务器，这些NS服务器知道下一级域名的各种记录。</p>
+<h3 id="查找步骤"><a href="#查找步骤" class="headerlink" title="查找步骤"></a>查找步骤</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">dig +trace @8.8.8.8 www.163.com</span><br></pre></td></tr></table></figure>
+
+<p>表示通过谷歌的域名服务器分级查找各级域名的NS记录，最后找到<a href="http://www.163.com的IP，查找steps：">www.163.com的IP，查找steps：</a></p>
+<ol>
+<li><p>询问本地DNS服务器（8.8.8.8）：根域名服务器地址（.root的服务器地址）</p>
+</li>
+<li><p>询问根域名服务器：顶级域名服务器地址（com的域名服务器地址）</p>
+</li>
+<li><p>询问顶级域名服务器：二级域名服务器地址(163.com域名服务器地址）</p>
+</li>
+<li><p>询问二级域名服务器：<a target="_blank" rel="noopener" href="http://www.163.com的ip地址/">www.163.com的IP地址</a></p>
+</li>
+</ol>
+<h3 id="DNS记录类型"><a href="#DNS记录类型" class="headerlink" title="DNS记录类型"></a>DNS记录类型</h3><p>A（Address）记录是地址记录，用来指定主机名（或域名）对应的IP地址记录，通过A记录，可以设置不同域名指向不同的IP。</p>
+<p>有时服务器的地址可能随时更改，并且不是固定的。 目前，使用了CNAME记录。 Cname也称为别名解析。 通常，将指定DNS服务提供商提供的第二级域名，以便DNS也可以通过该第二级域名找到服务器的IP地址。 使用CNAME的好处是，即使服务器的IP地址发生了变化，也无需更改解析记录。 DNS将自动更新解析，这比A记录要麻烦少一些。</p>
+<ul>
+<li><p>A记录：域名到IP地址的映射，IPV4协议；AAAA IPV6协议</p>
+</li>
+<li><p>CNAME： 域名的别名，<a target="_blank" rel="noopener" href="http://www.163.com的别名/">www.163.com的别名</a></p>
+</li>
+<li><p>MX：邮件投递时寻址</p>
+</li>
+<li><p>NS：权威服务器名字</p>
+</li>
+<li><p>PTR：IP地址到域名的映射，俗称反解</p>
+</li>
+<li><p>TXT：主机或域的文本记录，用于反垃圾</p>
+</li>
+</ul>
+<h2 id="使用DNS的好处"><a href="#使用DNS的好处" class="headerlink" title="使用DNS的好处"></a>使用DNS的好处</h2><p>服务器地址IP发生变化时，只需要在DNS系统中修改域名对应的ip即可，客户端则无需修改ip。</p>
+<p>在客户端发器域名解析时，通过权威DNS服务器可以查到新的IP地址，然后建立起连接即可完成互联网络传输。</p>
+<h2 id="使用DNS的风险"><a href="#使用DNS的风险" class="headerlink" title="使用DNS的风险"></a>使用DNS的风险</h2><p>DNS劫持导致用户呗重定向至非目标服务器。一旦DNS被劫持，意味着用户真实访问的网站并非是预期网站，可能造成资金安全、盗号、政治不安全等问题。</p>
+<p>例如攻击方案“缓存投毒”，通过修改DNS缓存服务器中的DNS缓存记录，也就是通过对子域名的投毒进而影响主域名的所有DNS解析，比如黑客利用不存在的子域名（xx.xx.com）进行投毒，达到更新DNS缓存服务器上子域名和IP的映射关系，核心目的是为了更改主域名和黑客DNS服务器ip的映射关系，让所有通过主域名的DNS解析都通过走黑客的DNS服务器来达到目的。</p>
+<p>实现缓存投毒，必须在DNS缓存服务器向权威服务器递归查询IP时，伪造大量的DNS Reply报文，先于权威服务器结果返回，达到先更新DNS缓存服务器中的域名和IP映射关系。</p>
+<p>1.黑客向缓存服务器发送一个不存在的子域名请求，在授权服务器返回DNS Reply报文之前，黑客大量伪造DNS Reply（包含授权服务器IP、缓存服务器端口，Reply Query ID），在授权服务器Reply到达之前被缓存服务器缓存，如果只是缓存不存在的子域名，几乎没影响。</p>
+<p>2.但是DNS Reply的时候会把主域名的解析记录一并返回，黑客利用这个机制，在伪造DNS Relpy报文的时候把主域名的映射关系也伪造掉，导致后续所有请求主域名的地址都是虚假的IP地址。</p>
+<p>防御思路：检查DNS reply报文的会话五元组信息（源IP地址、目的IP地址、源端口号、目的端口号、协议），Query ID和域名是否和缓存服务器发出的DNS request报文一致。</p>
+<h2 id="HTTP-DNS"><a href="#HTTP-DNS" class="headerlink" title="HTTP DNS"></a>HTTP DNS</h2><p>传统的DNS是一个公共基础服务，如果DNS缓存服务器中存在DNS记录则直接返回客户端，若不存在需要通过根域名服务器、顶级域名服务器、权威域名服务器多层地递归查询服务器ip地址列表返回给客户端，且缓存到DNS缓存服务器。一般来说，运营商会在自己的IDC部署DNS缓存服务器来减少DNS分级查找的消耗。 </p>
+<p><strong>缺点：</strong>缓存服务器存在和权威服务器同步更新不及时的情况、运营商域名转发导致并非最优链路，多层递归解析延迟、缓存污染等，导致客户端拿到的最终ip可能并非最优甚至是错误的。</p>
+<p>这表明减少消耗同时要付出代价的。</p>
+<p><strong>解决思路：</strong>减少中间查询层级，如果能做到让客户端直接和最后缓存服务器交互，返回最优的服务器地址，就可以提升查询的效率。</p>
+<p>基于上述思路，HTTPDNS采用不走传统的DNS解析，自己搭建基于HTTP协议的DNS服务器集群，DNS服务器集群中缓存自己的业务的服务器地址，分布在多个地点和多个运营商，当客户端需要DNS解析的时候，直接通过HTTP协议进行请求HTTPDNS服务器集群，得到就近的地址，这就需要基于HTTP协议，实现自己的域名解析和自定义地址簿，不使用统一的地址簿。</p>
+<p>HTTPDNS比较适合手机端的应用场景，在客户端的HTTPDNS sdk中可以提前下发HTTPDNS服务器列表，意味着HTTP请求时的域名解析不走公开的DNS解析，而是直接访问HTTPDNS服务端，获取业务服务器的IP列表，缓存到本地。因为HTTPDNS sdk可以知道用户ip、运营商、所在的省市信息等，HTTPDNS智能调度服务综合地址位置、线路状况酸楚一个排序有先访问优质低延时的ip，缓存到客户端，减少递归查询的层级，提升查询效率。</p>
+<p>HTTPDNS：像拥有一个帮助DNS解析的军师再去做DNS解析操作，是有能力的企业搭建自己的DNS缓存服务器，不走运营商的缓存服务器来减少中间查询层级，且通过自己的DNS缓存服务器可以做到实时刷新缓存，来解决更新不及时。</p>
+<p><img src="/2021/09/22/DNS%E9%80%9A%E8%AF%86/1628577021152-1a8d6459-0bd2-41d9-9a40-78151a080262.png" alt="img"></p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2021/09/18/next%E4%B8%BB%E9%A2%98%E7%BE%8E%E5%8C%96%E8%AE%B0%E5%BD%95/" rel="prev" title="next主题美化记录">
+                  <i class="fa fa-chevron-left"></i> next主题美化记录
+                </a>
+            </div>
+            <div class="post-nav-item">
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+
+<div class="copyright">
+  &copy; 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">koukoustar</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/muse/" rel="noopener" target="_blank">NexT.Muse</a> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <script src="https://cdn.jsdelivr.net/npm/animejs@3.2.1/lib/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/schemes/muse.js"></script><script src="/js/next-boot.js"></script>
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>

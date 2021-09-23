@@ -1,0 +1,1177 @@
+<?xml version="1.0" encoding="utf-8"?>
+<search>
+  <entry>
+    <title>COLMAP论文阅读笔记-sfm算法</title>
+    <url>/2021/05/28/COLMAP%E8%AE%BA%E6%96%87%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0-sfm%E7%AE%97%E6%B3%95/</url>
+    <content><![CDATA[<h1 id="structure-from-motion-revisited"><a href="#structure-from-motion-revisited" class="headerlink" title="structure from motion  revisited"></a>structure from motion  revisited</h1><p>Sfm是对三维重建算法的统称，incremental sfm则表示他是增量式的，在鲁棒性准确性方面有巨大进步；但是灵活性、完整<br>性以及可伸缩性仍然是打破技术壁垒的关键问题。论文后半部分讲述完整的重建流程。sfm 是一系列不同角度拍摄的图像的<br>投影来重建3的结构的过程。                                    </p>
+<p>本文探讨的增量式sfm是具有迭代重构组件的顺序处理管道（一系列工序）。通常是先进行feature提取和匹配没然后进行几何验证。生成的场景图是重建的基础，之后模型讲植入仔细选择的双视角重建（重建作为一个名词，我还不能给出具体的形式），然后再递增注册新图像之前，将对场景中的点进行三角剖分（啥是三角剖分triangulating），过滤异常值，并且使用<br>ba对重建进行优化。</p>
+<p>详细介绍：</p>
+<span id="more"></span>
+
+<h2 id="第一步-对应点搜索"><a href="#第一步-对应点搜索" class="headerlink" title="第一步 对应点搜索"></a>第一步 对应点搜索</h2><p>首先会先在输入的图片中找到重叠（overlap）的场景。</p>
+<p>输入的场景被定义为<br>$$<br>I = { I_i \quad |  \quad i=1 \dots N_I}<br>$$<br><strong>在上述输入场景中找到重叠图像，标记相同的点的投影，输出是一组经过了几何验证的图像对以及每个点的图像投影图。</strong></p>
+<p>这里每个点是指对应点搜索中重叠部分的相同点</p>
+<p>图像对被记作C</p>
+<p>==什么是几何验证==——我猜测，是肉眼观察这些点确实是一个点</p>
+<p>加粗部分为该步骤的整体概括。之后是细节步骤。</p>
+<h3 id="特征提取feature-extraction"><a href="#特征提取feature-extraction" class="headerlink" title="特征提取feature extraction"></a>特征提取feature extraction</h3><p>对于每个 I<del>i</del> ,SFM都会检测到一个用以表示位置在X<del>j</del>的特征集合<br>$$<br>F_i = { (x_j ,f_j) \quad | \quad j = 1\dots N_{F_i}}<br>$$<br>对这些特征有约束：对辐射和几何变化下应该是不变的，使得SFM可以在不同的图像中唯一识别他们。SIFT和其衍生特征点以及最新了解的那些特征点在鲁棒性方面是事实标准，另外，==二进制特征binary feature==损失部分鲁棒性提高效率。</p>
+<p>==这里提到了辐射radiometric，这也解释了之前标定的时候为什么不可以使用发光的屏幕==</p>
+<h3 id="匹配matching"><a href="#匹配matching" class="headerlink" title="匹配matching"></a>匹配matching</h3><p>接下来，SFM会通过利用特征集合，上一步骤中的F<del>i</del>来作为图像的外观描述来发现看到的相同场景部分的图像，朴素的方法会对每个图像对测试场景重叠。</p>
+<p>他会基于F<del>i</del>建立一个相似度的度量，为图像I<del>b</del>中的每个特征找到在图像I<del>a</del>中的最相似的特征来搜索对应的特征点，获得这个图像对的特征对应关系。并且这个方法具有计算复杂度<br>$$<br>O(N_I^2N_{F_i}^2)<br>$$<br>且不可以用于大型图像的集合。</p>
+<p>于是有许多方法致力于解决规模和效率的问题。（引用了七篇论文，09年-“一天之内造一个罗马城”之类的论文。</p>
+<p>输出是一组可能重叠的图像对<br>$$<br>C = { { I_a ,I_b} \quad | \quad I_a,I_b \in I,\quad a&lt;b}<br>$$<br>和他们关联的特征对应关系矩阵<br>$$<br>M_{ab}\in F_a \times F_b<br>$$</p>
+<h3 id="几何验证geometric-verification"><a href="#几何验证geometric-verification" class="headerlink" title="几何验证geometric verification"></a>几何验证geometric verification</h3><p>第三部分将验证可能重叠的图像对C关联的特征对应关系（correspondences）</p>
+<p>由于matching仅仅是基于外观的，那么不能保证相应的特征实际映射到同一场景点。因此，SFM通过尝试估计一个==变换矩阵==，该矩阵通过使用投影几何图形在图像对之间映射他们各自的特征点，来验证匹配。</p>
+<p>根据图像对的空间配置，不同的映射将描述他们的几何关系。</p>
+<p>单应性矩阵==H== 用以描述捕获到的平面场景的纯旋转或者纯平移的摄像机的==转换==</p>
+<p>对极几何中通过本征矩阵E（essential）（已经标定）或者基础矩阵（fundamental）F（未标定）描述运动中相机的关系，并且可以通过三焦点张量扩展到三个视图。</p>
+<p><strong>三焦点张量</strong>——tritensor，在计算机视觉中，是一个3*3 *3 的数组阵列，并入所有投影中的三个视图的几何关系，他与三个视图中的对应点或线的坐标相关联，这与场景结构无关，并且仅仅取决于三个视图之间的相对运动，（即姿态），以及其固有的校准参数（标定的内参）。因此，三焦点张量可以看作是三视图中基础矩阵F的推广，尽管27个元素，只有18个元素是独立的。</p>
+<p>如果有效的变换在图像对之间映射了足够多的特征，那么将这个==变换==视为通过了几何验证。由于来自matching的信息（correspondences）经常被异常值污染，所以会采用RANSAC这类鲁棒的估计方法。该阶段的输出是一组通过几何验证的图像对$\mathcal{\bar C}$，以及他们的关联的对应关系（correspondences）$\bar M_{ab}$,同时可选的会有一个关于他们几何关系的描述$G_{ab}$,为了确定适当的关系，可以使用诸如GRIC的决策标准或者QDEGSAC的方法，这个阶段的输出是所谓的场景图，scene graph，其中图像作为节点，已经验证的图像对作为边缘。</p>
+<h2 id="增量式重建"><a href="#增量式重建" class="headerlink" title="增量式重建"></a>增量式重建</h2><p>重建阶段的输入是场景图，scene graph，输出则是被配准的图像的姿态估计，记作P<br>$$<br>\mathcal{P} = { P_c\in SE(3) \quad |\quad c = 1\dots N_p}<br>$$<br>输出还包括重建的场景结构，以一组点的形式，这组点记作X<br>$$<br>\mathcal{X} = { X_k\in R^3 | k=1\dots N_X}<br>$$</p>
+<h3 id="初始化"><a href="#初始化" class="headerlink" title="初始化"></a>初始化</h3><p>SFM通过精心选择的两视图重建来初始化模型，选择适合的初始图像对十分重要，否则可能根本无法成功重建。此外，重建的鲁棒性，准确性、性能取决于增量过程的种子位置。从图像图中的稠密位置，意味着这里有很多视角有重叠的相机，开始初始化通常会导致冗余度提高，从而使鲁棒性和准确性更高，相反，由于BA处理了整个重建过程中累计的稀疏问题，因此从稀疏位置中进行初始化会降低运行时间。（==我并没有理解这里的点，虽然作者好像已经说明了原因==）</p>
+<p><strong>overall sparser problems</strong>这个问题，指的是什么呢？</p>
+<h3 id="图像配准"><a href="#图像配准" class="headerlink" title="图像配准"></a>图像配准</h3><p>这步叫做，Image registration，（原谅我一开始一直理解成了图像注册），从度量重构开始，使用特征对应关系于已经配准的图像（2d-3d的对应）中的三角点，来解决一个PnP问题,使得新的图像可以配准至当前的模型。</p>
+<p>PnP问题涉及姿态估计，P<del>c</del>,和相机的内参（没有标定的话）。</p>
+<p>因此，通过新配准的图像的姿势P<del>c</del>来扩展集合$\mathcal{P}$,这里由于2d-3d的对应关系经常被异常值污染，因此通常使用RANSAC和最小姿态求解器处理已经标定的相机，对于没标定的相机，会有各种最小求解器，作者提出了一种新颖的鲁棒的下一个最优图像选择方法，用于准确姿态估计和可靠的三角剖分。（4.2节）</p>
+<p>强调一下，配准，register，指的是将二维图片上的点匹配到三维世界中去 。</p>
+<h3 id="三角剖分triangulation"><a href="#三角剖分triangulation" class="headerlink" title="三角剖分triangulation"></a>三角剖分triangulation</h3><p>新配准的图像必须观察现有已经存在的场景点，此外，他还可以通过三角剖分来扩展点集，增加场景覆盖范围。在至少一幅图像或者更多副图像，不仅覆盖了新的场景部分，并且从一个新的视角覆盖了这个场景部分，当这（些）图像被配准之后，一个新的场景点$X_k$立刻就可以被三角化和增加到点集合$\mathcal{X}$中。</p>
+<p>三角剖分是sfm的关键一步，他通过冗余性增加了场景的稳定性，并且通过提供附加的2d-3d对应关系来启用新图象的配准。多视角三角剖分的方法很多，但是这些方法在sfm应用当中大多鲁棒性具有缺陷或者需要巨大的计算成本代价，作者提出了一个鲁棒且高效率的三角剖分方法（4.3节）</p>
+<h3 id="BA"><a href="#BA" class="headerlink" title="BA"></a>BA</h3><p>图像配准和三角测量是独立的过程，即使他们的输出是高度相关的，相机姿态的不确定性会传播到三角测量的点，反之亦然，附加的三角测量可能会通过增加冗余度来改善相机姿态，如果没有进一步的改进，SFM通常会迅速漂移到不可恢复的状态。</p>
+<p>BA是相机参数P<del>c</del>以及场景点集合X<del>k</del>的联合非线性优化，可以最大限度的减少重投影的误差E。<br>$$<br>E = \Sigma _j\rho _j(| \pi(\mathrm{P}_c,\mathrm{X}_k)-x_j|_2^2)<br>$$<br>这里的$\pi$函数将场景点投影到图像空间，损失函数$\rho_j$降低潜在异常值的权重。</p>
+<p>==Levenberg-Marquardt==是解决BA问题的首选方法。BA问题中参数的特殊结构，激发了==Schur补充技巧==。高亮部分的方法我都不了解。其中，前者首先解决简化的相机系统，然后通过反替换来更新点。由于相机的数量通常小于点的数量，因此该方案通常更有效，解决系统有两种选择，精确和不精确的步长算法。</p>
+<p>精确的算法将整个系统存储为空间复杂度为$O(N_P^2)$的稀疏或者稠密矩阵，并且方法的时间复杂度是$O(N_P^3)$.不精确的方法近似求解该系统，使用迭代求解器（计算方法那类求正规方程），例如preconditioned conjugate gradients (PCG)，时间、空间复杂度都是$O(N_P)$。直接的算法是多达几百台相机的首选算法，但是在大规模的条件下代价还是巨大。尽管稀疏的直接方法在很大程度上减少了整个稀疏问题的复杂程度，但是由于通常具有更密集的连接图，因此他们对于大型非结构化照片集是禁止的。在这种情况下，可以选择间接方法。</p>
+<p>特别是针对Internet土派年，BA将花费大量的时间来优化许多几乎重复的图片。</p>
+<p>在4.5节，作者将讨论识别和参数化高度重叠的图像的方法，以实现提高密集情况下的BA步骤效率。</p>
+<h2 id="面临的挑战"><a href="#面临的挑战" class="headerlink" title="面临的挑战"></a>面临的挑战</h2><p>一句话概括，完整性、鲁棒性难以保障。</p>
+<p>导致原因归根于两点：</p>
+<ol>
+<li>这可能是由于对应搜索产生了不完整的场景图，例如由于匹配近似，因此既没有为完整模型提供必要的连通性，也没有为可靠的估计提供足够的冗余度。</li>
+<li>这可能是由于重建阶段由于缺少或不正确的场景结构而导致的配准图像而导致的；图像配准和三角剖分具有共生关系，即图像只能配准到现有的场景结构，而场景结构只能从配准的图像进行三角剖分[64]。</li>
+</ol>
+<h2 id="贡献"><a href="#贡献" class="headerlink" title="贡献"></a>贡献</h2><p>介绍了一种新算法，他改进了sfm中的主要挑战。</p>
+<ol>
+<li>几何验证策略，增加信息来增强场景显示，随后提高了初始化和三角剖分组件的鲁棒性</li>
+<li>次最优视图选择将最大化增量重建过程的鲁棒性和准确性</li>
+<li>健壮的三角剖分方法，它以降低的计算成本产生了比现有技术明显更完整的场景结构</li>
+<li>采用迭代BA，重新三角剖分和离群滤波策略，通过减轻漂移效应来显着提高完整性和准确性</li>
+<li>通过冗余视图挖掘对密集照片集进行更有效的BA参数化，这将导致系统在健壮性和完整性方面明显优于现有技术：同时保持了效率</li>
+</ol>
+<h2 id="场景图增强"><a href="#场景图增强" class="headerlink" title="场景图增强"></a>场景图增强</h2><p>scene graph augmentation</p>
+<p><strong>RANSAC算法的基本假设是样本中包含正确数据(inliers，可以被模型描述的数据)，也包含异常数据(outliers，偏离正常范围很远、无法适应数学模型的数据)，即数据集中含有噪声。这些异常数据可能是由于错误的测量、错误的假设、错误的计算等产生的。同时RANSAC也假设，给定一组正确的数据，存在可以计算出符合这些数据的模型参数的方法。</strong></p>
+<p>也就是说下文中计算的inliers数量是基于ransac方法的过程中求到的？==待验证==</p>
+<p>正如上文中提到的，几何验证策略，以通过几何关系来增加场景图。</p>
+<p>首先我们要估计一个基础矩阵F，（基础矩阵F：除了包含E的信息外，还包含了两个摄像机的内参数。由于F包含了这些内参数，因此它可以在像素坐标系将两个摄像机关联起来。），一般，这里估计F是由于没有标定内参，因此估计F。</p>
+<p>如果找到了至少N<del>F</del>个像素（非异常值，原文中用inliers表示，但是这个inliers是如何产生的，看到这里我还不是很理解），那么将这对图像视为通过了几何验证，接下来，我们将对统一对图像通过确定单应性的inliers数量N<del>H</del>,来对之前得到的变换结果进行分类</p>
+<p> 若近似模型选择方法GRIC。当$N_H/N_F&lt;\epsilon_{HF}$，我们将这类变换情况视为这张图片到那张图片的一般场景中相机是移动的（常规）。</p>
+<p>如果是已经标定的图像，我们估计一个本征矩阵E，以及获得他的inliers的数量N<del>E</del>。如果$N_E/N_F&gt;\epsilon_{EF}$,我们将认为标定结果正确。在标定结果正确的情况下，若同时$N_H/N_F&lt;\epsilon_{HF}$，则分解矩阵E，从inliers的对应关系的进行三角化，确定三角剖分角$\alpha_m$，使用这个角度值，可以将视角的转换中纯旋转（全景）和纯平移（平面）的情况。</p>
+<p>此外，互联网照片中的水印时间戳或帧（通称WTF）会错误地连接不同地标的图像。为了检测出这种图像，我们在图像边缘处做一个相似度转换的估计，若具有N<del>s</del>个内点（理解成有这么多个点可能是WTF），如</p>
+<p>$N_S/N_F&gt;\epsilon_{SF}\or N_S/N_E&gt;\epsilon_{SE}$</p>
+<p>那么认为这对图像是一个WTF，就不会被插入到scene graph中去。</p>
+]]></content>
+  </entry>
+  <entry>
+    <title>DNS通识</title>
+    <url>/2021/09/22/DNS%E9%80%9A%E8%AF%86/</url>
+    <content><![CDATA[<h1 id="网络库深入1–应用层网络通识DNS"><a href="#网络库深入1–应用层网络通识DNS" class="headerlink" title="网络库深入1–应用层网络通识DNS"></a>网络库深入1–应用层网络通识DNS</h1><h2 id="DNS学习"><a href="#DNS学习" class="headerlink" title="DNS学习"></a>DNS学习</h2><span id="more"></span>
+
+<h3 id="使用dig查找域名服务器"><a href="#使用dig查找域名服务器" class="headerlink" title="使用dig查找域名服务器"></a>使用dig查找域名服务器</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">dig +trace www.163.com @8.8.8.8</span><br></pre></td></tr></table></figure>
+
+<h3 id="查找根域名服务器地址"><a href="#查找根域名服务器地址" class="headerlink" title="查找根域名服务器地址"></a>查找根域名服务器地址</h3><p><img src="/2021/09/22/DNS%E9%80%9A%E8%AF%86/1628248431001-29d2849b-b5d7-4f2b-90fb-bb3311c2e932.png" alt="img"></p>
+<p>google8.8.8.8域名服务器查找根域名服务器，返回13台.根域名服务器（a.<em>.net-m.</em>.net），客户端可以使用其中高的一台去查找顶级域名服务器。</p>
+<p>此时如果dig <em>.root-servers.net可以获得</em>根域名服务器的A记录.</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">b.root-servers.net.	54421	IN	A	199.9.14.201</span><br></pre></td></tr></table></figure>
+
+<h3 id="查找com域名服务器"><a href="#查找com域名服务器" class="headerlink" title="查找com域名服务器"></a>查找com域名服务器</h3><p>j.root-servers.net告诉client com域名服务器，一共13台com域名服务器。client可以使用其中一台com域名服务器超找163.com域名服务器</p>
+<p><img src="/2021/09/22/DNS%E9%80%9A%E8%AF%86/1628249090099-94f9b370-85fc-4e86-8370-d7af0dd52801.png" alt="img"></p>
+<h3 id="查找163-com域名服务器"><a href="#查找163-com域名服务器" class="headerlink" title="查找163.com域名服务器"></a>查找163.com域名服务器</h3><p>client选择了com域名服务器m.gtld-servers.net去查找<a href="http://www.163.com的ip地址,所以需要找一台163.com域名服务器/">www.163.com的ip地址，所以需要找一台163.com域名服务器</a></p>
+<p><img src="/2021/09/22/DNS%E9%80%9A%E8%AF%86/1628249399477-07b29959-6b24-4fcb-bc07-b208cd3631d7.png" alt="img"></p>
+<h3 id="查找最终IP地址或者cname地址"><a href="#查找最终IP地址或者cname地址" class="headerlink" title="查找最终IP地址或者cname地址"></a>查找最终IP地址或者cname地址</h3><p>通过找的163.com域名服务器（3.nease.net)找到了<a href="http://www.163.com的cname记录./">www.163.com的cname记录。</a></p>
+<p><img src="/2021/09/22/DNS%E9%80%9A%E8%AF%86/1628249983365-da1d0986-2004-4e57-ade4-4c16efebf1f1.png" alt="img"></p>
+<h3 id="通过cname找到对于的ip"><a href="#通过cname找到对于的ip" class="headerlink" title="通过cname找到对于的ip"></a>通过cname找到对于的ip</h3><p>可以看到如下对应的A记录。</p>
+<p><img src="/2021/09/22/DNS%E9%80%9A%E8%AF%86/1628250100043-bc8e6d05-21e0-4463-8ad0-09bacc800cb4.png" alt="img"></p>
+<h2 id="抽象出DNS的层级结构"><a href="#抽象出DNS的层级结构" class="headerlink" title="抽象出DNS的层级结构"></a>抽象出DNS的层级结构</h2><p>树形结构最为贴切，root就是根域名，再向左右两边长出枝干，按照层级对应顶级域名、一级域名、二级域名。</p>
+<p><img src="/2021/09/22/DNS%E9%80%9A%E8%AF%86/1628564546601-36683c54-f272-45dd-a1a8-75f8a1edc0bc.png" alt="img"></p>
+<h3 id="根域名-ROOT"><a href="#根域名-ROOT" class="headerlink" title="根域名.ROOT"></a>根域名.ROOT</h3><p>最高以及域名节点，whole world 有13组根域名服务器，a.root-servers.net ～ m.root-servers.net，其中一个主根服务器在US，其余12个为辅根服务器，9in US，2 in UKand 瑞典，1in Japan。</p>
+<p>13组根域名服务器由12个组织运营，Verisign管理2组根域名服务器，A J两个服务器，每家公司为例保证根域名服务器的稳定性，会部署多个节点，Verisign公司不熟练104台根域名服务器，根域名服务器个数至少有500多台。</p>
+<p>.root域名一般被省略，所有域名查询都需要先访问根域名。</p>
+<h3 id="顶级域名"><a href="#顶级域名" class="headerlink" title="顶级域名"></a>顶级域名</h3><p>.com .net .edu .us .cn诸如此类域名，由美国加州ICANN公司管理，ICANN负责规定顶级域名的名字范围，不负责管理域名，每个顶级域名委托给托管商，比如.cn域名的托管商是中国互联网络信息中心(CNNIC)，它决定了.cn域名的各种政策，目前最大的顶级域名托管商是Verisign，拖管了.com .net .name .gov四个一般性顶级域名以及.cc .tv国别级顶级域名。</p>
+<h2 id="DNS分级查找"><a href="#DNS分级查找" class="headerlink" title="DNS分级查找"></a>DNS分级查找</h2><h3 id="定义"><a href="#定义" class="headerlink" title="定义"></a>定义</h3><p>分级查询，根域名开始，依次查询每一级域名的NS记录，直到查到最终IP。每一级域名都有自己的NS记录，NS记录指向该级域名的域名服务器，这些NS服务器知道下一级域名的各种记录。</p>
+<h3 id="查找步骤"><a href="#查找步骤" class="headerlink" title="查找步骤"></a>查找步骤</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">dig +trace @8.8.8.8 www.163.com</span><br></pre></td></tr></table></figure>
+
+<p>表示通过谷歌的域名服务器分级查找各级域名的NS记录，最后找到<a href="http://www.163.com的IP，查找steps：">www.163.com的IP，查找steps：</a></p>
+<ol>
+<li><p>询问本地DNS服务器（8.8.8.8）：根域名服务器地址（.root的服务器地址）</p>
+</li>
+<li><p>询问根域名服务器：顶级域名服务器地址（com的域名服务器地址）</p>
+</li>
+<li><p>询问顶级域名服务器：二级域名服务器地址(163.com域名服务器地址）</p>
+</li>
+<li><p>询问二级域名服务器：<a href="http://www.163.com的ip地址/">www.163.com的IP地址</a></p>
+</li>
+</ol>
+<h3 id="DNS记录类型"><a href="#DNS记录类型" class="headerlink" title="DNS记录类型"></a>DNS记录类型</h3><p>A（Address）记录是地址记录，用来指定主机名（或域名）对应的IP地址记录，通过A记录，可以设置不同域名指向不同的IP。</p>
+<p>有时服务器的地址可能随时更改，并且不是固定的。 目前，使用了CNAME记录。 Cname也称为别名解析。 通常，将指定DNS服务提供商提供的第二级域名，以便DNS也可以通过该第二级域名找到服务器的IP地址。 使用CNAME的好处是，即使服务器的IP地址发生了变化，也无需更改解析记录。 DNS将自动更新解析，这比A记录要麻烦少一些。</p>
+<ul>
+<li><p>A记录：域名到IP地址的映射，IPV4协议；AAAA IPV6协议</p>
+</li>
+<li><p>CNAME： 域名的别名，<a href="http://www.163.com的别名/">www.163.com的别名</a></p>
+</li>
+<li><p>MX：邮件投递时寻址</p>
+</li>
+<li><p>NS：权威服务器名字</p>
+</li>
+<li><p>PTR：IP地址到域名的映射，俗称反解</p>
+</li>
+<li><p>TXT：主机或域的文本记录，用于反垃圾</p>
+</li>
+</ul>
+<h2 id="使用DNS的好处"><a href="#使用DNS的好处" class="headerlink" title="使用DNS的好处"></a>使用DNS的好处</h2><p>服务器地址IP发生变化时，只需要在DNS系统中修改域名对应的ip即可，客户端则无需修改ip。</p>
+<p>在客户端发器域名解析时，通过权威DNS服务器可以查到新的IP地址，然后建立起连接即可完成互联网络传输。</p>
+<h2 id="使用DNS的风险"><a href="#使用DNS的风险" class="headerlink" title="使用DNS的风险"></a>使用DNS的风险</h2><p>DNS劫持导致用户呗重定向至非目标服务器。一旦DNS被劫持，意味着用户真实访问的网站并非是预期网站，可能造成资金安全、盗号、政治不安全等问题。</p>
+<p>例如攻击方案“缓存投毒”，通过修改DNS缓存服务器中的DNS缓存记录，也就是通过对子域名的投毒进而影响主域名的所有DNS解析，比如黑客利用不存在的子域名（xx.xx.com）进行投毒，达到更新DNS缓存服务器上子域名和IP的映射关系，核心目的是为了更改主域名和黑客DNS服务器ip的映射关系，让所有通过主域名的DNS解析都通过走黑客的DNS服务器来达到目的。</p>
+<p>实现缓存投毒，必须在DNS缓存服务器向权威服务器递归查询IP时，伪造大量的DNS Reply报文，先于权威服务器结果返回，达到先更新DNS缓存服务器中的域名和IP映射关系。</p>
+<p>1.黑客向缓存服务器发送一个不存在的子域名请求，在授权服务器返回DNS Reply报文之前，黑客大量伪造DNS Reply（包含授权服务器IP、缓存服务器端口，Reply Query ID），在授权服务器Reply到达之前被缓存服务器缓存，如果只是缓存不存在的子域名，几乎没影响。</p>
+<p>2.但是DNS Reply的时候会把主域名的解析记录一并返回，黑客利用这个机制，在伪造DNS Relpy报文的时候把主域名的映射关系也伪造掉，导致后续所有请求主域名的地址都是虚假的IP地址。</p>
+<p>防御思路：检查DNS reply报文的会话五元组信息（源IP地址、目的IP地址、源端口号、目的端口号、协议），Query ID和域名是否和缓存服务器发出的DNS request报文一致。</p>
+<h2 id="HTTP-DNS"><a href="#HTTP-DNS" class="headerlink" title="HTTP DNS"></a>HTTP DNS</h2><p>传统的DNS是一个公共基础服务，如果DNS缓存服务器中存在DNS记录则直接返回客户端，若不存在需要通过根域名服务器、顶级域名服务器、权威域名服务器多层地递归查询服务器ip地址列表返回给客户端，且缓存到DNS缓存服务器。一般来说，运营商会在自己的IDC部署DNS缓存服务器来减少DNS分级查找的消耗。 </p>
+<p><strong>缺点：</strong>缓存服务器存在和权威服务器同步更新不及时的情况、运营商域名转发导致并非最优链路，多层递归解析延迟、缓存污染等，导致客户端拿到的最终ip可能并非最优甚至是错误的。</p>
+<p>这表明减少消耗同时要付出代价的。</p>
+<p><strong>解决思路：</strong>减少中间查询层级，如果能做到让客户端直接和最后缓存服务器交互，返回最优的服务器地址，就可以提升查询的效率。</p>
+<p>基于上述思路，HTTPDNS采用不走传统的DNS解析，自己搭建基于HTTP协议的DNS服务器集群，DNS服务器集群中缓存自己的业务的服务器地址，分布在多个地点和多个运营商，当客户端需要DNS解析的时候，直接通过HTTP协议进行请求HTTPDNS服务器集群，得到就近的地址，这就需要基于HTTP协议，实现自己的域名解析和自定义地址簿，不使用统一的地址簿。</p>
+<p>HTTPDNS比较适合手机端的应用场景，在客户端的HTTPDNS sdk中可以提前下发HTTPDNS服务器列表，意味着HTTP请求时的域名解析不走公开的DNS解析，而是直接访问HTTPDNS服务端，获取业务服务器的IP列表，缓存到本地。因为HTTPDNS sdk可以知道用户ip、运营商、所在的省市信息等，HTTPDNS智能调度服务综合地址位置、线路状况酸楚一个排序有先访问优质低延时的ip，缓存到客户端，减少递归查询的层级，提升查询效率。</p>
+<p>HTTPDNS：像拥有一个帮助DNS解析的军师再去做DNS解析操作，是有能力的企业搭建自己的DNS缓存服务器，不走运营商的缓存服务器来减少中间查询层级，且通过自己的DNS缓存服务器可以做到实时刷新缓存，来解决更新不及时。</p>
+<p><img src="/2021/09/22/DNS%E9%80%9A%E8%AF%86/1628577021152-1a8d6459-0bd2-41d9-9a40-78151a080262.png" alt="img"></p>
+]]></content>
+  </entry>
+  <entry>
+    <title>Tacotron2论文阅读笔记</title>
+    <url>/2021/05/28/Tacotron2%E8%AE%BA%E6%96%87%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0/</url>
+    <content><![CDATA[<h1 id="Tacotron2"><a href="#Tacotron2" class="headerlink" title="Tacotron2"></a>Tacotron2</h1><p>NATURAL TTS SYNTHESIS BY CONDITIONING WAVENET ON MEL SPECTROGRAM PREDICTIONS论文阅读笔记</p>
+<span id="more"></span>
+
+<p>先推荐一篇比较好的翻译，但不完整<a href="https://www.jiqizhixin.com/articles/2017-12-20-3">机器之心Tacotron2</a></p>
+<h4 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h4><ol>
+<li><p>历史回顾：</p>
+<ul>
+<li>前期方法：级联合成 、统计参量</li>
+<li>特点：低沉不自然</li>
+<li>方法：Wavenet 时域波形生成模型</li>
+<li>特点：音质提高但是输入繁杂</li>
+</ul>
+</li>
+<li><p>Tacotron2</p>
+<ul>
+<li><p>seq2seq 从字符序列到soectrograms，简化了语言声学特征产生的步骤</p>
+</li>
+<li><p>vocoder  : tacotron1–使用短时傅立叶逆变换  &lt; wavenet</p>
+</li>
+<li><p>对比其余网络： Deep Voice3–主观评估低 Char2Wav–使用传统的中间表示形式</p>
+</li>
+</ul>
+</li>
+</ol>
+<h4 id="模型简介"><a href="#模型简介" class="headerlink" title="模型简介"></a>模型简介</h4><ul>
+<li><p>系统组件：</p>
+<ol>
+<li><pre><code>注意力机制循环序列到序列特征预测network -- 从字符序列预测mel谱图
+</code></pre>
+</li>
+<li><pre><code>Wavenet优化版本 -- 基于mel谱图生成时域波形样本
+</code></pre>
+</li>
+</ol>
+</li>
+<li><p>中间特征代表选择</p>
+<ol>
+<li>mel蘋谱图：在较低的频率中强调细节；使用低频率细节，不强调摩擦音和噪声突发所站主导地位的高频细节。</li>
+<li>选择原因：线性频谱图会丢失相位信息，griffinlim(tacotron1)可以估计该丢弃信息，并且进行短时傅立叶逆变换进行时域转换；mel频谱图会丢弃更多信息，但是与其他声学或者语言特征相比，mel铺图失忆症更简单的低级声学表示，改进的wavenet框架可以从mel频谱中生成高质量的音频</li>
+</ol>
+</li>
+<li><p>频谱图预测网络</p>
+<ol>
+<li><p>模仿tacotron1,使用50ms帧12.5ms帧跳和Hann窗函数的傅立叶变换；使用5ms帧跳进行试验，以匹配原始wavenet中的条件输入的频率，时间分辨率的提高导致了发音问题增多</p>
+</li>
+<li><p>使用125HZ to 7.6kHz 80通道的mel滤波器组将STFT幅度转化为mel标度，之后进行对数动态范围压缩（取log）</p>
+</li>
+<li><p>网络结构</p>
+<ul>
+<li>编码器 –将字符序列转换为隐藏的特征表示形式</li>
+<li>解码器 –解析隐藏特征表示形式以预测频谱图</li>
+</ul>
+</li>
+<li><p>WaveNet Vocoder</p>
+</li>
+</ol>
+</li>
+</ul>
+<h4 id="预测网络详细介绍"><a href="#预测网络详细介绍" class="headerlink" title="预测网络详细介绍"></a>预测网络详细介绍</h4><ul>
+<li><p>编码器</p>
+<ol>
+<li>输入字符：学习的<strong>512维字符嵌入表示</strong>,字符序列经过3层每层512个5*1的过滤器的卷积层，即每个过滤器跨越5个字符，之后批归一化（batch ）和RELU激活函数；卷积层对上下文进行建模，最终输出传递到包含512个单位的<strong>单个双向LSTM层</strong>（前后两个方向各256个）</li>
+<li>编码器的输出被注意力网络解析，解码器将完整的编码序列总结为<strong>固定长度的上下文向量</strong>；使用<strong>位置敏感注意力机制</strong>，将来自先前解码器一定时间步长的累积注意力权重作为附加特征,这有助于模型顺着输入不停向前进行预测，减少了子序列被解码器重复或者忽略的故障模式</li>
+<li>输入和位置特征被投影到128维的隐藏表示形式后可计算出注意力概率；而位置特征是通过32个一维长为31的卷积滤波计算的</li>
+</ol>
+</li>
+<li><p>解码器</p>
+<ol>
+<li><p>解码器由一个自回归RNN，将来自编码器的输入序列每次一帧地预测一幅mel频谱图；来自上一步的预测首先通过一个包含256个隐藏relu单元的2层全连接层的小型<strong>预网</strong>（pre-net），预网的输出和注意力内容向量被连接并且投入2个具有1024单位的<strong>单向LSTM层</strong></p>
+</li>
+<li><p>单向LSTM层的输出和注意力内容向量被连接之后通过线性变换进行投影，来以此预测目标频谱图帧</p>
+</li>
+<li><p>最后，预测的mel频谱图通过5层卷积的post-net(后网)，该网络预测了要加到预测中的<strong>残差</strong>以提高整体性能，后网由512个5×1的过滤器组成，并且进行批归一化，之后在除了最后一层以外的所有层上tanh激活函数</p>
+</li>
+</ol>
+<p><img src="/2021/05/28/Tacotron2%E8%AE%BA%E6%96%87%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0/1.jpg" alt="tc2模型结构"></p>
+</li>
+</ul>
+<ul>
+<li><p>损失函数</p>
+<p>最小化<strong>经过后网之前和之后的MSE之和</strong>来帮助收敛</p>
+</li>
+<li><p>与预测频谱图并行的是将LSTM输出和注意上下文被投影到一个标量，并通过S型激活来预测输出序列完成的可能性，允许模型动态却仍<strong>何时终止生成</strong>，具体我恶言，生成将在此概率值&gt;0.5的第一帧处完成</p>
+</li>
+<li><p>编码器：网络中的卷积层使用概率为0.5的dropout,LSTM层使用概率为0.1的zoneout；解码器：为引入推断时的输出变化，概率为0.5的丢失仅用于自回归解码器的prenet层中</p>
+<table>
+<thead>
+<tr>
+<th>Tacotron1</th>
+<th>Tacotron2</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>使用CBHG和GRU（LSTM变体）模块</td>
+<td>使用原始的LSTM和卷积层</td>
+</tr>
+<tr>
+<td>结构较为复杂</td>
+<td>架结构更加简单</td>
+</tr>
+<tr>
+<td>使用griffin lim，减少因子</td>
+<td>不使用减少因子，每个解码器步骤对应于单个频谱图</td>
+</tr>
+</tbody></table>
+</li>
+</ul>
+<h4 id="wavenet声码器"><a href="#wavenet声码器" class="headerlink" title="wavenet声码器"></a>wavenet声码器</h4><ul>
+<li>tacotron2的声码器部分使用的是优化后的wavenet，将mel频谱图转换为时域的波形样本，与原始体系一样，具有30个膨胀卷积层，被分为了三个膨胀周期，第k层的膨胀率为$2^k$ ；为适应mel频谱12.5ms的帧跳，调节堆栈中的的上采样层只有两层而不是三层</li>
+<li>使用logistic分布的10分量混合生成24khz的16位样本，为计算逻辑混合分布，wavenet输出通过relu激活，之后进行线性投影，以预测每个分量组的各个参数（包括平均值、对数刻度、混合物权重）</li>
+<li>损失选择为对于ground truth样本的负对数似然率</li>
+</ul>
+<h4 id="实验与结果"><a href="#实验与结果" class="headerlink" title="实验与结果"></a>实验与结果</h4><ul>
+<li><p>预测网络训练–teacher-forcing模式，解码器输入正确的输出而非预测的输出，可以确保预测帧与目标波形样本的对齐</p>
+<ul>
+<li>单个gpu上batch size 64</li>
+<li>Adam优化器 $\epsilon = 10^{-6}$</li>
+<li>学习率0.001 50000次迭代后降至0.00001</li>
+<li>L2正则化 权重$10^{-6}$</li>
+</ul>
+</li>
+<li><p>声码器训练</p>
+<ul>
+<li>基于ground truth 批大小128 32GPUS 同步更新</li>
+<li>Adam优化器 $\epsilon = 10^{-8}$</li>
+<li>固定学习率$10^{-4}$</li>
+<li>波形目标缩放127.5倍以加速收敛</li>
+</ul>
+</li>
+<li><p>数据集</p>
+</li>
+<li><p>一名专业女发言人24.6小时的演讲时间，所有文本均已阐明</p>
+</li>
+<li><p>结果</p>
+</li>
+</ul>
+<p><img src="/2021/05/28/Tacotron2%E8%AE%BA%E6%96%87%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0/20200728200416736.png" alt="MOS评测结果"></p>
+<ul>
+<li>局限–尽管我们的系统能够可靠地处理整个输入，但韵律模型仍有改进的空间</li>
+<li>局限–时会遇到发音困难，例如在处理名称时。这一结果表明了端到端方法的挑战-他们需要对涵盖预期用途的数据进行培训</li>
+<li>优点–神经系统倾向于生成更自然，更像人类的语音</li>
+</ul>
+<h4 id="更多角度评价"><a href="#更多角度评价" class="headerlink" title="更多角度评价"></a>更多角度评价</h4><p>对比在预测值和ground truth上声码器的表现对比</p>
+<p><img src="/2021/05/28/Tacotron2%E8%AE%BA%E6%96%87%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0/2.jpg" alt="在这里插入图片描述"></p>
+<p>对比使用线性频谱和mel频谱作为声码器输入</p>
+<p><img src="/2021/05/28/Tacotron2%E8%AE%BA%E6%96%87%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0/3.jpg" alt="在这里插入图片描述"></p>
+<p>对比简化wavenet</p>
+<p><img src="/2021/05/28/Tacotron2%E8%AE%BA%E6%96%87%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0/4.jpg" alt="在这里插入图片描述"></p>
+<h4 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h4><p>本文介绍了Tacotron 2，这是一种全神经TTS系统，该系统结合了序列到序列的递归网络，并通过改进的WaveNet声码器来关注预测梅尔谱图。 最终的系统将语音合成为Tacotron级韵律和WaveNet级音频质量。 该系统可以直接从数据中进行训练，而无需依赖复杂的特征工程，并且可以实现接近自然人语音的最新音质。</p>
+]]></content>
+  </entry>
+  <entry>
+    <title>next主题美化记录</title>
+    <url>/2021/09/18/next%E4%B8%BB%E9%A2%98%E7%BE%8E%E5%8C%96%E8%AE%B0%E5%BD%95/</url>
+    <content><![CDATA[<h2 id="现状"><a href="#现状" class="headerlink" title="现状"></a>现状</h2><p>很丑，很平凡</p>
+]]></content>
+  </entry>
+  <entry>
+    <title>学习网络库SDK</title>
+    <url>/2021/08/10/%E5%AD%A6%E4%B9%A0%E7%BD%91%E7%BB%9C%E5%BA%93SDK/</url>
+    <content><![CDATA[]]></content>
+  </entry>
+  <entry>
+    <title>结合TravisCI自动部署Next主题的Hexo博客</title>
+    <url>/2021/09/18/%E7%BB%93%E5%90%88TravisCI%E8%87%AA%E5%8A%A8%E9%83%A8%E7%BD%B2Next%E4%B8%BB%E9%A2%98%E7%9A%84Hexo%E5%8D%9A%E5%AE%A2/</url>
+    <content><![CDATA[<p>此文记录了如何利用Travis CI帮助部署Hexo博客的静态页面到github page， 具体实现的效果是：当我修改hexo站点的内容，并且提交推送至远程被CI监控的特定分支上之后，CI将开始按照.travis.yml中执行CI步骤，帮你进行后续的渲染和部署操作。所以你自己实际上的操作只包括了修改hexo的源文件和CI的配置文件，后续都由CI帮你代劳。</p>
+<p>文章后续会探究如何基于Ci对页面进行一些美化的配置。</p>
+<span id="more"></span>
+
+<blockquote>
+<p>折腾了一个晚上加上一个下午，终于成功让CI帮我部署hexo的博客页面，啊，我还想赶紧看看怎么能美化一些next博客有很多可以自定的设置，所以说快速回顾一下，希望这些内容能够帮到你。</p>
+</blockquote>
+<h2 id="Hexo-建站"><a href="#Hexo-建站" class="headerlink" title="Hexo - 建站"></a>Hexo - 建站</h2><p>这部分快速过一遍。首先要使用hexo框架需要的依赖项：</p>
+<ul>
+<li>git</li>
+<li>npm</li>
+</ul>
+<p>请无论通过百度还是谷歌帮上面两个依赖配置好。</p>
+<h3 id="安装hexo"><a href="#安装hexo" class="headerlink" title="安装hexo"></a>安装hexo</h3><figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">npm install -g hexo-cli</span><br></pre></td></tr></table></figure>
+
+<h3 id="配置hexo"><a href="#配置hexo" class="headerlink" title="配置hexo"></a>配置hexo</h3><figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">hexo init &lt;hexo-site-dir&gt;</span><br></pre></td></tr></table></figure>
+
+<p>其中<code>&lt;hexo-site-dir&gt;</code>这是你本地的hexo站点的目录名称，可以随便起，本地将新建一个以此为名称的目录。</p>
+<p>一些初始配置可以更改<code>_config.yml</code> ,例如<code>title</code>，更改主题landscape为next</p>
+<figure class="highlight yml"><table><tr><td class="code"><pre><span class="line"><span class="comment"># _config.yml</span></span><br><span class="line"><span class="attr">themes:</span> <span class="string">next</span></span><br></pre></td></tr></table></figure>
+
+
+
+<blockquote>
+<p>感兴趣的可以看官网给的更多配置项目<a href="https://link.segmentfault.com/?url=https://hexo.io/docs/configuration">官网doc</a></p>
+</blockquote>
+<p>⚠️这里还需要你配置一下<code>.gitignore</code>文件,加上<code>themes/</code>以忽略这个文件夹的记录，因为CI中会重新拉取主题（假设我们用了next）的repo，由于themes下的主题文件夹也是一个repo，同时站点文件夹在CI中也是基于一个repo来工作的，为了减少子模块可能带来的不必要的错误，这里采取忽略本地的主题文件夹策略：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">.DS_Store</span><br><span class="line">Thumbs.db</span><br><span class="line">db.json</span><br><span class="line">*.log</span><br><span class="line">node_modules/</span><br><span class="line">public/</span><br><span class="line">.deploy*/</span><br><span class="line">themes/</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>配置完之后，你的站点文件夹大致是这个样子：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">.</span><br><span class="line">├── _config.landscape.yml</span><br><span class="line">├── _config.yml</span><br><span class="line">├── db.json</span><br><span class="line">├── node_modules</span><br><span class="line">├── package.json</span><br><span class="line">├── scaffolds</span><br><span class="line">├── source</span><br><span class="line">└── themes</span><br></pre></td></tr></table></figure>
+
+<p><code>hexo new post xxxx</code>写几篇日志，之后<code>hexo s -g</code>，打开<code>http://localhost:4000</code>看看你的静态文件渲染的样子,一切正常就继续往下看</p>
+<h2 id="Github-创建github-io仓库"><a href="#Github-创建github-io仓库" class="headerlink" title="Github - 创建github.io仓库"></a>Github - 创建github.io仓库</h2><p>去github新建一个仓库，repo名字叫做<code>username.github.io</code>username是你用户名。</p>
+<p>之后回到你的本地站点，</p>
+<p><code>git init &amp;&amp; git remote add origin &lt;url-example: git@github.com:wangpei72/wangpei72.github.io.git&gt;</code> ,<url>设置成刚刚新建的仓库的git地址，建议走ssh，因为2021.8.13github走https需要personal acess token来取代密码的认证方式，而这个token在后续CI中还会用到，不过这里走ssh是不受这条变更的影响的，而且也很方便。</p>
+<p>之后将你的改动提交至本地source分支，⚠️意味着你的源文件存在source分支上，push到远程仓库。</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">git add .</span><br><span class="line">git checkout -B source</span><br><span class="line">git commit -m &#x27;first commit&#x27;</span><br><span class="line">git push origin source:source</span><br></pre></td></tr></table></figure>
+
+<h2 id="Travis-CI-配置CI"><a href="#Travis-CI-配置CI" class="headerlink" title="Travis CI - 配置CI"></a>Travis CI - 配置CI</h2><h3 id="授权"><a href="#授权" class="headerlink" title="授权"></a>授权</h3><p>重点来了，开始用Travis CI之前，先去<a href="https://www.travis-ci.com/">官网</a>sign up,如果你之前用过那就直接sign in，注意，本文使用CI的方式基于github。</p>
+<p><img src="/2021/09/18/%E7%BB%93%E5%90%88TravisCI%E8%87%AA%E5%8A%A8%E9%83%A8%E7%BD%B2Next%E4%B8%BB%E9%A2%98%E7%9A%84Hexo%E5%8D%9A%E5%AE%A2/0D77DFE4-E678-4344-9427-092D0B65E616.png" alt="image-20210918161902960"></p>
+<p>点击头像 -&gt; settings ，配置你的repo，将github.io仓库设置到travis CI的目标repo list当中来。</p>
+<p><img src="/2021/09/18/%E7%BB%93%E5%90%88TravisCI%E8%87%AA%E5%8A%A8%E9%83%A8%E7%BD%B2Next%E4%B8%BB%E9%A2%98%E7%9A%84Hexo%E5%8D%9A%E5%AE%A2/2.jpg"></p>
+<h3 id="获取personal-token-并且配置环境变量"><a href="#获取personal-token-并且配置环境变量" class="headerlink" title="获取personal token 并且配置环境变量"></a>获取personal token 并且配置环境变量</h3><p><a href="https://github.com/settings/tokens">去这里</a>拿到你的token，勾选repo权限组就够用了，复制你的token信息，要把他当作密码来使用，整个文件记下来，待会要用。</p>
+<p>回到travis CI，找到<code>My repositories</code>， 找到<code>More options</code>，点击<code>Settings</code>,在<code>Environment Variables</code>栏目里设置name： GH_TOKEN， vale：复制你刚刚拿到的token，点击Add。</p>
+<p><img src="/2021/09/18/%E7%BB%93%E5%90%88TravisCI%E8%87%AA%E5%8A%A8%E9%83%A8%E7%BD%B2Next%E4%B8%BB%E9%A2%98%E7%9A%84Hexo%E5%8D%9A%E5%AE%A2/3.jpg"> </p>
+<p>回到你的本地站点,新建一个用于驱动CI工作的配置文件<code>.travis.yml</code>。</p>
+<figure class="highlight yml"><table><tr><td class="code"><pre><span class="line"><span class="attr">language:</span> <span class="string">node_js</span> </span><br><span class="line"><span class="attr">node_js:</span></span><br><span class="line">  <span class="bullet">-</span> <span class="number">12</span>  <span class="comment"># 使用 nodejs LTS v12</span></span><br><span class="line"><span class="attr">branches:</span></span><br><span class="line">  <span class="attr">only:</span></span><br><span class="line">    <span class="bullet">-</span> <span class="string">source</span> <span class="comment"># 只监控 source 的 branch</span></span><br><span class="line"><span class="attr">cache:</span></span><br><span class="line">  <span class="attr">directories:</span></span><br><span class="line">    <span class="bullet">-</span> <span class="string">node_modules</span> </span><br><span class="line"><span class="attr">before_install:</span></span><br><span class="line">  <span class="bullet">-</span> <span class="string">export</span> <span class="string">TZ=&#x27;Asia/Shanghai&#x27;</span>    </span><br><span class="line"><span class="attr">before_script:</span> </span><br><span class="line">  <span class="bullet">-</span> <span class="string">npm</span> <span class="string">install</span> <span class="string">-g</span> <span class="string">hexo-cli</span> <span class="comment"># 在 CI 环境内安装 Hexo</span></span><br><span class="line">  <span class="bullet">-</span> <span class="string">git</span> <span class="string">clone</span> <span class="string">https://github.com/next-theme/hexo-theme-next.git</span> <span class="string">themes/next</span></span><br><span class="line">  <span class="comment">#从 Github 上拉取 next 主题</span></span><br><span class="line">  <span class="bullet">-</span> <span class="string">npm</span> <span class="string">install</span> <span class="comment"># 在根目录安装站点需要的依赖 </span></span><br><span class="line"><span class="attr">script:</span> </span><br><span class="line">  <span class="bullet">-</span> <span class="string">hexo</span> <span class="string">clean</span></span><br><span class="line">  <span class="bullet">-</span> <span class="string">hexo</span> <span class="string">generate</span> <span class="comment"># generate static files</span></span><br><span class="line"><span class="attr">deploy:</span></span><br><span class="line">  <span class="attr">provider:</span> <span class="string">pages</span></span><br><span class="line">  <span class="attr">skip_cleanup:</span> <span class="literal">true</span> <span class="comment"># 构建完成后不清除</span></span><br><span class="line">  <span class="attr">token:</span> <span class="string">$GH_TOKEN</span> <span class="comment"># 你刚刚设置的 token</span></span><br><span class="line">  <span class="attr">keep_history:</span> <span class="literal">true</span> </span><br><span class="line">  <span class="attr">fqdn:</span> <span class="string">koukoustar.cn</span> <span class="comment"># 自定义域名，使用 username.github.io 可删除</span></span><br><span class="line">  <span class="attr">on:</span></span><br><span class="line">    <span class="attr">branch:</span> <span class="string">source</span> <span class="comment"># hexo 站点源文件所在的 branch</span></span><br><span class="line">  <span class="attr">local_dir:</span> <span class="string">public</span> </span><br><span class="line">  <span class="attr">target_branch:</span> <span class="string">master</span> <span class="comment"># 存放生成站点文件的 branch,和你github.io settings中的page栏目中设置保持一致</span></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h3 id="git提交-观察CI执行"><a href="#git提交-观察CI执行" class="headerlink" title="git提交 - 观察CI执行"></a>git提交 - 观察CI执行</h3><p>将你目前在本地站点所做的更改提交一下，push 到远程的source分支上</p>
+<p>push完毕之后，Travis CI就会开始queuing，queue完了就开始执行，会有一个host来跑你的travis.yml解析出来的命令，例如：安装nodejs，拉取next主题的仓库，clean， generate， deploy</p>
+<p>如果没有出错，执行成功则结果大致如下：</p>
+<p><img src="/2021/09/18/%E7%BB%93%E5%90%88TravisCI%E8%87%AA%E5%8A%A8%E9%83%A8%E7%BD%B2Next%E4%B8%BB%E9%A2%98%E7%9A%84Hexo%E5%8D%9A%E5%AE%A2/4.jpg"></p>
+<h2 id="Reference"><a href="#Reference" class="headerlink" title="Reference"></a>Reference</h2><p><a href="https://segmentfault.com/a/1190000021987832">🔗</a></p>
+<p><a href="https://www.itfanr.cc/2017/08/09/using-travis-ci-automatic-deploy-hexo-blogs/">🔗</a></p>
+]]></content>
+      <tags>
+        <tag>hero, next, Travis CI</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>视觉slam7.1-视觉里程计：使用相机运动估计视觉算法</title>
+    <url>/2021/05/28/%E8%A7%86%E8%A7%89slam7-1-%E8%A7%86%E8%A7%89%E9%87%8C%E7%A8%8B%E8%AE%A1%EF%BC%9A%E4%BD%BF%E7%94%A8%E7%9B%B8%E6%9C%BA%E8%BF%90%E5%8A%A8%E4%BC%B0%E8%AE%A1%E8%A7%86%E8%A7%89%E7%AE%97%E6%B3%95/</url>
+    <content><![CDATA[<p>本篇文章记录了少许阅读《视觉slam14讲》的阅读整理，不是特别全面，只是为了本次项目中特定任务搜查资料，时间比较紧，文章并没有全面涵盖所有知识点。日后若时间有空闲，将回来补充整理。</p>
+<span id="more"></span>
+
+<h2 id="相机位姿估计"><a href="#相机位姿估计" class="headerlink" title="相机位姿估计"></a>相机位姿估计</h2><h3 id="特征点法"><a href="#特征点法" class="headerlink" title="特征点法"></a>特征点法</h3><p>首先，视觉里程计的核心问题是根据图像估计相机运动。利用特征点能够有效利用图像矩阵为我们提供的关于相机运动的信息。特征点一般具有可重复可区别高效率和本地性的特点。</p>
+<h3 id="特征点组成"><a href="#特征点组成" class="headerlink" title="特征点组成"></a>特征点组成</h3><p><strong>关键点key-point</strong> 和<strong>描述子descriptor</strong></p>
+<p>关键点是指特征点的位置，描述子是按照相似的关键点一般具有相似的描述子设计的，如果2个特征点的描述子在向量空间上的距离相近，那么我们称他们是同样的特征点。</p>
+<h4 id="ORB特征"><a href="#ORB特征" class="headerlink" title="ORB特征"></a>ORB特征</h4><p>分为FAST关键点和BRIEF描述子</p>
+<table>
+<thead>
+<tr>
+<th>名称</th>
+<th>FAST关键点</th>
+<th>BRIEF描述子</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>原理</td>
+<td>比较像素点之间的亮度差异</td>
+<td>二进制高维度向量</td>
+</tr>
+<tr>
+<td>优缺点</td>
+<td>速度快、重复性不强、分布不均匀<br />不具有尺度不变性以及方向性</td>
+<td>速度快，有利于存储、适用于实时匹配<br />不具有旋转不变性</td>
+</tr>
+<tr>
+<td>解决办法</td>
+<td>尺度：在不同层的图像金字塔匹配<br />方向性：计算图像灰度质心</td>
+<td>旋转：关键点方向被计算出来的情况下可以计算旋转之后的Steer BRIEF</td>
+</tr>
+</tbody></table>
+<h4 id="特征匹配"><a href="#特征匹配" class="headerlink" title="特征匹配"></a>特征匹配</h4><p>暴力匹配；浮点型关键点-&gt;匹配欧氏距离；二进制关键点-&gt;匹配汉明距离；特征点个数极多时，考虑快速近似最近邻FLANN算法。</p>
+<h3 id="特征点匹配核心代码（OpenCV）"><a href="#特征点匹配核心代码（OpenCV）" class="headerlink" title="特征点匹配核心代码（OpenCV）"></a>特征点匹配核心代码（OpenCV）</h3><figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="comment">//首先初始化部分、关键点、描述子、计算描述子指针、匹配matcher指针</span></span><br><span class="line"><span class="comment">//-- 初始化</span></span><br><span class="line">    std::vector&lt;KeyPoint&gt; keypoints_1, keypoints_2;</span><br><span class="line">    Mat descriptors_1, descriptors_2;</span><br><span class="line">    Ptr&lt;FeatureDetector&gt; detector = ORB::<span class="built_in">create</span>();</span><br><span class="line">    Ptr&lt;DescriptorExtractor&gt; descriptor = ORB::<span class="built_in">create</span>();</span><br><span class="line">    <span class="comment">// Ptr&lt;FeatureDetector&gt; detector = FeatureDetector::create(detector_name);</span></span><br><span class="line">    <span class="comment">// Ptr&lt;DescriptorExtractor&gt; descriptor = DescriptorExtractor::create(descriptor_name);</span></span><br><span class="line">    Ptr&lt;DescriptorMatcher&gt; matcher  = DescriptorMatcher::<span class="built_in">create</span> ( <span class="string">&quot;BruteForce-Hamming&quot;</span> );</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="comment">//之后</span></span><br><span class="line"> <span class="comment">//-- 第一步:检测 Oriented FAST 角点位置</span></span><br><span class="line">    detector-&gt;<span class="built_in">detect</span> ( img_1,keypoints_1 );</span><br><span class="line">    detector-&gt;<span class="built_in">detect</span> ( img_2,keypoints_2 );</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="comment">//在之后,Mat存储描述子</span></span><br><span class="line"> <span class="comment">//-- 第二步:根据角点位置计算 BRIEF 描述子</span></span><br><span class="line">    descriptor-&gt;<span class="built_in">compute</span> ( img_1, keypoints_1, descriptors_1 );</span><br><span class="line">    descriptor-&gt;<span class="built_in">compute</span> ( img_2, keypoints_2, descriptors_2 );</span><br></pre></td></tr></table></figure>
+
+<p>可视化可以使用函数</p>
+<figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="built_in">drawKeypoints</span>( img_1, keypoints_1, outimg1, Scalar::<span class="built_in">all</span>(<span class="number">-1</span>), DrawMatchesFlags::DEFAULT );</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="comment">//最后是特征匹配</span></span><br><span class="line">  <span class="comment">//-- 第三步:对两幅图像中的BRIEF描述子进行匹配，使用 Hamming 距离</span></span><br><span class="line">    vector&lt;DMatch&gt; matches;</span><br><span class="line">    <span class="comment">//BFMatcher matcher ( NORM_HAMMING );</span></span><br><span class="line">    matcher-&gt;<span class="built_in">match</span> ( descriptors_1, descriptors_2, matches );</span><br></pre></td></tr></table></figure>
+
+<p>关于DMatch这个类，可以理解为匹配关键点描述子的类，有以下成员，存着匹配对的各种信息，用于筛选匹配对</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line"> DMatch.distance - 描述符之间的距离。越小越好。</span><br><span class="line">• DMatch.trainIdx - 目标图像中描述符的索引。</span><br><span class="line">• DMatch.queryIdx - 查询图像中描述符的索引。</span><br><span class="line">• DMatch.imgIdx - 目标图像的索引</span><br></pre></td></tr></table></figure>
+
+<p>之后对匹配点对进行筛选</p>
+<figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="comment">//-- 第四步:匹配点对筛选</span></span><br><span class="line">    <span class="keyword">double</span> min_dist=<span class="number">10000</span>, max_dist=<span class="number">0</span>;</span><br><span class="line"></span><br><span class="line">    <span class="comment">//找出所有匹配之间的最小距离和最大距离, 即是最相似的和最不相似的两组点之间的距离</span></span><br><span class="line">    <span class="keyword">for</span> ( <span class="keyword">int</span> i = <span class="number">0</span>; i &lt; descriptors_1.rows; i++ )</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="keyword">double</span> dist = match[i].distance;</span><br><span class="line">        <span class="keyword">if</span> ( dist &lt; min_dist ) min_dist = dist;</span><br><span class="line">        <span class="keyword">if</span> ( dist &gt; max_dist ) max_dist = dist;</span><br><span class="line">    &#125;</span><br><span class="line"><span class="comment">//当描述子之间的距离大于两倍的最小距离时,即认为匹配有误.但有时候最小距离会非常小,设置一个经验值30作为下限.</span></span><br><span class="line">    <span class="keyword">for</span> ( <span class="keyword">int</span> i = <span class="number">0</span>; i &lt; descriptors_1.rows; i++ )</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="keyword">if</span> ( match[i].distance &lt;= <span class="built_in">max</span> ( <span class="number">2</span>*min_dist, <span class="number">30.0</span> ) )</span><br><span class="line">        &#123;</span><br><span class="line">            matches.<span class="built_in">push_back</span> ( match[i] );</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>以上代码中得到的</p>
+<figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line">std::vector &lt;cv::Dmatch&gt; matches</span><br></pre></td></tr></table></figure>
+
+
+<p>即为最后获得筛选后的匹配对</p>
+<p>之后顺便看到一个像素坐标系转相机坐标系的函数，顺便摘抄作为参考</p>
+<figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="function">Point2d <span class="title">pixel2cam</span> <span class="params">( <span class="keyword">const</span> Point2d&amp; p, <span class="keyword">const</span> Mat&amp; K )</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="built_in">Point2d</span></span><br><span class="line">           (</span><br><span class="line">               ( p.x - K.at&lt;<span class="keyword">double</span>&gt; ( <span class="number">0</span>,<span class="number">2</span> ) ) / K.at&lt;<span class="keyword">double</span>&gt; ( <span class="number">0</span>,<span class="number">0</span> ),</span><br><span class="line">               ( p.y - K.at&lt;<span class="keyword">double</span>&gt; ( <span class="number">1</span>,<span class="number">2</span> ) ) / K.at&lt;<span class="keyword">double</span>&gt; ( <span class="number">1</span>,<span class="number">1</span> )</span><br><span class="line">           );</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>翻译成公式就是<br>$$<br>x_{cam} = \frac {x_{pxl} -  {c_x}} {f_x} \<br>y_{cam} = \frac {y_{pxl} - {c_y}}{f_y}<br>$$</p>
+<h3 id="计算相机运动"><a href="#计算相机运动" class="headerlink" title="计算相机运动"></a>计算相机运动</h3><table>
+<thead>
+<tr>
+<th>已知情况</th>
+<th>采用方法</th>
+<th>效果</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>单目相机、两组2D点</td>
+<td>对极几何</td>
+<td>估计相机运动</td>
+</tr>
+<tr>
+<td>双目相机、RGBD相机（两组3D点）</td>
+<td>ICP方法</td>
+<td>得到距离信息，估计相机运动</td>
+</tr>
+<tr>
+<td>一组3D一组2D</td>
+<td>PnP求解</td>
+<td>估计相机运动</td>
+</tr>
+</tbody></table>
+<h3 id="2D-2D"><a href="#2D-2D" class="headerlink" title="2D-2D"></a>2D-2D</h3><p>因为不太适用于本次比赛应用场景，先跳过这一步骤</p>
+<h3 id="三角测量"><a href="#三角测量" class="headerlink" title="三角测量"></a>三角测量</h3><p>又称三角化，==目的是求解目标特征点的空间位置==，考虑两张不同视角的二维图，两图之间变换矩阵为T ,I<del>1</del>有特征点p<del>1</del> , I<del>2</del>有特征点p2 , 都对应p点， 现在x1 x2是两个特征点的归一化坐标，已知R T,要求解两个特征点的深度s<del>1</del>  s<del>2</del>.</p>
+<ol>
+<li><p>如果我们考虑计算s～1,首先我们有<br>$$<br>s_2x_2 = s_1Rx_1 + t<br>$$</p>
+</li>
+<li><p>对上式我们左乘$x_2^{\Lambda}$</p>
+</li>
+<li><p>$$<br>s_2x_2^{\Lambda}x_2 = 0 = s_1x_2^{\Lambda}Rx_1 + x_2^{\Lambda}t<br>$$</p>
+<p>可以解方程得到s<del>2</del>,有了s<del>2</del>之后s<del>1</del>也很易得</p>
+<p>注意，前提是对极几何中我们求解了相机位子，在此基础之上进行三角化求解特征点的空间位置，这是为了解决==单目slam中的单幅图无法获取深度信息==</p>
+</li>
+</ol>
+<figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="comment">//opencv中提供了封装的函数用于三角化</span></span><br><span class="line">cv::<span class="built_in">triangulatePoints</span>( T1, T2, pts_1, pts_2, pts_4d );</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 转换成非齐次坐标</span></span><br><span class="line">    <span class="keyword">for</span> ( <span class="keyword">int</span> i=<span class="number">0</span>; i&lt;pts_4d.cols; i++ )</span><br><span class="line">    &#123;</span><br><span class="line">        Mat x = pts_4d.<span class="built_in">col</span>(i);</span><br><span class="line">        x /= x.at&lt;<span class="keyword">float</span>&gt;(<span class="number">3</span>,<span class="number">0</span>); <span class="comment">// 归一化</span></span><br><span class="line">        <span class="function">Point3d <span class="title">p</span> <span class="params">(</span></span></span><br><span class="line"><span class="params"><span class="function">            x.at&lt;<span class="keyword">float</span>&gt;(<span class="number">0</span>,<span class="number">0</span>), </span></span></span><br><span class="line"><span class="params"><span class="function">            x.at&lt;<span class="keyword">float</span>&gt;(<span class="number">1</span>,<span class="number">0</span>), </span></span></span><br><span class="line"><span class="params"><span class="function">            x.at&lt;<span class="keyword">float</span>&gt;(<span class="number">2</span>,<span class="number">0</span>) </span></span></span><br><span class="line"><span class="params"><span class="function">        )</span></span>;</span><br><span class="line">        points.<span class="built_in">push_back</span>( p );</span><br><span class="line">    &#125;<span class="comment">//需要一步将其次坐标归一化并且转换为费其次坐标</span></span><br></pre></td></tr></table></figure>
+
+
+<figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="comment">//这函数的参数必须都是float类型的</span></span><br><span class="line">Parameters：</span><br><span class="line"></span><br><span class="line">projMatr1</span><br><span class="line"><span class="number">3</span>x4 projection matrix of the first camera.<span class="comment">//左侧相机的RT矩阵（一般设置成eyes 0）</span></span><br><span class="line">projMatr2</span><br><span class="line"><span class="number">3</span>x4 projection matrix of the second camera.<span class="comment">//右侧相机的RT矩阵</span></span><br><span class="line">projPoints1</span><br><span class="line"><span class="number">2</span>xN array of feature points in the first image. In <span class="keyword">case</span> of c++ version it can be also a vector of feature points <span class="keyword">or</span> two-channel matrix of size <span class="number">1</span>xN <span class="keyword">or</span> Nx1.<span class="comment">//左侧相机在相机坐标系下特征点坐标的集合</span></span><br><span class="line">projPoints2</span><br><span class="line"><span class="number">2</span>xN array of corresponding points in the second image. In <span class="keyword">case</span> of c++ version it can be also a vector of feature points <span class="keyword">or</span> two-channel matrix of size <span class="number">1</span>xN <span class="keyword">or</span> Nx1.<span class="comment">//右侧相机在相机坐标系下特征点坐标的集合</span></span><br><span class="line">points4D</span><br><span class="line"><span class="number">4</span>xN array of reconstructed points in homogeneous coordinates.<span class="comment">//齐次坐标中的4xN</span></span><br></pre></td></tr></table></figure>
+
+
+<p>三角化测量中具有的深度不确定性可以根据深度滤波器来改进</p>
+<h3 id="3D-2D-PnP"><a href="#3D-2D-PnP" class="headerlink" title="3D-2D:PnP"></a>3D-2D:PnP</h3><p>终于来到了PnP，此方法描述了当知道n个3D空间点以及其投影位置时，估计相机的位姿。两张图像中的一张特征点的3D位置已知，最少需要3个点对以及至少1个额外点验证结果来估计相机运动，3D位置可以由三角化和RGBD相机的深度图确定，因此在双目或者rgbd相机的视觉里程计中</p>
+<p>这里介绍很多PNP问题的求解方法，并且可以用非线性化的方式构造最小二乘问题迭代求解</p>
+<h4 id="直接线性变换DLT"><a href="#直接线性变换DLT" class="headerlink" title="直接线性变换DLT"></a>直接线性变换DLT</h4><p>已知一组3D点，以及他们在相机中的投影位置</p>
+<p>==可以求解给定地图和图像时的相机状态问题==，如果把3D点看做另一个相机坐标系点的话，也可以求解两个相机的相对运动问题。</p>
+<p>==–后记–==<br>关于相机运动估计，最后采取的解决办法实际上是跑一个slam的包，效果会比手写pnp来的更准，且操作也很方便。</p>
+]]></content>
+  </entry>
+  <entry>
+    <title>记录hexo原理探究</title>
+    <url>/2021/05/27/%E8%AE%B0%E5%BD%95hexo%E5%8E%9F%E7%90%86%E6%8E%A2%E7%A9%B6/</url>
+    <content><![CDATA[<p>前部分算是转载了<a href="https://littlezero.top/20190831what-is-Hexo/">文章</a>。</p>
+<p>在官方文档中，我们可以找到他的定义：Hexo 是一个快速、简洁且高效的博客框架。</p>
+<p>Hexo 使用 Markdown解析文章，在几秒内，即可利用靓丽的主题生成静态网页。</p>
+<span id="more"></span>
+
+<h2 id="工作原理"><a href="#工作原理" class="headerlink" title="工作原理"></a>工作原理</h2><p><strong>文件架构：</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">├── node_modules：             #依赖包-安装插件及所需nodejs模块。 </span><br><span class="line">├── public          #最终网页信息。即存放被解析markdown、html文件。 </span><br><span class="line">├── scaffolds         #模板文件夹。即当您新建文章时，根据 scaffold生成文件。 </span><br><span class="line">├── source          #资源文件夹。即存放用户资源。 </span><br><span class="line">|   └── _posts         #博客文章目录。 </span><br><span class="line">└── themes             #存放主题。Hexo根据主题生成静态页面。 </span><br><span class="line">├── _config.yml       #网站的配置信息。标题、网站名称等。 </span><br><span class="line">├── db.json：        #source解析所得到的缓存文件。 </span><br><span class="line">├── package.json      # 应用程序信息。即配置Hexo运行需要js包。</span><br></pre></td></tr></table></figure>
+
+<p>首先本地文件夹的source就是数据库，以.md（markdown）格式存储文章，theme文件夹是主题文件（决定页面模板）。</p>
+<p> 我们可以通过部署流程来逐步详尽分析。以下先来了解hexo有哪些部署命令，再分析部署的步骤流程。</p>
+<p><strong>hexo命令总览：</strong></p>
+<p>hexo可以粗略分为三个子项目，分别是:</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">hexo-cli</span><br><span class="line">hexo (下文中用hexo core来指代)</span><br><span class="line">hexo plugins</span><br></pre></td></tr></table></figure>
+
+<p>hexo plugins泛指所有的hexo plugin项目。</p>
+<p><img src="/2021/05/27/%E8%AE%B0%E5%BD%95hexo%E5%8E%9F%E7%90%86%E6%8E%A2%E7%A9%B6/1.jpg"></p>
+<p><strong>每次部署的流程：</strong></p>
+<p>我发现这个人的解读还是跟我想要解决的问题有偏差，我不是想知道js，node如何工作，如何填充模板。我现在想知道部署过程中我在本地的渲染效果为何在远端没有展现出来，到底是哪里出现了问题。</p>
+<p>思考一下，静态文件的渲染依赖于html，我的gh-pages分支上的静态文件一直是没有背景文件的，为何？</p>
+<p>我的背景是如何加进去的，是依靠自定义styl文件，在站点文件夹的source/_data文件夹里，那么，我部属过去之后的分支上，有 _data吗？没有。 为何，因为gh-pages上只有css、js之类的文件夹，没有source的，那怎么样才能让远端的自定义文件也生效呢。</p>
+<p>到底咋搞呢…我找找原因。</p>
+<p><strong>我找到了，只需要，将根目录下的config里也加上你在next文件夹里的自定义文件的配置信息：</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">custom_file_path:</span><br><span class="line">  head: source/_data/head.njk</span><br><span class="line">  #header: source/_data/header.njk</span><br><span class="line">  #sidebar: source/_data/sidebar.njk</span><br><span class="line">  #postMeta: source/_data/post-meta.njk</span><br><span class="line">  postBodyEnd: source/_data/post-body-end.njk</span><br><span class="line">  #footer: source/_data/footer.njk</span><br><span class="line">  bodyEnd: source/_data/body-end.njk</span><br><span class="line">  variable: source/_data/variables.styl</span><br><span class="line">  mixin: source/_data/mixins.styl</span><br><span class="line">  style: source/_data/styles.styl</span><br></pre></td></tr></table></figure>
+
+<p>我的githubio终于有背景了，哭泣。</p>
+]]></content>
+  </entry>
+  <entry>
+    <title>groovy基础语法</title>
+    <url>/2021/09/17/groovy%E5%9F%BA%E7%A1%80%E8%AF%AD%E6%B3%95/</url>
+    <content><![CDATA[<h1 id="GROOVY基础入门"><a href="#GROOVY基础入门" class="headerlink" title="GROOVY基础入门"></a>GROOVY基础入门</h1><h2 id="概要"><a href="#概要" class="headerlink" title="概要"></a>概要</h2><p>groovy基于JVM（java虚拟机）的敏捷开发语言，结合了Python，Ruby和Smalltalk许多强大的特性。groovy代码能够与java代码很好地结合，也能够用于扩展现有代码。groovy可以使用java代码编写的库。</p>
+<span id="more"></span>
+
+<h2 id="特点"><a href="#特点" class="headerlink" title="特点"></a>特点</h2><ul>
+<li>java之外的特性支持 </li>
+<li>支持dsl（领域定义语言）</li>
+<li>有原生类型、有面向对象，ant dsl，编写脚本很简单</li>
+<li>开发web，gui，数据库或者控制台程序时通过减少框架性代码提高编码效率</li>
+<li>直接编译成java字节码，可以在任何用java的地方直接用groovy</li>
+<li>支持函数式编程，不需要main函数</li>
+<li>新的运算符，默认导入常用的包，支持单元测试和模拟</li>
+<li>类不支持default作用域，默认作用域为public</li>
+<li>groovy基本类型也是对象，可以直接调用对象的方法</li>
+</ul>
+<h2 id="重要特性"><a href="#重要特性" class="headerlink" title="重要特性"></a>重要特性</h2><ol>
+<li><p>动态类型</p>
+<p>类型对于变量，属性，方法，闭包的参数以及方法的返回类型都是可有可无的，都是在给变量赋值的时候才决定它的类型， 不同的类型会在后面用到，任何类型都可以被使用,即使是基本类型 (通过自动包装（autoboxing）). 当需要时，很多类型之间的转换都会自动发生，比如在这些类型之间的转换: 字符串（String），基本类型(如int) 和类型的包装类 (如Integer)之间，可以把不同的基本类型添加到同一数组（collections）中。</p>
+</li>
+<li><p>闭包</p>
+<p>可以使用参数的代码片段，每个闭包会被编译成继承groovy.lang.Closure类的类，这个类有一个叫call方法，通过该方法可以传递参数并调用这个闭包.它们可以访问并修改在闭包创建的范围内的变量，在闭包内创建的变量在闭包被调用的范围内同样可以被引用， 闭包可以保存在变量中并被作为参数传递到方法中。</p>
+</li>
+<li><p>语法</p>
+<p>可以将它想像成 Java 语言的一种更加简单、表达能力更强的变体。Groovy 和 Java 语言的主要区别是：完成同样的任务所需的 Groovy 代码比 Java 代码更少。</p>
+</li>
+<li><p>类</p>
+<p>Groovy类和java类一样，完全可以用标准java bean的语法定义一个Groovy类。但作为另一种语言，可以使用更Groovy的方式定义类，这样的好处是，可以少写一半以上的javabean代码。</p>
+<p><strong>（1）不需public修饰符</strong></p>
+<p>如前面所言，Groovy的默认访问修饰符就是public，如果Groovy类成员需要public修饰，则根本不用写它。</p>
+<p><strong>（2）不需要类型说明</strong></p>
+<p>同样前面也说过，Groovy也不关心变量和方法参数的具体类型。</p>
+<p><strong>（3）不需要getter/setter方法</strong></p>
+<p>在很多ide（如eclipse）早就可以为程序员自动产生getter/setter方法了，在Groovy中，不需要getter/setter方法–所有类成员（如果是默认的public）根本不用通过getter/setter方法引用它们（当然，如果一定要通过getter/setter方法访问成员属性，Groovy也提供了它们）。</p>
+<p><strong>（4）不需要构造函数</strong></p>
+<p>不再需要程序员声明任何构造函数，因为实际上只需要两个构造函数（1个不带参数的默认构造函数，1个只带一个map参数的构造函数–由于是map类型，通过这个参数可以构造对象时任意初始化它的成员变量）。</p>
+<p><strong>（5）不需要return</strong></p>
+<p>Groovy中，方法不需要return来返回值。</p>
+<p><strong>（6）不需要（）</strong></p>
+<p>Groovy中方法调用可以省略（）（构造函数除外）。</p>
+</li>
+</ol>
+<h2 id="基本语法"><a href="#基本语法" class="headerlink" title="基本语法"></a>基本语法</h2><p>​    <strong>导入</strong> 默认导入以下库</p>
+<figure class="highlight groovy"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> java.lang.* </span><br><span class="line"><span class="keyword">import</span> java.util.* </span><br><span class="line"><span class="keyword">import</span> java.io.* </span><br><span class="line"><span class="keyword">import</span> java.net.* </span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> groovy.lang.* </span><br><span class="line"><span class="keyword">import</span> groovy.util.* </span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> java.math.BigInteger </span><br><span class="line"><span class="keyword">import</span> java.math.BigDecimal</span><br></pre></td></tr></table></figure>
+
+<p>导入其他库时可以这么导</p>
+<figure class="highlight groovy"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> groovy.xml.MarkupBuilder </span><br><span class="line"><span class="keyword">def</span> xml = <span class="keyword">new</span> MarkupBuilder() </span><br></pre></td></tr></table></figure>
+
+<p><strong>分号</strong></p>
+<figure class="highlight groovy"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Example</span> &#123;</span></span><br><span class="line">   <span class="keyword">static</span> <span class="keyword">void</span> main(String[] args) &#123;</span><br><span class="line">      <span class="comment">// One can see the use of a semi-colon after each statement</span></span><br><span class="line">      <span class="keyword">def</span> x = <span class="number">5</span>;</span><br><span class="line">      println(<span class="string">&#x27;Hello World&#x27;</span>);  </span><br><span class="line">   &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><strong>身份标识</strong>  标识符被用来定义变量，函数或其他用户定义的变量。标识符以字母开头，美元或下划线。他们不能以数字开头。</p>
+<figure class="highlight groovy"><table><tr><td class="code"><pre><span class="line"><span class="keyword">def</span> employeename </span><br><span class="line"><span class="keyword">def</span> student1 </span><br><span class="line"><span class="keyword">def</span> student_name</span><br></pre></td></tr></table></figure>
+
+<p>def是用来定义标识符的关键字</p>
+<p><strong>关键词</strong></p>
+<table>
+<thead>
+<tr>
+<th>as</th>
+<th>assert</th>
+<th>break</th>
+<th>case</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>catch</td>
+<td>class</td>
+<td>const</td>
+<td>continue</td>
+</tr>
+<tr>
+<td>def</td>
+<td>default</td>
+<td>do</td>
+<td>else</td>
+</tr>
+<tr>
+<td>enum</td>
+<td>extends</td>
+<td>false</td>
+<td>Finally</td>
+</tr>
+<tr>
+<td>for</td>
+<td>goto</td>
+<td>if</td>
+<td>implements</td>
+</tr>
+<tr>
+<td>import</td>
+<td>in</td>
+<td>instanceof</td>
+<td>interface</td>
+</tr>
+<tr>
+<td>new</td>
+<td>pull</td>
+<td>package</td>
+<td>return</td>
+</tr>
+<tr>
+<td>super</td>
+<td>switch</td>
+<td>this</td>
+<td>throw</td>
+</tr>
+<tr>
+<td>throws</td>
+<td>trait</td>
+<td>true</td>
+<td>try</td>
+</tr>
+<tr>
+<td>while</td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+</tbody></table>
+<p><strong>空白</strong> 告诉编译器如何分割不同声明的部分</p>
+<p><strong>文字</strong> 文字表示固定值的符号，符号整数，浮点数，字符和字符串</p>
+<figure class="highlight groovy"><table><tr><td class="code"><pre><span class="line"><span class="number">12</span> </span><br><span class="line"><span class="number">1.45</span> </span><br><span class="line">‘a’ </span><br><span class="line">“aa”</span><br></pre></td></tr></table></figure>
+
+<h2 id="groovy数据类型"><a href="#groovy数据类型" class="headerlink" title="groovy数据类型"></a>groovy数据类型</h2><p>内置类型：byte short int  long float double char Boolean String</p>
+<table>
+<thead>
+<tr>
+<th>byte</th>
+<th>-128到127</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>short</td>
+<td>-32,768到32,767</td>
+</tr>
+<tr>
+<td>int</td>
+<td>2,147,483,648 到,147,483,647</td>
+</tr>
+<tr>
+<td>long</td>
+<td>-9,223,372,036,854,775,808到+9,223,372,036,854,775,807</td>
+</tr>
+<tr>
+<td>float</td>
+<td>1.40129846432481707e-45到3.40282346638528860e + 38</td>
+</tr>
+<tr>
+<td>double</td>
+<td>4.94065645841246544e-324d 到1.79769313486231570e + 308d</td>
+</tr>
+</tbody></table>
+<p>支持高精度计算的累（java包装类）</p>
+<table>
+<thead>
+<tr>
+<th>名称</th>
+<th>描述</th>
+<th>例如</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>java.math.BigInteger</td>
+<td>不可变的任意精度的有符号整数数字</td>
+<td>30g</td>
+</tr>
+<tr>
+<td>java.math.BigDecimal</td>
+<td>不可变的任意精度的有符号十进制数</td>
+<td>3.5g</td>
+</tr>
+</tbody></table>
+<h2 id="运算符"><a href="#运算符" class="headerlink" title="运算符"></a>运算符</h2><p>特别注意的运算符</p>
+<p>范围运算符 .. </p>
+<figure class="highlight groovy"><table><tr><td class="code"><pre><span class="line"><span class="keyword">def</span> range = <span class="number">0.</span><span class="number">.5</span></span><br></pre></td></tr></table></figure>
+
+<p>表示一个整数范围，下限0上限5，具体案例：</p>
+<figure class="highlight groovy"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Example</span> &#123;</span> </span><br><span class="line">   <span class="keyword">static</span> <span class="keyword">void</span> main(String[] args) &#123; </span><br><span class="line">      <span class="keyword">def</span> range = <span class="number">5.</span><span class="number">.10</span>; </span><br><span class="line">      println(range); </span><br><span class="line">      println(range.get(<span class="number">2</span>)); </span><br><span class="line">   &#125; </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>get语句会从定义的范围中获取一个对象，将索引值作为参数</p>
+<p>优先级</p>
+<table>
+<thead>
+<tr>
+<th>运算符</th>
+<th>名称</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>++ - + -</td>
+<td>预增/减，一元加，一元减</td>
+</tr>
+<tr>
+<td>* / ％</td>
+<td>乘法，除法，取模</td>
+</tr>
+<tr>
+<td>+ -</td>
+<td>加法，减法</td>
+</tr>
+<tr>
+<td>==！= &lt;=&gt;</td>
+<td>等于，不等于，比较</td>
+</tr>
+<tr>
+<td>＆</td>
+<td>二进制/位运算符与</td>
+</tr>
+<tr>
+<td>^</td>
+<td>二进制/位异或</td>
+</tr>
+<tr>
+<td>|</td>
+<td>二进制/按位或</td>
+</tr>
+<tr>
+<td>&amp;&amp;</td>
+<td>逻辑和</td>
+</tr>
+<tr>
+<td>||</td>
+<td>逻辑或</td>
+</tr>
+<tr>
+<td>= ** = * = / =％= + = - = &lt;&lt; = &gt;&gt; = &gt;&gt;&gt; = = ^ = | =</td>
+<td>各种赋值运算符</td>
+</tr>
+</tbody></table>
+<h2 id="循环"><a href="#循环" class="headerlink" title="循环"></a>循环</h2><p>break continue语句用于改变循环里的控制流 break还可以用于改变switch语句内的控制流</p>
+<figure class="highlight groovy"><table><tr><td class="code"><pre><span class="line"><span class="keyword">while</span>(condition) &#123; </span><br><span class="line">   statement #<span class="number">1</span> </span><br><span class="line">   statement #<span class="number">2</span> </span><br><span class="line">   ... </span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">for</span>(variable declaration;expression;Increment) &#123; </span><br><span class="line">   statement #<span class="number">1</span> </span><br><span class="line">   statement #<span class="number">2</span> </span><br><span class="line">   … </span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">for</span>(variable <span class="keyword">in</span> range) &#123; </span><br><span class="line">   statement #<span class="number">1</span> </span><br><span class="line">   statement #<span class="number">2</span> </span><br><span class="line">   … </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="条件语句"><a href="#条件语句" class="headerlink" title="条件语句"></a>条件语句</h2><p><strong>if</strong> if/else 嵌套if  switch  嵌套switch</p>
+<h2 id="方法"><a href="#方法" class="headerlink" title="方法"></a>方法</h2><p>Groovy 中的方法是使用返回类型或使用 def 关键字定义的。方法可以接收任意数量的参数。定义参数时，不必显式定义类型。可以添加修饰符，如 public，private 和 protected。默认情况下，如果未提供可见性修饰符，则该方法为 public。</p>
+<p><strong>默认参数：</strong>默认参数在参数列表的末尾定义</p>
+<figure class="highlight groovy"><table><tr><td class="code"><pre><span class="line"><span class="keyword">def</span> someMethod(parameter1, parameter2 = <span class="number">0</span>, parameter3 = <span class="number">0</span>) &#123;    <span class="comment">// Method code goes here &#125; </span></span><br></pre></td></tr></table></figure>
+
+<p><strong>返回值：</strong> </p>
+<figure class="highlight groovy"><table><tr><td class="code"><pre><span class="line"><span class="keyword">static</span> <span class="keyword">int</span> sum(<span class="keyword">int</span> a,<span class="keyword">int</span> b = <span class="number">5</span>) &#123;      <span class="keyword">int</span> c = a+b;      <span class="keyword">return</span> c;   &#125; </span><br></pre></td></tr></table></figure>
+
+<p><strong>实例方法：</strong></p>
+<p><strong>本地参数和外部参数</strong>：</p>
+<figure class="highlight groovy"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Example</span> &#123;</span> <span class="comment">// x是全局的属性   static int x = 100; 	   public static int getX() &#123;       // lx是内部属性      int lx = 200;       println(lx);       return x;    &#125; 	   static void main(String[] args) &#123;       println getX()    &#125;  &#125;</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>方法属性：</strong></p>
+<p>groovy 可以使用 this 关键字访问它的实例成员。</p>
+<h2 id="可选类型"><a href="#可选类型" class="headerlink" title="可选类型"></a>可选类型</h2><p>与Java相比，Java是一种“强”类型的语言，由此编译器知道每个变量的所有类型，并且可以在编译时理解和尊重合同。这意味着方法调用能够在编译时确定。</p>
+<p>Groovy中编写代码时，开发人员可以灵活地提供类型或不是类型。可选类型通过def关键字键入，可以用于声明一些基本类型或者是包装类。</p>
+<p>为了避免想要使用可选类型提供的灵活性同时兼顾后期开发阶段的可维护性，可以采用鸭式编程的方式。</p>
+<figure class="highlight groovy"><table><tr><td class="code"><pre><span class="line"><span class="keyword">def</span> aint = <span class="number">100</span>;       println(aint); 		      <span class="comment">// Example of an float using def       def bfloat = 100.10;       println(bfloat); 		      // Example of an Double using def       def cDouble = 100.101;       println(cDouble);		      // Example of an String using def       def dString = &quot;HelloWorld&quot;;       println(dString); </span></span><br></pre></td></tr></table></figure>
+
+<h2 id="列表"><a href="#列表" class="headerlink" title="列表"></a>列表</h2><p>List 中的对象引用占据序列中的位置，并通过整数索引来区分。</p>
+<p>列表文字表示为一系列用逗号分隔并用方括号括起来的对象。</p>
+<p>groovy 列表使用索引操作符 [] 索引。列表索引从 0 开始，指第一个元素。</p>
+<p>groovy 中的一个列表中的数据可以是任意类型。这 java 下集合列表有些不同，java 下的列表是同种类型的数据集合。</p>
+<p>groovy 列表可以嵌套列表。groovy 列表内置有反转方法 reverse()。groovy 列表内置有排序方法 sort()。空列表表示为 [] 声明一个空集合：</p>
+<figure class="highlight groovy"><table><tr><td class="code"><pre><span class="line"><span class="keyword">def</span> list1 = []  <span class="keyword">def</span> list2 = [<span class="number">1</span>,<span class="number">2</span>,<span class="number">3</span>,<span class="number">4</span>]  list2.add(<span class="number">12</span>)  list2.add(<span class="number">12</span>)  println list1.size()</span><br></pre></td></tr></table></figure>
+
+<p><strong>添加</strong></p>
+<figure class="highlight groovy"><table><tr><td class="code"><pre><span class="line"><span class="keyword">def</span> list1 = [<span class="number">100</span>, <span class="number">101</span>]<span class="keyword">def</span> list2 = [ <span class="number">99</span>,<span class="number">98</span>,<span class="number">1</span>]println list2.plus(list1)<span class="comment">//输出结果： [100, 101, 99, 98,1]// list2.plus(list1) 也可以写成 list2 + list1</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>删除</strong></p>
+<figure class="highlight groovy"><table><tr><td class="code"><pre><span class="line"><span class="keyword">def</span> list1 = [<span class="number">12</span>, <span class="number">13</span>]<span class="keyword">def</span> list2 = [<span class="number">11</span>, <span class="number">2</span>, <span class="number">33</span>, <span class="number">12</span>, <span class="number">13</span>, <span class="number">16</span>]println list2.minus(list1) <span class="comment">//输出结果： [11, 2, 33, 16]//list2.minus(list1) 也可以写成 list2 - list1</span></span><br></pre></td></tr></table></figure>
+
+<table>
+<thead>
+<tr>
+<th>序号</th>
+<th align="center">方法和描述</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>1</td>
+<td align="center"><a href="https://www.w3cschool.cn/groovy/groovy_add.html">add()</a>将新值附加到此列表的末尾。</td>
+</tr>
+<tr>
+<td>2</td>
+<td align="center"><a href="https://www.w3cschool.cn/groovy/groovy_lists_contains.html">contains()</a>如果此列表包含指定的值，则返回 true。</td>
+</tr>
+<tr>
+<td>3</td>
+<td align="center"><a href="https://www.w3cschool.cn/groovy/groovy_lists_get.html">get()</a>返回此列表中指定位置的元素。</td>
+</tr>
+<tr>
+<td>4</td>
+<td align="center"><a href="https://www.w3cschool.cn/groovy/groovy_isempty.html">isEmpty()</a>如果此列表不包含元素，则返回 true</td>
+</tr>
+<tr>
+<td>5</td>
+<td align="center"><a href="https://www.w3cschool.cn/groovy/groovy_lists_minus.html">minus()</a>创建一个由原始元素组成的新列表，而不是集合中指定的元素。</td>
+</tr>
+<tr>
+<td>6</td>
+<td align="center"><a href="https://www.w3cschool.cn/groovy/groovy_lists_plus.html">plus()</a>创建由原始元素和集合中指定的元素组成的新列表。</td>
+</tr>
+<tr>
+<td>7</td>
+<td align="center"><a href="https://www.w3cschool.cn/groovy/groovy_pop.html">pop()</a>从此列表中删除最后一个项目</td>
+</tr>
+<tr>
+<td>8</td>
+<td align="center"><a href="https://www.w3cschool.cn/groovy/groovy_remove.html">remove()</a>删除此列表中指定位置的元素。</td>
+</tr>
+<tr>
+<td>9</td>
+<td align="center"><a href="https://www.w3cschool.cn/groovy/groovy_reverse.html">reverse()</a>创建与原始列表的元素相反的新列表</td>
+</tr>
+<tr>
+<td>10</td>
+<td align="center"><a href="https://www.w3cschool.cn/groovy/groovy_lists_size.html">size()</a>获取此列表中的元素数。</td>
+</tr>
+<tr>
+<td>11</td>
+<td align="center"><a href="https://www.w3cschool.cn/groovy/groovy_sort.html">sort()</a>返回原始列表的排序副本。</td>
+</tr>
+</tbody></table>
+<h2 id="映射"><a href="#映射" class="headerlink" title="映射"></a>映射</h2><p>映射（也称为关联数组，字典，表和散列）是对象引用的无序集合。Map集合中的元素由键值访问。 Map中使用的键可以是任何类。当我们插入到Map集合中时，需要两个值：键和值。</p>
+<ul>
+<li>[‘TopicName’：’Lists’，’TopicName’：’Maps’] - 具有TopicName作为键的键值对的集合及其相应的值。</li>
+<li>[：] - 空映射。</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>序号</th>
+<th align="center">方法和描述</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>1</td>
+<td align="center"><a href="https://www.w3cschool.cn/groovy/groovy_containskey.html">containsKey()</a>此映射是否包含此键？</td>
+</tr>
+<tr>
+<td>2</td>
+<td align="center"><a href="https://www.w3cschool.cn/groovy/groovy_maps_get.html">get()</a>查找此Map中的键并返回相应的值。如果此映射中没有键的条目，则返回null。</td>
+</tr>
+<tr>
+<td>3</td>
+<td align="center"><a href="https://www.w3cschool.cn/groovy/groovy_keyset.html">keySet()</a>获取此映射中的一组键。</td>
+</tr>
+<tr>
+<td>4</td>
+<td align="center"><a href="https://www.w3cschool.cn/groovy/groovy_put.html">put()</a>将指定的值与此映射中的指定键相关联。如果此映射先前包含此键的映射，则旧值将替换为指定的值。</td>
+</tr>
+<tr>
+<td>5</td>
+<td align="center"><a href="https://www.w3cschool.cn/groovy/groovy_maps_size.html">size()</a>返回此地图中的键值映射的数量。</td>
+</tr>
+<tr>
+<td>6</td>
+<td align="center"><a href="https://www.w3cschool.cn/groovy/groovy_values.html">values()</a>返回此地图中包含的值的集合视图。</td>
+</tr>
+</tbody></table>
+<h2 id="异常"><a href="#异常" class="headerlink" title="异常"></a>异常</h2><p>**捕获异常： **try和catch关键字的组合捕获异常。 try / catch块放置在可能生成异常的代码周围。</p>
+<figure class="highlight groovy"><table><tr><td class="code"><pre><span class="line"><span class="keyword">try</span> &#123;    <span class="comment">//Protected code &#125; catch(ExceptionName e1) &#123;   //Catch block &#125;</span></span><br></pre></td></tr></table></figure>
+
+<p>**多个捕获块： ** 对具体类型的异常做不同的处理</p>
+<p><strong>finally块</strong> 跟在try块或catch块之后。代码的finally块总是执行，而不管异常的发生。</p>
+<h2 id="面向对象"><a href="#面向对象" class="headerlink" title="面向对象"></a>面向对象</h2><p><strong>扩展</strong>  extends用于继承累的属性的关键字</p>
+<p><strong>内部类</strong> 内部类在另一个类中定义。封闭类可以像往常一样使用内部类。另一方面，内部类可以访问其封闭类的成员，即使它们是私有的。不允许除封闭类之外的类访问内部类。</p>
+<figure class="highlight groovy"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Outer</span> &#123;</span>    String name;	   <span class="keyword">def</span> callInnerMethod() &#123;       <span class="keyword">new</span> Inner().methodA()    &#125; 	   <span class="class"><span class="keyword">class</span> <span class="title">Inner</span> &#123;</span>      <span class="keyword">def</span> methodA() &#123;          println(name);       &#125;    &#125; &#125;  </span><br></pre></td></tr></table></figure>
+
+<p><strong>抽象类 ** 表示通用概念，因此，它们</strong>不能被实例化**，被创建为子类化。成员包括字段/属性和抽象或具体方法。抽象方法没有实现，必须通过具体子类来实现。抽象类必须用抽象关键字声明。抽象方法也必须用抽象关键字声明。</p>
+<figure class="highlight groovy"><table><tr><td class="code"><pre><span class="line"><span class="keyword">abstract</span> <span class="class"><span class="keyword">class</span> <span class="title">Person</span> &#123;</span>    <span class="keyword">public</span> String name;    <span class="keyword">public</span> Person() &#123; &#125;    <span class="keyword">abstract</span> <span class="keyword">void</span> DisplayMarks();&#125; <span class="class"><span class="keyword">class</span> <span class="title">Student</span> <span class="keyword">extends</span> <span class="title">Person</span> &#123;</span>    <span class="keyword">int</span> StudentID    <span class="keyword">int</span> Marks1; 	   <span class="keyword">public</span> Student() &#123;       <span class="built_in">super</span>();    &#125; 	   <span class="keyword">void</span> DisplayMarks() &#123;       println(Marks1);    &#125;  &#125; </span><br></pre></td></tr></table></figure>
+
+<p>**接口 ** 接口仅定义需要实现的方法的列表，但是不定义方法实现。需要使用interface关键字声明接口。接口仅定义方法签名。接口的方法总是公开的。在接口中使用受保护或私有方法是一个错误。</p>
+<figure class="highlight groovy"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">interface</span> <span class="title">Marks</span> &#123;</span>    <span class="keyword">void</span> DisplayMarks(); &#125; <span class="class"><span class="keyword">class</span> <span class="title">Student</span> <span class="keyword">implements</span> <span class="title">Marks</span> &#123;</span>   <span class="keyword">int</span> StudentID   <span class="keyword">int</span> Marks1;	   <span class="keyword">void</span> DisplayMarks() &#123;      println(Marks1);   &#125;&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="泛型"><a href="#泛型" class="headerlink" title="泛型"></a>泛型</h2><p>以下是一个泛型类的实例：</p>
+<figure class="highlight groovy"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">ListType</span>&lt;<span class="title">T</span>&gt; &#123;</span>   <span class="keyword">private</span> T localt;	   <span class="keyword">public</span> T get() &#123;      <span class="keyword">return</span> <span class="built_in">this</span>.localt;   &#125;	   <span class="keyword">public</span> <span class="keyword">void</span> set(T plocal) &#123;      <span class="built_in">this</span>.localt = plocal;   &#125; &#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="特征"><a href="#特征" class="headerlink" title="特征"></a>特征</h2><p>特征是语言的结构构造，允许 -</p>
+<ul>
+<li>行为的组成。</li>
+<li>接口的运行时实现。</li>
+<li>与静态类型检查/编译的兼容性</li>
+</ul>
+<p>可看作是承载默认实现和状态的接口。使用trait关键字定义 trait。</p>
+<figure class="highlight groovy"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">trait</span> <span class="title">Marks</span> &#123;</span>    <span class="keyword">void</span> DisplayMarks() &#123;      println(<span class="string">&quot;Display Marks&quot;</span>);   &#125; &#125; <span class="class"><span class="keyword">class</span> <span class="title">Student</span> <span class="keyword">implements</span> <span class="title">Marks</span> &#123;</span>    <span class="keyword">int</span> StudentID   <span class="keyword">int</span> Marks1;&#125;</span><br></pre></td></tr></table></figure>
+
+<p><strong>实现接口</strong></p>
+<p>Traits 可以实现接口，在这种情况下，使用 interface 关键字声明接口。下</p>
+<ul>
+<li>接口 Total 使用方法 DisplayTotal 定义。</li>
+<li>特征 Marks 实现了 Total 接口，因此需要为 DisplayTotal 方法提供一个实现。</li>
+</ul>
+<figure class="highlight groovy"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">interface</span> <span class="title">Total</span> &#123;</span>   <span class="keyword">void</span> DisplayTotal() &#125; <span class="class"><span class="keyword">trait</span> <span class="title">Marks</span> <span class="keyword">implements</span> <span class="title">Total</span> &#123;</span>   <span class="keyword">void</span> DisplayMarks() &#123;      println(<span class="string">&quot;Display Marks&quot;</span>);   &#125;	   <span class="keyword">void</span> DisplayTotal() &#123;      println(<span class="string">&quot;Display Total&quot;</span>);    &#125; &#125; <span class="class"><span class="keyword">class</span> <span class="title">Student</span> <span class="keyword">implements</span> <span class="title">Marks</span> &#123;</span>    <span class="keyword">int</span> StudentID   <span class="keyword">int</span> Marks1;  &#125; </span><br></pre></td></tr></table></figure>
+
+<p><strong>属性</strong> 特征可以定义属性。</p>
+<figure class="highlight groovy"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">interface</span> <span class="title">Total</span> &#123;</span>      <span class="keyword">void</span> DisplayTotal()    &#125; 	   <span class="class"><span class="keyword">trait</span> <span class="title">Marks</span> <span class="keyword">implements</span> <span class="title">Total</span> &#123;</span>      <span class="keyword">int</span> Marks1;		      <span class="keyword">void</span> DisplayMarks() &#123;         <span class="built_in">this</span>.Marks1 = <span class="number">10</span>;         println(<span class="built_in">this</span>.Marks1);      &#125;		      <span class="keyword">void</span> DisplayTotal() &#123;         println(<span class="string">&quot;Display Total&quot;</span>);      &#125;    &#125; 	   <span class="class"><span class="keyword">class</span> <span class="title">Student</span> <span class="keyword">implements</span> <span class="title">Marks</span> &#123;</span>      <span class="keyword">int</span> StudentID    &#125;</span><br></pre></td></tr></table></figure>
+
+<p><strong>行为的构成</strong></p>
+<p>特征可以用于以受控的方式实现多重继承，避免钻石问题。</p>
+<figure class="highlight groovy"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">trait</span> <span class="title">Marks</span> &#123;</span>   <span class="keyword">void</span> DisplayMarks() &#123;      println(<span class="string">&quot;Marks1&quot;</span>);   &#125; &#125; <span class="class"><span class="keyword">trait</span> <span class="title">Total</span> &#123;</span>   <span class="keyword">void</span> DisplayTotal() &#123;       println(<span class="string">&quot;Total&quot;</span>);   &#125; &#125;  <span class="comment">//Student扩展了两个特征，可以访问这两种方法class Student implements Marks,Total &#123;   int StudentID &#125;   </span></span><br></pre></td></tr></table></figure>
+
+<p><strong>扩展特征</strong> 特征可能扩展另一个特征，在这种情况下，必须使用extends关键字。在下面的代码示例中，我们使用 Marks trait 扩展了 Total trait。</p>
+<figure class="highlight groovy"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Example</span> &#123;</span>   <span class="keyword">static</span> <span class="keyword">void</span> main(String[] args) &#123;      Student st = <span class="keyword">new</span> Student();      st.StudentID = <span class="number">1</span>;      println(st.DisplayMarks());<span class="comment">// 输出Total   &#125; &#125; trait Marks &#123;   void DisplayMarks() &#123;      println(&quot;Marks1&quot;);   &#125; &#125; trait Total extends Marks &#123;   void DisplayMarks() &#123;      println(&quot;Total&quot;);   &#125; &#125;  class Student implements Total &#123;   int StudentID &#125;</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="闭包"><a href="#闭包" class="headerlink" title="闭包"></a>闭包</h2><p>短的匿名代码段</p>
+<figure class="highlight groovy"><table><tr><td class="code"><pre><span class="line"><span class="keyword">def</span> clos = &#123;println <span class="string">&quot;Hello World&quot;</span>&#125;;clos.call();</span><br></pre></td></tr></table></figure>
+
+<p><strong>形式参数：</strong> 使用$ {param}，这导致closure接受一个参数。当通过clos.call语句调用闭包时，我们现在可以选择将一个参数传递给闭包。</p>
+<figure class="highlight groovy"><table><tr><td class="code"><pre><span class="line"><span class="keyword">def</span> clos = &#123;param-&gt;println <span class="string">&quot;Hello $&#123;param&#125;&quot;</span>&#125;;clos.call(<span class="string">&quot;World&quot;</span>);</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight groovy"><table><tr><td class="code"><pre><span class="line"><span class="keyword">def</span> clos = &#123;println <span class="string">&quot;Hello $&#123;it&#125;&quot;</span>&#125;;clos.call(<span class="string">&quot;World&quot;</span>);<span class="comment">//和上一个例子是同样的结果，it是关键字</span></span><br></pre></td></tr></table></figure>
+
+<p>**闭包和变量： **闭包可以在定义闭包时引用变量</p>
+<figure class="highlight groovy"><table><tr><td class="code"><pre><span class="line"><span class="keyword">def</span> str1 = <span class="string">&quot;Hello&quot;</span>;<span class="keyword">def</span> clos = &#123;param -&gt; println <span class="string">&quot;$&#123;str1&#125; $&#123;param&#125;&quot;</span>&#125;clos.call(<span class="string">&quot;World&quot;</span>);<span class="comment">//Hello Worldstr1 = &quot;Welcome&quot;;clos.call(&quot;World&quot;);//Welcome World</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>在方法中使用闭包</strong> 闭包也可以用作方法的参数</p>
+<figure class="highlight groovy"><table><tr><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="keyword">static</span> Display(clo) &#123;      <span class="comment">// This time the $param parameter gets replaced by the string &quot;Inner&quot;               clo.call(&quot;Inner&quot;);   &#125; static void main(String[] args) &#123;      def str1 = &quot;Hello&quot;;      def clos = &#123; param -&gt; println &quot;$&#123;str1&#125; $&#123;param&#125;&quot; &#125;      clos.call(&quot;World&quot;);      // Passing our closure to a method      Example.Display(clos);   &#125; </span></span><br></pre></td></tr></table></figure>
+
+<p><strong>集合和字符串中的闭包</strong> list Map String 方法接收一个闭包作为参数</p>
+<figure class="highlight groovy"><table><tr><td class="code"><pre><span class="line"><span class="keyword">def</span> lst = [<span class="number">11</span>, <span class="number">12</span>, <span class="number">13</span>, <span class="number">14</span>];lst.each &#123;println it&#125;</span><br></pre></td></tr></table></figure>
+
+<p><strong>使用映射闭包</strong> </p>
+<figure class="highlight groovy"><table><tr><td class="code"><pre><span class="line"><span class="keyword">def</span> mp = [<span class="string">&quot;TopicName&quot;</span> : <span class="string">&quot;Maps&quot;</span>, <span class="string">&quot;TopicDescription&quot;</span> : <span class="string">&quot;Methods in Maps&quot;</span>]             mp.each &#123;println it&#125;mp.each &#123;println <span class="string">&quot;$&#123;it.key&#125; maps to: $&#123;it.value&#125;&quot;</span>&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight groovy"><table><tr><td class="code"><pre><span class="line">lst.each&#123;num -&gt; <span class="keyword">if</span>(num % <span class="number">2</span> == <span class="number">0</span>) println num&#125;</span><br></pre></td></tr></table></figure>
+
+<p><strong>闭包本身使用的方法</strong></p>
+<table>
+<thead>
+<tr>
+<th>序号</th>
+<th align="center">方法和描述</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>1</td>
+<td align="center"><a href="https://www.w3cschool.cn/groovy/groovy_find.html">find()</a>find方法查找集合中与某个条件匹配的第一个值。</td>
+</tr>
+<tr>
+<td>2</td>
+<td align="center"><a href="https://www.w3cschool.cn/groovy/groovy_findall.html">findAll（）</a>它找到接收对象中与闭合条件匹配的所有值。</td>
+</tr>
+<tr>
+<td>3</td>
+<td align="center"><a href="https://www.w3cschool.cn/groovy/groovy_any_every.html">any() &amp; every()</a>方法any迭代集合的每个元素，检查布尔谓词是否对至少一个元素有效。</td>
+</tr>
+<tr>
+<td>4</td>
+<td align="center"><a href="https://www.w3cschool.cn/groovy/groovy_collect.html">collect()</a>该方法通过集合收集迭代，使用闭包作为变换器将每个元素转换为新值。</td>
+</tr>
+</tbody></table>
+<figure class="highlight groovy"><table><tr><td class="code"><pre><span class="line">value = lst.find &#123;element -&gt; element &gt; <span class="number">2</span>&#125; value = lst.findAll &#123;element -&gt; element &gt; <span class="number">2</span>&#125;<span class="comment">// Is there any value above 2value = lst.any&#123;element -&gt; element &gt; 2&#125;println(value);//true// Are all value above 2value = lst.every&#123;element -&gt; element &gt; 2&#125;println(value);//falsenewlst = lst.collect &#123;element -&gt; return element * element&#125;println(newlst);</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="DSLS"><a href="#DSLS" class="headerlink" title="DSLS"></a>DSLS</h2><p>Groovy允许在顶层语句的方法调用的参数周围省略括号。这被称为“命令链”功能。这个扩展的工作原理是允许一个人链接这种无括号的方法调用，在参数周围不需要括号，也不需要链接调用之间的点。</p>
+<figure class="highlight groovy"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">EmailDsl</span> &#123;</span>     String toText    String fromText    String body 	   <span class="comment">/**    * This method accepts a closure which is essentially the DSL. Delegate the    * closure methods to    * the DSL class so the calls can be processed    */</span>       <span class="keyword">def</span> <span class="keyword">static</span> make(closure) &#123;       EmailDsl emailDsl = <span class="keyword">new</span> EmailDsl()       <span class="comment">// any method called in closure will be delegated to the EmailDsl class       closure.delegate = emailDsl      closure()    &#125;      /**    * Store the parameter as a variable and use it later to output a memo    */ 	   def to(String toText) &#123;       this.toText = toText    &#125;      def from(String fromText) &#123;       this.fromText = fromText    &#125;      def body(String bodyText) &#123;       this.body = bodyText    &#125; &#125;EmailDsl.make &#123;    to &quot;Nirav Assar&quot;    from &quot;Barack Obama&quot;    body &quot;How are things? We are doing well. Take care&quot; &#125;</span></span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>使用接受闭包的静态方法。这是一个很麻烦的方式来实现DSL。</li>
+<li>在电子邮件示例中，类EmailDsl具有make方法。它创建一个实例，并将闭包中的所有调用委派给实例。这是一种机制，其中“to”和“from”节结束了EmailDsl类中的执行方法。</li>
+<li>一旦to（）方法被调用，我们将文本存储在实例中以便以后格式化。</li>
+<li>我们现在可以使用易于为最终用户理解的简单语言调用EmailDSL方法。</li>
+</ul>
+<h2 id="shebang"><a href="#shebang" class="headerlink" title="shebang"></a>shebang</h2><p>除了单行注释外, 还有一种被特别的行注释, 通常被称作shebang行，它通常在UNIX系统中被认知，它容许脚本直接在命令行中运行那些你已经安装的Groovy和那些已经在PATH中可用的groovy命令。</p>
+<figure class="highlight sh"><table><tr><td class="code"><pre><span class="line"><span class="meta">#!/usr/bin/env groovyprintln &quot;Hello from the shebang line&quot;</span></span><br></pre></td></tr></table></figure>
+
+]]></content>
+      <tags>
+        <tag>groovy</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>每日一题</title>
+    <url>/2021/05/24/%E6%AF%8F%E6%97%A5%E4%B8%80%E9%A2%98/</url>
+    <content><![CDATA[<h2 id="lc12-整数转罗马数字"><a href="#lc12-整数转罗马数字" class="headerlink" title="lc12 整数转罗马数字"></a><a href="https://leetcode-cn.com/problems/integer-to-roman/">lc12</a> 整数转罗马数字</h2><p>罗马数字有7个单字符号 又六个减法规则带料的符合符号，总共十三个，给出一个int转成罗马数字表示。</p>
+<p><img src="/images/image-20210514160844788.png" alt="image-20210514160844788"></p>
+<p>官方题解给出了关于数字140的例子：</p>
+<p><img src="/images/image-20210514160909592.png" alt="image-20210514160909592"></p>
+<p>确定罗马数字的规则是：对于罗马数字从左到右的每一位，选择尽可能大的符号值。对于 140，最大可以选择的符号值为 C=100。接下来，对于剩余的数字 40，最大可以选择的符号值为 XL=40。因此，140140 的对应的罗马数字为 CXL。</p>
+<span id="more"></span>
+
+<p>方法列表</p>
+<ol>
+<li><p>模拟</p>
+<p>表示一个给定的整数 num，我们寻找不超过 num 的最大符号值，将num 减去该符号值，然后继续寻找不超过num 的最大符号值，将该符号拼接在上一个找到的符号之后，循环直至 num 为 0。最后得到的字符串即为罗马数字表示。</p>
+</li>
+<li><p>硬编码数字</p>
+</li>
+</ol>
+<p>mycode：</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Solution</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> String <span class="title">intToRoman</span><span class="params">(<span class="keyword">int</span> num)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">int</span>[] values = &#123;<span class="number">1000</span>,<span class="number">900</span>,<span class="number">500</span>,<span class="number">400</span>,<span class="number">100</span>,<span class="number">90</span>,<span class="number">50</span>,<span class="number">40</span>,<span class="number">10</span>,<span class="number">9</span>,<span class="number">5</span>,<span class="number">4</span>,<span class="number">1</span>&#125;;</span><br><span class="line">        String[] symbols = &#123;<span class="string">&quot;M&quot;</span>, <span class="string">&quot;CM&quot;</span>,<span class="string">&quot;D&quot;</span>,<span class="string">&quot;CD&quot;</span>,<span class="string">&quot;C&quot;</span>,<span class="string">&quot;XC&quot;</span>,<span class="string">&quot;L&quot;</span>,<span class="string">&quot;XL&quot;</span>,<span class="string">&quot;X&quot;</span>,<span class="string">&quot;IX&quot;</span>,<span class="string">&quot;V&quot;</span>,<span class="string">&quot;IV&quot;</span>,<span class="string">&quot;I&quot;</span>&#125;;</span><br><span class="line">        StringBuffer sb = <span class="keyword">new</span> StringBuffer();</span><br><span class="line">        <span class="keyword">for</span>(<span class="keyword">int</span> i =<span class="number">0</span>;i &lt; values.length; i++)&#123;</span><br><span class="line">            <span class="keyword">int</span> v = values[i];</span><br><span class="line">            String s = symbols[i];</span><br><span class="line">            <span class="keyword">while</span>(num &gt;= v)&#123;</span><br><span class="line">                num -= v;</span><br><span class="line">                sb.append(s);</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">if</span>(num == <span class="number">0</span>)<span class="keyword">break</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> sb.toString();</span><br><span class="line">        </span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<h2 id="lc1035-不相交的线"><a href="#lc1035-不相交的线" class="headerlink" title="lc1035 不相交的线"></a><a href="https://leetcode-cn.com/problems/uncrossed-lines/">lc1035</a> 不相交的线</h2><p>两条独立的水平线上按给定的顺序写nums1 nums2</p>
+<p>绘制链接这两组数字中某两个的而直线，这些直线同时满足:</p>
+<p>nums1[i] == nums2[j]</p>
+<p>绘制的直线不予其他线相交</p>
+<p>请注意 连线及时在端点也不能相交 每个数字只能属于一条直线</p>
+<p><strong>返回可以绘制的最大连线数目</strong> </p>
+<p>2   5 1 2 5</p>
+<p>10 5 2 1 5 2</p>
+<p>1 3 7 1 7 5</p>
+<p>19 2 5 1</p>
+<p>先思考：两条连线如果相交那么表示的是？ i1&lt;i2和j1&lt;j2不能同时满足，这种情况下可能会导致两条连线相交.</p>
+<p>这题的思路可以用动态规划，首先，所有的线不相交的条件：假设一共绘制了k条直线，其中第x条直线链接nums1[$i_x$]和nums2[$j_x$]，有这两个数字相等 且这k对元素在两个数组中的相对顺序是一致的，因此这k对相等元素组成的序列是数组nums1和nums2的公共子序列，最长公共子序列——典型的二维动态规划问题。</p>
+<p>nums1 长度 m</p>
+<p>nums2 长度 n</p>
+<p>创建m+1行n+1列的二维数组dp，其中dp[i][j]表示表示nums1[0:i] nums2[0:j]的最长公共子序列的长度。</p>
+<p>考虑边界： i =0 时 nums1[0:i]空数组和任何数组的最长公共子序列的长度是0 dp [ 0 ][ j ] = 0;</p>
+<p>当j  = 0 时，nums2[0:j]为空 同理 dp[i][0] = 0</p>
+<p>当 i &gt; 0 且 j  &gt; 0时，考虑dp[ i ][ j ] 的计算：</p>
+<p>当nums1[i-1] = nums2[j-1]时，将这两个相同的元素称为公共元素，考虑nums1[0:i-1] nums2[0:j-1]的最长公共子序列，再增加一个元素，即可得到nums1[0:i]和nums2[0:j]的最长公共子序列，因此dp[i][j] = dp[i-1][j-1] +1</p>
+<p>当nums1[i-1]与nums2[j-1] 不相等，考虑0:i-1 0:j 的最长公共子序列和0：i 0：j-1的最长公共子序列 两者较大项即可</p>
+<p><img src="/images/image-20210521195544341.png" alt="image-20210521195544341"></p>
+<h2 id="lc810-黑板异或游戏"><a href="#lc810-黑板异或游戏" class="headerlink" title="lc810 黑板异或游戏"></a>lc810 黑板异或游戏</h2><p>黑板上写着一个非负整数数组 nums[i] 。Alice 和 Bob 轮流从黑板上擦掉一个数字，Alice 先手。如果擦除一个数字后，剩余的所有数字按位异或运算得出的结果等于 0 的话，当前玩家游戏失败。 (另外，如果只剩一个数字，按位异或运算得到它本身；如果无数字剩余，按位异或运算结果为 0。）</p>
+<p>并且，轮到某个玩家时，如果当前黑板上所有数字按位异或运算结果等于 0，这个玩家获胜。</p>
+<p>假设两个玩家每步都使用最优解，当且仅当 Alice 获胜时返回 true。</p>
+<p>解析：</p>
+<p>思考什么情况下Alice会获胜，当轮到某个玩家时，当前黑板上所有数字异或结果为0，此时该玩家获胜（因为上一个玩家失败），这个情况下Alice先手，也就是初始时抑或结果为0 A获胜</p>
+<p>下面讨论初始时黑白上所有数字异或结果不为0的情况</p>
+<p>由于两个人交替擦除数字，且每次都恰好擦除一个数字，因此对于这两人中的任意一人，其每次在擦除数字前，黑板上数字个数的奇偶性是相同的。</p>
+<p>从数组的奇偶性来讨论。如果nums的长度是偶数，先手Alice是否可能失败呢？</p>
+<p>假设Alice要失败的话，只有一种情况，无论擦除哪一个数字，剩余所有的数字的异或结果都等于0 而这是不可能的 给出证明：</p>
+<p>设数组nums长度n n为偶数 </p>
+<p><img src="/images/image-20210523193628449.png" alt="image-20210523193628449"></p>
+<p>擦除nums[i]之后：</p>
+<p><img src="/images/image-20210523193635351.png" alt="image-20210523193635351"></p>
+<p>等式两边同时异或nums[i]  （*）</p>
+<p><img src="/images/image-20210523193726189.png" alt="image-20210523193726189"></p>
+<p>若无论擦掉哪个数字，剩余的所有数字异或结果都等于0，即对于属于0，n的i 都有Si = 0</p>
+<p>因此对所有的Si异或结果也为0</p>
+<p><img src="/images/image-20210523193837639.png" alt="image-20210523193837639"></p>
+<p>将 *带入 并且根据异或运算的交换律和结合律化简</p>
+<p><img src="/images/image-20210523195814410.png" alt="image-20210523195814410"></p>
+<p>此公式第三行左边括号为n个S异或，由于n是偶数，因此n个S异或的结果为0</p>
+<p>S=0与实际情况S$\neq$0矛盾</p>
+<p>因此当数组的长度为偶数时，先手Alice总能找到一个数字，擦除这个数字之后剩余的所有数字异或结果不等于零。</p>
+<p>在Alice擦掉之后，BOb是奇数，擦一个，给A的一定还是偶数个，此时要么A获胜，要不A擦完后结果不为0，此时Alice一直不败。</p>
+<p>同理，如果数组长度为奇数时候，Alice擦除掉一个数字之后，留给Bob的是偶数，因此Bob必胜。</p>
+<p>因此Alice必胜的条件是以下两个条件中的至少一个得到满足：</p>
+<p>数组nums的全部元素的异或结果等于0；</p>
+<p>数组nums的长度是偶数。</p>
+<h2 id="lc1707-与数组中元素的最大异或值"><a href="#lc1707-与数组中元素的最大异或值" class="headerlink" title="lc1707 与数组中元素的最大异或值"></a><a href="https://leetcode-cn.com/problems/maximum-xor-with-an-element-from-array/">lc1707</a> 与数组中元素的最大异或值</h2><p>给我一个由非负整数组成的数组nums，另外有一个查询数组queries，其中q[i]=[xi,mi]</p>
+<p>第i个查询的答案是Xi和任何nums数组中不超过mi的元素按位异或得到的最大值，换句话说，答案是max(nums[j] XOR xi)其中所有j均满足nums[j] &lt;= mi.如果nums中所有元素都大于mi，那么最终答案为-1</p>
+<p>返回一个整数数组answer作为查询的答案，其中answer长度为queries的长度且元素一一对应</p>
+<p>这题思路在理解了字典树还是比较清晰的，但是具体的位运算实现细节就很魔鬼了。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Solution</span> </span>&#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">int</span>[] maximizeXor(<span class="keyword">int</span>[] nums, <span class="keyword">int</span>[][] queries) &#123;</span><br><span class="line">        Arrays.sort(nums);</span><br><span class="line">        <span class="keyword">int</span> numQ = queries.length;</span><br><span class="line">        <span class="keyword">int</span>[][] newQueries = <span class="keyword">new</span> <span class="keyword">int</span>[numQ][<span class="number">3</span>];</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; numQ; ++i) &#123;</span><br><span class="line">            newQueries[i][<span class="number">0</span>] = queries[i][<span class="number">0</span>];</span><br><span class="line">            newQueries[i][<span class="number">1</span>] = queries[i][<span class="number">1</span>];</span><br><span class="line">            newQueries[i][<span class="number">2</span>] = i;</span><br><span class="line">        &#125;</span><br><span class="line">        Arrays.sort(newQueries, <span class="keyword">new</span> Comparator&lt;<span class="keyword">int</span>[]&gt;() &#123;</span><br><span class="line">            <span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">compare</span><span class="params">(<span class="keyword">int</span>[] query1, <span class="keyword">int</span>[] query2)</span> </span>&#123;</span><br><span class="line">                <span class="keyword">return</span> query1[<span class="number">1</span>] - query2[<span class="number">1</span>];</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;);</span><br><span class="line"></span><br><span class="line">        <span class="keyword">int</span>[] ans = <span class="keyword">new</span> <span class="keyword">int</span>[numQ];</span><br><span class="line">        Trie trie = <span class="keyword">new</span> Trie();</span><br><span class="line">        <span class="keyword">int</span> idx = <span class="number">0</span>, n = nums.length;</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span>[] query : newQueries) &#123;</span><br><span class="line">            <span class="keyword">int</span> x = query[<span class="number">0</span>], m = query[<span class="number">1</span>], qid = query[<span class="number">2</span>];</span><br><span class="line">            <span class="keyword">while</span> (idx &lt; n &amp;&amp; nums[idx] &lt;= m) &#123;</span><br><span class="line">                trie.insert(nums[idx]);</span><br><span class="line">                ++idx;</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">if</span> (idx == <span class="number">0</span>) &#123; <span class="comment">// 字典树为空</span></span><br><span class="line">                ans[qid] = -<span class="number">1</span>;</span><br><span class="line">            &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                ans[qid] = trie.getMaxXor(x);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> ans;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Trie</span> </span>&#123;</span><br><span class="line">    <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">int</span> L = <span class="number">30</span>;</span><br><span class="line">    Trie[] children = <span class="keyword">new</span> Trie[<span class="number">2</span>];</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">insert</span><span class="params">(<span class="keyword">int</span> val)</span> </span>&#123;</span><br><span class="line">        Trie node = <span class="keyword">this</span>;</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i = L - <span class="number">1</span>; i &gt;= <span class="number">0</span>; --i) &#123;</span><br><span class="line">            <span class="keyword">int</span> bit = (val &gt;&gt; i) &amp; <span class="number">1</span>;</span><br><span class="line">            <span class="keyword">if</span> (node.children[bit] == <span class="keyword">null</span>) &#123;</span><br><span class="line">                node.children[bit] = <span class="keyword">new</span> Trie();</span><br><span class="line">            &#125;</span><br><span class="line">            node = node.children[bit];</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">getMaxXor</span><span class="params">(<span class="keyword">int</span> val)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">int</span> ans = <span class="number">0</span>;</span><br><span class="line">        Trie node = <span class="keyword">this</span>;</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i = L - <span class="number">1</span>; i &gt;= <span class="number">0</span>; --i) &#123;</span><br><span class="line">            <span class="keyword">int</span> bit = (val &gt;&gt; i) &amp; <span class="number">1</span>;</span><br><span class="line">            <span class="keyword">if</span> (node.children[bit ^ <span class="number">1</span>] != <span class="keyword">null</span>) &#123;</span><br><span class="line">                ans |= <span class="number">1</span> &lt;&lt; i;</span><br><span class="line">                bit ^= <span class="number">1</span>;</span><br><span class="line">            &#125;</span><br><span class="line">            node = node.children[bit];</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> ans;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>此题的铺垫——前缀树</p>
+<h2 id="lc208-实现Trie"><a href="#lc208-实现Trie" class="headerlink" title="lc208 实现Trie"></a><a href="https://leetcode-cn.com/problems/implement-trie-prefix-tree/">lc208</a> 实现Trie</h2><p>前缀树 一种树形的数据结构，用于高校的存储检索字符串数据集中的键，这一数据结构应用场景很多例如自动补完和拼写检查。</p>
+<p>请你实现 Trie 类：</p>
+<p>Trie() 初始化前缀树对象。<br>void insert(String word) 向前缀树中插入字符串 word 。<br>boolean search(String word) 如果字符串 word 在前缀树中，返回 true（即，在检索之前已经插入）；否则，返回 false 。<br>boolean startsWith(String prefix) 如果之前已经插入的字符串 word 的前缀之一为 prefix ，返回 true ；否则，返回 false 。</p>
+<p>Trie，又称前缀树或字典树，是一棵有根树，其每个节点包含以下字段：</p>
+<ul>
+<li>指向子节点的指针数组 children。对于本题而言，数组长度为 26，即小写英文字母的数量。此时 children[0] 对应小写字母 aa，children[1] 对应小写字母 b，…，children[25] 对应小写字母 z。</li>
+<li>布尔字段isEnd，表示该节点是否为字符串的结尾。</li>
+</ul>
+<h2 id="lc664-奇怪的打印机"><a href="#lc664-奇怪的打印机" class="headerlink" title="lc664 奇怪的打印机"></a><a href="https://leetcode-cn.com/problems/strange-printer/">lc664</a> 奇怪的打印机</h2><p>题目描述：一个打印机每次纸打印相同字符的序列，每次可以在任意位置开始和结束打印一串序列并且覆盖之前的符号。给我一个字符串s，求该打印机能够打印出该符号串所需的最小打印次数。</p>
+<p>定义 f[l][r] 为将 [l, r][l,r] 这一段打印成目标结果所消耗的最小打印次数。</p>
+<p>不失一般性考虑 f[l][r] 该如何转移：</p>
+<p>只打印 l 这个位置，此时 f[l][r] = f[l + 1][r] + 1<br>不只打印 l 这个位置，而是从 l 打印到 k（需要确保首位相同 s[l] = s[k]）：f[l][r] = f[l][k - 1] + f[k + 1][r], l &lt; k &lt;= r<br>其中状态转移方程中的情况 22 需要说明一下：由于我们只确保 s[l] = s[k]，并不确保 [l, k][l,k] 之间的字符相同，根据我们基本分析可知，s[k] 这个点可由打印 s[l]s[l] 的时候一同打印，因此本身 s[k] 并不独立消耗打印次数，所以这时候 [l, k][l,k] 这一段的最小打印次数应该取f[l][k−1]，而不是 f[l][k]。</p>
+<p>最终的 f[l][r] 为上述所有方案中取min。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Solution</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">strangePrinter</span><span class="params">(String s)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">int</span> n = s.length();</span><br><span class="line">        <span class="keyword">int</span>[][] f = <span class="keyword">new</span> <span class="keyword">int</span>[n + <span class="number">1</span>][n + <span class="number">1</span>];</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> len = <span class="number">1</span>; len &lt;= n; len++) &#123;</span><br><span class="line">            <span class="keyword">for</span> (<span class="keyword">int</span> l = <span class="number">0</span>; l + len - <span class="number">1</span> &lt; n; l++) &#123;</span><br><span class="line">                <span class="keyword">int</span> r = l + len - <span class="number">1</span>;</span><br><span class="line">                f[l][r] = f[l + <span class="number">1</span>][r] + <span class="number">1</span>;</span><br><span class="line">                <span class="keyword">for</span> (<span class="keyword">int</span> k = l + <span class="number">1</span>; k &lt;= r; k++) &#123;</span><br><span class="line">                    <span class="keyword">if</span> (s.charAt(l) == s.charAt(k)) &#123;</span><br><span class="line">                        f[l][r] = Math.min(f[l][r], f[l][k - <span class="number">1</span>] + f[k + <span class="number">1</span>][r]);</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> f[<span class="number">0</span>][n - <span class="number">1</span>];</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h2 id="lc1787-使所有区间的异或结果为零"><a href="#lc1787-使所有区间的异或结果为零" class="headerlink" title="lc1787 使所有区间的异或结果为零"></a><a href="https://leetcode-cn.com/problems/make-the-xor-of-all-segments-equal-to-zero/">lc1787</a> 使所有区间的异或结果为零</h2><p><strong>题目描述：</strong></p>
+<p>给你一个整数数组 nums 和一个整数 k 。区间 [left, right]（left &lt;= right）的异或结果是对下标位于 left 和 right（包括 left 和 right ）之间所有元素进行 XOR 运算的结果：nums[left] XOR nums[left+1] XOR … XOR nums[right] 。</p>
+<p>返回数组中 要更改的最小元素数 ，以使所有长度为 k 的区间异或结果等于零。</p>
+<p><strong>示例 1：</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">输入：nums = [1,2,0,3,0], k = 1</span><br><span class="line">输出：3</span><br><span class="line">解释：将数组 [1,2,0,3,0] 修改为 [0,0,0,0,0]</span><br></pre></td></tr></table></figure>
+
+<p><strong>示例 2：</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">输入：nums = [3,4,5,2,1,7,3,4,7], k = 3</span><br><span class="line">输出：3</span><br><span class="line">解释：将数组 [3,4,5,2,1,7,3,4,7] 修改为 [3,4,7,3,4,7,3,4,7]</span><br></pre></td></tr></table></figure>
+
+<p><strong>示例 3：</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">输入：nums = [1,2,4,1,2,5,1,2,6], k = 3</span><br><span class="line">输出：3</span><br><span class="line">解释：将数组[1,2,4,1,2,5,1,2,6] 修改为 [1,2,3,1,2,3,1,2,3]</span><br></pre></td></tr></table></figure>
+
+
+
+<p><strong>官方解题思路：</strong></p>
+<p>有空可以考虑看看<a href="https://leetcode-cn.com/problems/make-the-xor-of-all-segments-equal-to-zero/solution/gong-shui-san-xie-chou-xiang-cheng-er-we-ww79/">三叶姐姐的题解</a>。</p>
+<p>涉及到**最大，最小之类的问题，我现在已经能够敏锐地察觉到动规解法。官方题解就是动规，设nums长度为n。</p>
+<p>为了动规能够找到状态的转移条件，需要分析这个数组被修改之后应该具有的性质。</p>
+<p>由于任意长度为 <em>k</em> 的区间异或结果等于 0，那么对于任意的 <em>i</em>，有：</p>
+<p><img src="/2021/05/24/%E6%AF%8F%E6%97%A5%E4%B8%80%E9%A2%98/1.jpg"></p>
+<p>和</p>
+<p><img src="/2021/05/24/%E6%AF%8F%E6%97%A5%E4%B8%80%E9%A2%98/2.jpg"></p>
+<p>根据a^b ^ b = a的异或运算性质，联立上述两式，可得</p>
+<p><img src="/2021/05/24/%E6%AF%8F%E6%97%A5%E4%B8%80%E9%A2%98/3.jpg"></p>
+<p>等价于nums[i] = nums[i+k]:重要结论——nums修改之后是一个以k为周期的数组，对任意[0,n-k)的i，有上式成立。</p>
+<p>将数组下标对k取模分成k个组，每个组内元素必须要相等。并且这k个组对应的元素的异或和为0，即：</p>
+<p><img src="/2021/05/24/%E6%AF%8F%E6%97%A5%E4%B8%80%E9%A2%98/4.jpg"></p>
+<p>对于第 i个组，我们可以使用哈希映射来存储该组内的元素以及每个元素出现的次数，这样一来，我们就可以尝试使用动态规划来解决本题了。设 f(i,mask) 表示我们已经处理了第 0, 1, …,i 个组，并且这些组对应元素的异或和：</p>
+<p><img src="/2021/05/24/%E6%AF%8F%E6%97%A5%E4%B8%80%E9%A2%98/5.jpg"></p>
+<p>作为mask的前提下，这些组<strong>总计</strong>最少需要修改的元素个数。进行状态转移时，我们可以枚举第i组被修改成为哪个数，假设修改成了x，那么0,1,…,i-1组对应的元素异或和即为mask^x,可得状态转移方程：</p>
+<p><img src="/2021/05/24/%E6%AF%8F%E6%97%A5%E4%B8%80%E9%A2%98/6.jpg"></p>
+<p>其中size(i)表示第i组里元素个数，count(i,x)表示第i组里元素x的次数，他们的值都可以通过hash映射得到，该转移方程的意义为：如果我们选择将第 i 组全部修改为 x，那么有 count(i,x) 个数是无需修改的，这样就需要修改 size(i)−count(i,x) 次。（还是能理解的过来的）</p>
+<p>由于x的上限导致该方程的时间复杂度数量级很高，因此需要优化。</p>
+<p>首先 size(<em>i</em>) 是与 <em>x</em> 无关的常量，我们可以将其移出最小值的限制，即：</p>
+<p><img src="/2021/05/24/%E6%AF%8F%E6%97%A5%E4%B8%80%E9%A2%98/7.jpg"></p>
+<p>由于我们需要求的是「最小值」，因此在状态转移方程中添加若干大于等于「最小值」的项，对最终的答案不会产生影响。</p>
+<p>考虑 count(<em>i</em>,<em>x</em>) 这一项，如果 <em>x</em> 没有在哈希表中出现，那么这一项的值为 0方程：</p>
+<p><img src="/2021/05/24/%E6%AF%8F%E6%97%A5%E4%B8%80%E9%A2%98/8.jpg" alt="(1)"></p>
+<p>否则这一项的值大于 0。即：</p>
+<p><img src="/2021/05/24/%E6%AF%8F%E6%97%A5%E4%B8%80%E9%A2%98/9.jpg" alt="(2)"></p>
+<p>(2)项严格小于(1),如果在方程中加(1)不会对结果产生影响。因此我们可以将状态转移方程变化为：</p>
+<p><img src="/2021/05/24/%E6%AF%8F%E6%97%A5%E4%B8%80%E9%A2%98/10.jpg"></p>
+<p><img src="/2021/05/24/%E6%AF%8F%E6%97%A5%E4%B8%80%E9%A2%98/11.jpg"></p>
+<p><img src="/2021/05/24/%E6%AF%8F%E6%97%A5%E4%B8%80%E9%A2%98/12.jpg"></p>
+<p><em>t</em>2 就是所有状态 f*(*i−1,..) 中的最小值。</p>
+<p>最终的答案取f(k-1,0)。</p>
+<p>设计细节：</p>
+<p>由于 f(i, ..) 只会从 f(i-1, ..) 转移而来，因此我们可以使用两个长度为 2^{10}的一维数组代替二维数组，交替地进行状态转移，减少空间复杂度。此外，当i=0 时，f(−1,..) 都是需要特殊考虑的边界条件。由于 f(−1,..) 表示没有考虑任何组时的异或和，因此该异或和一定为 0，即 f(-1, 0) = 0。其它的状态都是不合法的状态，我们可以将它们赋予一个极大值 ∞。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Solution</span> </span>&#123;</span><br><span class="line">    <span class="comment">// x 的范围为 [0, 2^10)</span></span><br><span class="line">    <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">int</span> MAXX = <span class="number">1</span> &lt;&lt; <span class="number">10</span>;</span><br><span class="line">    <span class="comment">// 极大值，为了防止整数溢出选择 INT_MAX / 2</span></span><br><span class="line">    <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">int</span> INFTY = Integer.MAX_VALUE / <span class="number">2</span>;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">minChanges</span><span class="params">(<span class="keyword">int</span>[] nums, <span class="keyword">int</span> k)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">int</span> n = nums.length;</span><br><span class="line">        <span class="keyword">int</span>[] f = <span class="keyword">new</span> <span class="keyword">int</span>[MAXX];</span><br><span class="line">        Arrays.fill(f, INFTY);</span><br><span class="line">        <span class="comment">// 边界条件 f(-1,0)=0</span></span><br><span class="line">        f[<span class="number">0</span>] = <span class="number">0</span>;</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; k; ++i) &#123;</span><br><span class="line">            <span class="comment">// 第 i 个组的哈希映射</span></span><br><span class="line">            Map&lt;Integer, Integer&gt; cnt = <span class="keyword">new</span> HashMap&lt;Integer, Integer&gt;();</span><br><span class="line">            <span class="keyword">int</span> size = <span class="number">0</span>;</span><br><span class="line">            <span class="keyword">for</span> (<span class="keyword">int</span> j = i; j &lt; n; j += k) &#123;</span><br><span class="line">                cnt.put(nums[j], cnt.getOrDefault(nums[j], <span class="number">0</span>) + <span class="number">1</span>);</span><br><span class="line">                ++size;</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            <span class="comment">// 求出 t2</span></span><br><span class="line">            <span class="keyword">int</span> t2min = Arrays.stream(f).min().getAsInt();</span><br><span class="line"></span><br><span class="line">            <span class="keyword">int</span>[] g = <span class="keyword">new</span> <span class="keyword">int</span>[MAXX];</span><br><span class="line">            Arrays.fill(g, t2min);</span><br><span class="line">            <span class="keyword">for</span> (<span class="keyword">int</span> mask = <span class="number">0</span>; mask &lt; MAXX; ++mask) &#123;</span><br><span class="line">                <span class="comment">// t1 则需要枚举 x 才能求出</span></span><br><span class="line">                <span class="keyword">for</span> (Map.Entry&lt;Integer, Integer&gt; entry : cnt.entrySet()) &#123;</span><br><span class="line">                    <span class="keyword">int</span> x = entry.getKey(), countx = entry.getValue();</span><br><span class="line">                    g[mask] = Math.min(g[mask], f[mask ^ x] - countx);</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">            </span><br><span class="line">            <span class="comment">// 别忘了加上 size</span></span><br><span class="line">            <span class="keyword">for</span> (<span class="keyword">int</span> j = <span class="number">0</span>; j &lt; MAXX; ++j) &#123;</span><br><span class="line">                g[j] += size;</span><br><span class="line">            &#125;</span><br><span class="line">            f = g;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> f[<span class="number">0</span>];</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="1c1190-反转每对括号间的子串"><a href="#1c1190-反转每对括号间的子串" class="headerlink" title="1c1190 反转每对括号间的子串"></a><a href="https://leetcode-cn.com/problems/reverse-substrings-between-each-pair-of-parentheses">1c1190</a> 反转每对括号间的子串</h2><p><strong>题目描述：</strong></p>
+<p>给出一个字符串 s（仅含有小写英文字母和括号）。</p>
+<p>请你按照从括号内到外的顺序，逐层反转每对匹配括号中的字符串，并返回最终的结果。</p>
+<p>注意，您的结果中不应包含任何括号。</p>
+<p><strong>示例 1：</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">输入：s = &quot;(abcd)&quot;</span><br><span class="line">输出：&quot;dcba&quot;</span><br></pre></td></tr></table></figure>
+
+<p><strong>示例 2：</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">输入：s = &quot;(u(love)i)&quot;</span><br><span class="line">输出：&quot;iloveu&quot;</span><br></pre></td></tr></table></figure>
+
+<p><strong>示例 3：</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">输入：s = &quot;(ed(et(oc))el)&quot;</span><br><span class="line">输出：&quot;leetcode&quot;</span><br></pre></td></tr></table></figure>
+
+<p><strong>题解</strong>：</p>
+<p>官方题解方法一用栈结构，通过辅助变量str来保存小写英文字母，判断遍历时是左括号还是右括号来确定如何对字符串进行操作。</p>
+<p>是基础思路，建议有空闲去读一读三叶的双端队列做法，数组模拟那个，空间复杂度更小。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> String <span class="title">myreverse</span><span class="params">(String s)</span></span>&#123;</span><br><span class="line">       Deque&lt;String&gt; stack = <span class="keyword">new</span> LinkedList&lt;&gt;();</span><br><span class="line">       StringBuilder sb = <span class="keyword">new</span> StringBuilder();</span><br><span class="line">       <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; s.length(); i++) &#123;</span><br><span class="line">           <span class="keyword">char</span> ch = s.charAt(i);</span><br><span class="line">           <span class="keyword">if</span>(ch == <span class="string">&#x27;(&#x27;</span>)&#123;</span><br><span class="line">               stack.push(sb.toString());</span><br><span class="line">               sb.setLength(<span class="number">0</span>);</span><br><span class="line">           &#125;</span><br><span class="line">           <span class="keyword">else</span> <span class="keyword">if</span>(ch == <span class="string">&#x27;)&#x27;</span>)&#123;</span><br><span class="line">               sb.reverse();</span><br><span class="line">               sb.insert(<span class="number">0</span>,stack.pop());</span><br><span class="line">           &#125;</span><br><span class="line">           <span class="keyword">else</span> &#123;</span><br><span class="line">               sb.append(ch);</span><br><span class="line">           &#125;</span><br><span class="line">       &#125;</span><br><span class="line">       <span class="keyword">return</span> sb.toString();</span><br><span class="line">   &#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="1c461-汉明距离"><a href="#1c461-汉明距离" class="headerlink" title="1c461 汉明距离"></a><a href="https://leetcode-cn.com/problems/hamming-distance/">1c461</a> 汉明距离</h2><p><strong>题目描述：</strong></p>
+<p>两个整数之间的<a href="https://baike.baidu.com/item/%E6%B1%89%E6%98%8E%E8%B7%9D%E7%A6%BB">汉明距离</a>指的是这两个数字对应二进制位不同的位置的数目。</p>
+<p>给出两个整数 <code>x</code> 和 <code>y</code>，计算它们之间的汉明距离。</p>
+<p>示例:</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">输入: x = 1, y = 4</span><br><span class="line"></span><br><span class="line">输出: 2</span><br><span class="line"></span><br><span class="line">解释:</span><br><span class="line">1   (0 0 0 1)</span><br><span class="line">4   (0 1 0 0)</span><br><span class="line">       ↑   ↑</span><br><span class="line"></span><br><span class="line">上面的箭头指出了对应二进制位不同的位置。</span><br></pre></td></tr></table></figure>
+
+<p><strong>题解：</strong></p>
+<p>今天是简单题，但是不容小觑。“不同为1，相同为0”的异或运算，感觉很适合求解这道题。</p>
+<p><img src="/2021/05/24/%E6%AF%8F%E6%97%A5%E4%B8%80%E9%A2%98/13.jpg"></p>
+<p>计算 xx 和 yy 之间的汉明距离，可以先计算 x \oplus yx⊕y，然后统计结果中等于 11 的位数。</p>
+<p>现在，原始问题转换为位计数问题。位计数有多种思路，将在下面的方法中介绍。大多数编程语言都内置了计算二进制表达中 11 的数量的函数。在工程中，我们应该直接使用内置函数。比如c++中__builtin_popcount函数，java Integer的函数bitCount。</p>
+<p>其他的位计数可以由移位实现，先介绍使用位运算中移位的操作实现位计数功能的方法。</p>
+<p>具体地，记 s = x⊕y，我们可以不断地检查 s的最低位，如果最低位为 1，那么令计数器加一，然后我们令 s 整体右移一位，这样 s 的最低位将被舍去，原本的次低位就变成了新的最低位。我们重复这个过程直到 s=0 为止。这样计数器中就累计了 s 的二进制表示中 1 的数量。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Solution</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">hammingDistance</span><span class="params">(<span class="keyword">int</span> x, <span class="keyword">int</span> y)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">int</span> s = x ^ y, ret = <span class="number">0</span>;</span><br><span class="line">        <span class="keyword">while</span> (s != <span class="number">0</span>) &#123;</span><br><span class="line">            ret += s &amp; <span class="number">1</span>;</span><br><span class="line">            s &gt;&gt;= <span class="number">1</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> ret;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h2 id="lc477-汉明距离总和-2021-05-28-中等"><a href="#lc477-汉明距离总和-2021-05-28-中等" class="headerlink" title="lc477 汉明距离总和 2021.05.28 中等"></a><a href="https://leetcode-cn.com/problems/total-hamming-distance/">lc477</a> 汉明距离总和 2021.05.28 中等</h2><p><strong>题目描述：</strong></p>
+<p>两个整数的 <a href="https://baike.baidu.com/item/%E6%B1%89%E6%98%8E%E8%B7%9D%E7%A6%BB/475174?fr=aladdin">汉明距离</a> 指的是这两个数字的二进制数对应位不同的数量。</p>
+<p>计算一个数组中，任意两个数之间汉明距离的总和。</p>
+<p>示例:</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">输入: 4, 14, 2</span><br><span class="line"></span><br><span class="line">输出: 6</span><br><span class="line"></span><br><span class="line">解释: 在二进制表示中，4表示为0100，14表示为1110，2表示为0010。（这样表示是为了体现后四位之间关系）</span><br><span class="line">所以答案为：</span><br><span class="line">HammingDistance(4, 14) + HammingDistance(4, 2) + HammingDistance(14, 2) = 2 + 2 + 2 = 6.</span><br><span class="line"></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p><strong>题解：</strong></p>
+<p>我们知道，汉明距离为两数二进制表示中不同位的个数，同时每位的统计是相互独立的。</p>
+<p>即最终的答案为 $\sum^{31}_{x=0}cal(x)$ ，其中calc 函数为求得所有数二进制表示中的某一位 x所产生的不同位的个数。</p>
+<p>关于这个函数如何求解，事实上，对于nums[i],我们只关心nums中有多少个数的第x位和他不同，并不关心具体是哪些数字。</p>
+<p>我们可以建立两个集合s0,s1,分别统计出nums中所有数的第x位中0和1的个数，集合中的每次计数代表了nums中的某一元素，根据所在集合的不同代表了其在x位的值是0还是1，那么要找到nums中有多少位数与某一个数的第x位不同，只需要读取另一个集合的元素个数即可。这期间时间复杂度O(1),要求第x位所有不同数的对数的个数，乘法原理，将两者个数相乘即可。</p>
+<p><strong>code:</strong></p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Solution</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">totalHammingDistance</span><span class="params">(<span class="keyword">int</span>[] nums)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">int</span> ans = <span class="number">0</span>;</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> x = <span class="number">31</span>; x &gt;= <span class="number">0</span>; x--) &#123;</span><br><span class="line">            <span class="keyword">int</span> s0 = <span class="number">0</span>, s1 = <span class="number">0</span>;</span><br><span class="line">            <span class="keyword">for</span> (<span class="keyword">int</span> u : nums) &#123;</span><br><span class="line">                <span class="keyword">if</span> (((u &gt;&gt; x) &amp; <span class="number">1</span>) == <span class="number">1</span>) &#123;</span><br><span class="line">                    s1++;</span><br><span class="line">                &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                    s0++;</span><br><span class="line">                &#125;  </span><br><span class="line">            &#125;</span><br><span class="line">            ans += s0 * s1;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> ans;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+]]></content>
+      <tags>
+        <tag>leetcodeEveryDay</tag>
+      </tags>
+  </entry>
+</search>
