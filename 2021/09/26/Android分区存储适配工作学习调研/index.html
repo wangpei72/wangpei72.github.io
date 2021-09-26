@@ -28,7 +28,7 @@
 <meta property="og:description" content="背景当一个应用从Android SDK Level 10升级到11时，就涉及到适配的问题，而根据谷歌官方文档，可以知道10-&gt;11的变更范围。 变更范围中的重点有一项是强制执行分区存储，我们知道分区存储也就是安卓设备在存储上引入了沙盒机制，应用不能够访问其他应用的私有目录，但是可以无权限访问自己的私有目录和公共的媒体文件目录。">
 <meta property="og:locale" content="zh_CN">
 <meta property="article:published_time" content="2021-09-26T02:23:09.000Z">
-<meta property="article:modified_time" content="2021-09-26T09:53:47.884Z">
+<meta property="article:modified_time" content="2021-09-26T10:07:12.425Z">
 <meta property="article:author" content="koukoustar">
 <meta property="article:tag" content="Android">
 <meta name="twitter:card" content="summary">
@@ -108,7 +108,7 @@
       <div class="sidebar-panel-container">
         <!--noindex-->
         <div class="post-toc-wrap sidebar-panel">
-            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%83%8C%E6%99%AF"><span class="nav-number">1.</span> <span class="nav-text">背景</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%88%86%E5%8C%BA%E5%AD%98%E5%82%A8%E9%80%82%E9%85%8D%E8%A6%81%E7%82%B9"><span class="nav-number">2.</span> <span class="nav-text">分区存储适配要点</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#API%E8%B0%83%E7%94%A8%E6%96%B9%E5%BC%8F"><span class="nav-number">2.1.</span> <span class="nav-text">API调用方式</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%90%86%E8%AE%BA%E8%A6%81%E7%82%B9"><span class="nav-number">2.2.</span> <span class="nav-text">理论要点</span></a></li></ol></li></ol></div>
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%83%8C%E6%99%AF"><span class="nav-number">1.</span> <span class="nav-text">背景</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%88%86%E5%8C%BA%E5%AD%98%E5%82%A8%E9%80%82%E9%85%8D%E8%A6%81%E7%82%B9"><span class="nav-number">2.</span> <span class="nav-text">分区存储适配要点</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#API%E8%B0%83%E7%94%A8%E6%96%B9%E5%BC%8F"><span class="nav-number">2.1.</span> <span class="nav-text">API调用方式</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%90%86%E8%AE%BA%E8%A6%81%E7%82%B9"><span class="nav-number">2.2.</span> <span class="nav-text">理论要点</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Android%E5%AD%98%E5%82%A8%E6%9C%BA%E5%88%B6%E6%A6%82%E5%86%B5-%E5%8C%85%E6%8B%AC%E5%BC%95%E5%85%A5%E6%B2%99%E7%9B%92%E6%9C%BA%E5%88%B6%E4%B9%8B%E5%89%8D%E7%9A%84"><span class="nav-number">3.</span> <span class="nav-text">Android存储机制概况-包括引入沙盒机制之前的</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link"><span class="nav-number">3.1.</span> <span class="nav-text"></span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8F%98%E6%9B%B4"><span class="nav-number">4.</span> <span class="nav-text">变更</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%85%BC%E5%AE%B9%E6%A8%A1%E5%BC%8F%E6%9B%B4%E6%94%B9-%E6%B5%8B%E8%AF%95%E9%80%82%E9%85%8D%E7%BB%93%E6%9E%9C%E6%96%B9%E6%B3%95"><span class="nav-number">5.</span> <span class="nav-text">兼容模式更改-测试适配结果方法</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%A1%8C%E4%B8%BA%E5%8F%98%E6%9B%B4"><span class="nav-number">5.1.</span> <span class="nav-text">行为变更</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%85%BC%E5%AE%B9%E6%80%A7%E8%A1%8C%E4%B8%BA"><span class="nav-number">5.2.</span> <span class="nav-text">兼容性行为</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8F%82%E8%80%83%E8%B5%84%E6%96%99"><span class="nav-number">6.</span> <span class="nav-text">参考资料</span></a></li></ol></div>
         </div>
         <!--/noindex-->
 
@@ -210,7 +210,7 @@
       <span class="post-meta-item-text">发表于</span>
       
 
-      <time title="创建时间：2021-09-26 10:23:09 / 修改时间：17:53:47" itemprop="dateCreated datePublished" datetime="2021-09-26T10:23:09+08:00">2021-09-26</time>
+      <time title="创建时间：2021-09-26 10:23:09 / 修改时间：18:07:12" itemprop="dateCreated datePublished" datetime="2021-09-26T10:23:09+08:00">2021-09-26</time>
     </span>
 
   
@@ -250,7 +250,169 @@
 <p>适配分区存储的时候，需要兼容Android 10系统版本以下的内容，通过SDK_VERSION区分</p>
 </blockquote>
 <ul>
-<li>如果</li>
+<li>若您的应用使用旧版存储模型且之前以 Android 10 或更低版本为目标平台，您可能会将数据存储到启用<a target="_blank" rel="noopener" href="https://developer.android.google.cn/training/data-storage#scoped-storage">分区存储</a>模型后您的应用无法访问的目录中。在以 Android 11 为目标平台之前，请将<a target="_blank" rel="noopener" href="https://developer.android.google.cn/training/data-storage/use-cases#migrate-legacy-storage">数据迁移</a>到与分区存储兼容的目录。</li>
+</ul>
+<h2 id="Android存储机制概况-包括引入沙盒机制之前的"><a href="#Android存储机制概况-包括引入沙盒机制之前的" class="headerlink" title="Android存储机制概况-包括引入沙盒机制之前的"></a>Android存储机制概况-包括引入沙盒机制之前的</h2><table>
+<thead>
+<tr>
+<th><strong>内容类型</strong></th>
+<th align="center"><strong>访问方法</strong></th>
+<th><strong>所需权限</strong></th>
+<th><strong>其他应用是否可以访问？</strong></th>
+<th><strong>卸载应用时是否移除文件？</strong></th>
+<th></th>
+</tr>
+</thead>
+<tbody><tr>
+<td><a target="_blank" rel="noopener" href="https://developer.android.google.cn/training/data-storage/app-specific">应用专属文件</a><br />app-specific</td>
+<td align="center">仅供您的应用使用的文件</td>
+<td>从内部存储空间访问，可以使用 getFilesDir() 或 getCacheDir() 方法  从外部存储空间访问，可以使用 getExternalFilesDir() 或 getExternalCacheDir() 方法getExternalMediaDirsgetObbDirs</td>
+<td>从内部存储空间访问不需要任何权限  如果应用在搭载 Android 4.4（API 级别 19）或更高版本的设备上运行，从外部存储空间访问不需要任何权限</td>
+<td>如果文件存储在内部存储空间中的目录内，则不能访问  如果文件存储在外部存储空间中的目录内，则可以访问</td>
+<td>是</td>
+</tr>
+<tr>
+<td><a target="_blank" rel="noopener" href="https://developer.android.google.cn/training/data-storage/shared/media">媒体</a><br />media</td>
+<td align="center">可共享的媒体文件（图片、音频文件、视频）</td>
+<td>MediaStore API</td>
+<td>在 Android 10（API 级别 29）或更高版本中，访问其他应用的文件需要 READ_EXTERNAL_STORAGE 或 WRITE_EXTERNAL_STORAGE 权限  在 Android 9（API 级别 28）或更低版本中，访问<strong>所有</strong>文件均需要相关权限</td>
+<td>是，但其他应用需要 READ_EXTERNAL_STORAGE 权限</td>
+<td>否</td>
+</tr>
+<tr>
+<td><a target="_blank" rel="noopener" href="https://developer.android.google.cn/training/data-storage/shared/documents-files">文档和其他文件</a><br />document-files</td>
+<td align="center">其他类型的可共享内容，包括已下载的文件</td>
+<td>存储访问框架</td>
+<td>无</td>
+<td>是，可以通过系统文件选择器访问</td>
+<td>否</td>
+</tr>
+<tr>
+<td><a target="_blank" rel="noopener" href="https://developer.android.google.cn/training/data-storage/shared-preferences">应用偏好设置</a><br />shared-preferences</td>
+<td align="center">键值对</td>
+<td><a target="_blank" rel="noopener" href="https://developer.android.google.cn/guide/topics/ui/settings/use-saved-values">Jetpack Preferences</a> 库</td>
+<td>无</td>
+<td>否</td>
+<td>是</td>
+</tr>
+<tr>
+<td>数据库</td>
+<td align="center">结构化数据</td>
+<td><a target="_blank" rel="noopener" href="https://developer.android.google.cn/training/data-storage/room">Room</a> 持久性库</td>
+<td>无</td>
+<td>否</td>
+<td>是</td>
+</tr>
+</tbody></table>
+<ul>
+<li><p>公共目录：Downloads、Documents、Pictures 、DCIM、Movies、Music、Ringtones等</p>
+</li>
+<li><ul>
+<li>公共目录的文件在App卸载后，==不会删除==</li>
+<li>可以通过SAF、MediaStore接口访问  </li>
+</ul>
+</li>
+<li><ul>
+<li>拥有权限，也能通过路径直接访问</li>
+</ul>
+</li>
+<li><h3 id=""><a href="#" class="headerlink" title=""></a></h3></li>
+</ul>
+<h2 id="变更"><a href="#变更" class="headerlink" title="变更"></a>变更</h2><ol>
+<li><p>私有文件沙盒</p>
+</li>
+<li><ol>
+<li>沙箱目录： /sdcard/Android/sandbox/packagename/</li>
+<li>任何其他应用都无法直接访问您应用的沙盒文件。由于文件是您应用的私有文件，因此您不再需要任何权限即可在外部存储设备中访问和保存自己的文件</li>
+</ol>
+</li>
+<li><ol>
+<li>当app卸载后，沙箱中的文件==删除==</li>
+</ol>
+</li>
+<li><p>媒体文件共享集合</p>
+</li>
+<li><ol>
+<li>访问权限</li>
+<li>共享方案</li>
+</ol>
+</li>
+<li><p>照片访问</p>
+</li>
+<li><ol>
+<li>位置信息</li>
+<li>图库显示</li>
+</ol>
+</li>
+<li><p>跨应用文件<br>读取和存储跨应用文件</p>
+<table>
+<thead>
+<tr>
+<th><strong>方法</strong></th>
+<th><strong>错误现象</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Environment.getExternalStorageDirectory</td>
+<td></td>
+</tr>
+<tr>
+<td>Environment.getExternalStoragePublicDirectory</td>
+<td>创建目录的时候提示无权限</td>
+</tr>
+<tr>
+<td>Environment.getDownloadCacheDirectory</td>
+<td></td>
+</tr>
+<tr>
+<td>Environment.getStorageDirectory</td>
+<td></td>
+</tr>
+<tr>
+<td>Environment.getDataDirectory</td>
+<td></td>
+</tr>
+<tr>
+<td>Environment.getRootDirectory</td>
+<td></td>
+</tr>
+<tr>
+<td>/sdcard/<em>，/mnt/</em></td>
+<td></td>
+</tr>
+</tbody></table>
+</li>
+</ol>
+<blockquote>
+<p>上述接口在target 30中都不可使用，应该使用SAF，MediaStore和专属私有目录相关API替代。</p>
+<p>代码中Hardcode的路径，例如/sdcard/*，/mnt/*这类用法</p>
+<p>应该使用==SAF，MediaStore和专属私有目录==相关API替代，或者更改存储目录。</p>
+</blockquote>
+<h2 id="兼容模式更改-测试适配结果方法"><a href="#兼容模式更改-测试适配结果方法" class="headerlink" title="兼容模式更改-测试适配结果方法"></a>兼容模式更改-测试适配结果方法</h2><h3 id="行为变更"><a href="#行为变更" class="headerlink" title="行为变更"></a>行为变更</h3><p>在 Android Q 测试版 1 中启用此行为变更，请在终端窗口中执行以下命令：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">adb shell sm set-isolated-storage on</span><br></pre></td></tr></table></figure>
+
+<p>查看是否已生效</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">adb shell getprop sys.isolated_storage_snapshot</span><br></pre></td></tr></table></figure>
+
+<h3 id="兼容性行为"><a href="#兼容性行为" class="headerlink" title="兼容性行为"></a>兼容性行为</h3><p>测试您的应用时，您可以通过在终端窗口中运行以下命令来为外部文件存储访问权限启用兼容性模式：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">adb shell cmd appops set your-package-name android:legacy_storage allow</span><br></pre></td></tr></table></figure>
+
+<p>停用兼容性模式，请在 Android Q 上卸载然后重新安装您的应用，或在终端窗口中运行以下命令</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">adb shell cmd appops set your-package-name android:legacy_storage default</span><br></pre></td></tr></table></figure>
+
+<h2 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h2><ul>
+<li><p>应用分区存储Google的最佳实践：<a target="_blank" rel="noopener" href="https://developer.android.com/training/data-storage/use-cases">https://developer.android.com/training/data-storage/use-cases</a></p>
+</li>
+<li><p>优酷存储空间适配：<a target="_blank" rel="noopener" href="https://yuque.antfin.com/youku_android_arch/atlas/ka510p#getExternalStoragePublicDirectory">https://yuque.antfin.com/youku_android_arch/atlas/ka510p#getExternalStoragePublicDirectory</a></p>
+</li>
+<li><p>Google存储行为变更：<a target="_blank" rel="noopener" href="https://developer.android.google.cn/about/versions/11/privacy/storage">https://developer.android.google.cn/about/versions/11/privacy/storage</a></p>
+</li>
+<li><p>存储访问框架：<a target="_blank" rel="noopener" href="https://developer.android.google.cn/guide/topics/providers/document-provider">https://developer.android.google.cn/guide/topics/providers/document-provider</a></p>
+</li>
+<li><p>FileProvider：<a target="_blank" rel="noopener" href="https://developer.android.google.cn/training/secure-file-sharing/setup-sharing">https://developer.android.google.cn/training/secure-file-sharing/setup-sharing</a></p>
+</li>
+<li><p>分区存储：<a target="_blank" rel="noopener" href="https://developer.android.google.cn/training/data-storage#scoped-storage">https://developer.android.google.cn/training/data-storage#scoped-storage</a></p>
+</li>
 </ul>
 
     </div>
