@@ -138,3 +138,35 @@ theme_config:
     rounded: false
     # If true, the avatar will be rotated with the cursor.
     rotated: true
+  # scheme: Muse
+  #scheme: Mist
+  #scheme: Pisces
+  scheme: Gemini
+  language: zh-Hans
+  menu:
+  home: / 
+  #about: /about/ || fa fa-user
+  tags: /tags/ 
+  #categories: /categories/ || fa fa-th
+  archives: /archives/ 
+  #schedule: /schedule/ || fa fa-calendar
+  #sitemap: /sitemap.xml || fa fa-sitemap
+  #commonweal: /404/ || fa fa-heartbeat
+
+  menu_settings:
+    icons: true
+    badges: false
+  sidebar:
+    display: post
+  baidu_analytics: ecb87535d9cf17e94cd6ba19cd63b06f    
+
+  leancloud_visitors:
+    enable: true
+    app_id: hpvFBiv00KI5T4MJlJ0X4kGs-9Nh9j0Va
+    app_key: NM6BCuXqe6i2mac04S6y733a
+    # Required for apps from CN region
+    server_url: # <your server url>
+    # Dependencies: https://github.com/theme-next/hexo-leancloud-counter-security
+    # If you don't care about security in leancloud counter and just want to use it directly
+    # (without hexo-leancloud-counter-security plugin), set `security` to `false`.
+    security: false
