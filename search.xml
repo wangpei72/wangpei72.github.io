@@ -5,6 +5,33 @@
     <url>/2021/09/26/Android%E5%88%86%E5%8C%BA%E5%AD%98%E5%82%A8%E9%80%82%E9%85%8D%E5%B7%A5%E4%BD%9C%E5%AD%A6%E4%B9%A0%E8%B0%83%E7%A0%94/</url>
     <content><![CDATA[<h2 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h2><p>当一个应用从Android SDK Level 10升级到11时，就涉及到适配的问题，而根据谷歌官方文档，可以知道10-&gt;11的变更范围。</p>
 <p>变更范围中的重点有一项是强制执行分区存储，我们知道分区存储也就是安卓设备在存储上引入了沙盒机制，应用不能够访问其他应用的私有目录，但是可以无权限访问自己的私有目录和公共的媒体文件目录。</p>
+<span id="more"></span>
+
+<h2 id="分区存储适配要点"><a href="#分区存储适配要点" class="headerlink" title="分区存储适配要点"></a>分区存储适配要点</h2><p>适配的内容在具体工作中包括那些呢？</p>
+<h3 id="API调用方式"><a href="#API调用方式" class="headerlink" title="API调用方式"></a>API调用方式</h3><p>最直接的体现在ContentProvider接口的修改方式。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">String[] PROJECTIONS = <span class="keyword">new</span> String[]&#123;</span><br><span class="line">            FileColumns._ID,</span><br><span class="line">            FileColumns.DATA,</span><br><span class="line">            FileColumns.MEDIA_TYPE,</span><br><span class="line">            FileColumns.DATE_MODIFIED,</span><br><span class="line">            MediaStore.Video.Media.DURATION&#125;;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">private</span> Cursor <span class="title">queryImages</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        Uri uri = MediaStore.Files.getContentUri(<span class="string">&quot;external&quot;</span>);</span><br><span class="line">        Pair&lt;String, String[]&gt;  selects = getSelects();</span><br><span class="line">        String sortOrderAndLimit = FileColumns.DATE_MODIFIED + <span class="string">&quot; DESC LIMIT &quot;</span> + getLimit();</span><br><span class="line">        Cursor cursor = getActivity().getContentResolver().query(uri, PROJECTIONS, selects.first, selects.second,  sortOrderAndLimit);</span><br><span class="line">        <span class="keyword">return</span> cursor;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+
+<p>所有涉及访问图片文件的代码部分，都需要调用上述接口以增加对Content api的支持。</p>
+<p>可以看到Activity实例拥有一个<code>ContentResolver</code>的实例对象能够对以Uri方式定义的资源进行访问,在这里调用query方法时需要提供5个参数，其中需要给出一个string数组 <code>PROJECTIONS</code>,他表示什么？用于存储一个媒体资源文件的类型和数据信息的结构化数据吗？这目前是我的猜测。</p>
+<p>同时查询时需要提供<code>Pair&lt;String, String[]&gt;</code>类型的selects，该对象获取逻辑由<code>getSelects()</code>获取</p>
+<p>为什么是这样设计的？我们先对比一下该函数的抽象方法：</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="comment">// 查询数据；</span></span><br><span class="line">query(Uri, String[], String, String[], String)；</span><br></pre></td></tr></table></figure>
+
+<p>看到这里，应该不难理解为什么selects是一个Pair类型的了吧，这是由函数接口决定的。</p>
+<h3 id="理论要点"><a href="#理论要点" class="headerlink" title="理论要点"></a>理论要点</h3><ul>
+<li><p>Android 10及以上文件存储机制修改成了沙盒模式</p>
+</li>
+<li><p>APP只能访问自己目录下的文件和公共媒体文件</p>
+</li>
+<li><p>对于Android10一下的系统，还是使用老的文件存储方式</p>
+</li>
+</ul>
+<blockquote>
+<p>适配分区存储的时候，需要兼容Android 10系统版本以下的内容，通过SDK_VERSION区分</p>
+</blockquote>
+<ul>
+<li>如果</li>
+</ul>
 ]]></content>
       <tags>
         <tag>Android</tag>
@@ -314,6 +341,87 @@
 ]]></content>
   </entry>
   <entry>
+    <title>养猫计划1.0</title>
+    <url>/2021/09/26/%E5%85%BB%E7%8C%AB%E8%AE%A1%E5%88%921-0/</url>
+    <content><![CDATA[<h2 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h2><p>啊，看到这个标题，soda，我打算养只布偶，也可能是两只;为了能够赚钱为以后的深造计划和养猫这种费钱的行为以及买房的伟大理想不会冲突，需要对养猫这一计划做合理的预算规划。</p>
+<p>同时为了能够最低成本出色完成这件事，需要提前做很多功课。那么，我将基于谷歌、知乎等站点给出的建议，对整个养猫计划做出一个合理的安排。</p>
+<span id="more"></span>
+
+<h2 id="置顶-干货帖子"><a href="#置顶-干货帖子" class="headerlink" title="置顶-干货帖子"></a>置顶-干货帖子</h2><p><a href="https://www.dealmoon.com/guide/769595">猫日常用品整理，包括购物链接</a></p>
+<p><a href="https://zhuanlan.zhihu.com/p/352278682">布偶猫挑选注意事项</a></p>
+<h2 id="布偶猫品种溯源-amp-挑选注意事项"><a href="#布偶猫品种溯源-amp-挑选注意事项" class="headerlink" title="布偶猫品种溯源&amp;挑选注意事项"></a>布偶猫品种溯源&amp;挑选注意事项</h2><p><img src="/2021/09/26/%E5%85%BB%E7%8C%AB%E8%AE%A1%E5%88%921-0/1.jpeg"></p>
+<p>如何挑选一个好看的布偶，这图出处的帖子给了非常详细的介绍，我总结一下有以下几点：</p>
+<table>
+<thead>
+<tr>
+<th>部位</th>
+<th>特点</th>
+<th>正面例子</th>
+<th>反面例子</th>
+<th>重要级</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>头部</td>
+<td>具圆形轮廓的宽大的改良倒三角形（楔形）,<strong>头一定要宽，且嘴套不能太窄，整体</strong></br><strong>保持倒三角形</strong></td>
+<td><img src="/2021/09/26/%E5%85%BB%E7%8C%AB%E8%AE%A1%E5%88%921-0/3.jpg"></td>
+<td><img src="/2021/09/26/%E5%85%BB%E7%8C%AB%E8%AE%A1%E5%88%921-0/4.jpg"></td>
+<td>🌟🌟</td>
+</tr>
+<tr>
+<td>耳朵</td>
+<td>1、两耳之间是平面，不能是圆的，不然会破坏倒三角的底边</br></td>
+<td><img src="/6.jp"></td>
+<td><img src="/2021/09/26/%E5%85%BB%E7%8C%AB%E8%AE%A1%E5%88%921-0/5.jpg"></td>
+<td>🌟🌟</td>
+</tr>
+<tr>
+<td>耳朵</td>
+<td>2、中的尺寸大小底部宽，耳朵尖圆圆的，对称，侧看略微前倾<br /><strong>不能太大太高（容易出现）或者太低和太向外倾斜（看上去会有点怂怂的）<br />这个需要多注意</strong></td>
+<td><img src="/2021/09/26/%E5%85%BB%E7%8C%AB%E8%AE%A1%E5%88%921-0/7.jpg"></td>
+<td><img src="/2021/09/26/%E5%85%BB%E7%8C%AB%E8%AE%A1%E5%88%921-0/8.jpg"></td>
+<td>🌟🌟如果耳朵不好，开脸再好，也显得不美观</td>
+</tr>
+<tr>
+<td>眼睛</td>
+<td>瞳孔和耳朵中间根部共线<br />深蓝色是首选，大且椭圆，适度的宽的位置<br />眼睛不能相对耳朵太斜，眼仁不能太小</td>
+<td><img src="/2021/09/26/%E5%85%BB%E7%8C%AB%E8%AE%A1%E5%88%921-0/10.jpg"></td>
+<td><img src="/2021/09/26/%E5%85%BB%E7%8C%AB%E8%AE%A1%E5%88%921-0/11.jpg"></td>
+<td>🌟🌟<br /><img src="/2021/09/26/%E5%85%BB%E7%8C%AB%E8%AE%A1%E5%88%921-0/9.jpg"></td>
+</tr>
+<tr>
+<td>下巴</td>
+<td>侧面看和鼻子共线</td>
+<td><img src="/2021/09/26/%E5%85%BB%E7%8C%AB%E8%AE%A1%E5%88%921-0/12.jpg"></td>
+<td><img src="/2021/09/26/%E5%85%BB%E7%8C%AB%E8%AE%A1%E5%88%921-0/14.jpg"></td>
+<td>🌟</td>
+</tr>
+<tr>
+<td>嘴套</td>
+<td>圆形，中等长度，在楔形线上<br />注意不要太尖，圆形的饱满</td>
+<td></td>
+<td><img src="/2021/09/26/%E5%85%BB%E7%8C%AB%E8%AE%A1%E5%88%921-0/13.jpg"></td>
+<td>🌟🌟</td>
+</tr>
+</tbody></table>
+<p>布偶是一个晚熟的品种，需要2年毛色也能充分体现，4年达到最饱满的体格和重量,所以说刚开始养的时候品相可能看不出来以后的完全状态，中间在生长的时候还需要度过一段尴尬期。布偶猫作为一种人工干预繁育出来的品种，其实受父母基因影响很大，基本上看到父母的样子，基本可以判断出这一窝小猫咪的长相趋势；再结合小猫两三个月呈现出来的品相，基本可以判断出当前这只猫在一窝里面的品质和之后的生长情况。所以说挑选小猫时候一定要看父母。</p>
+<p>总结：可以看出挑选时在面相上注意的点，头得是楔形，耳朵之间是平的，耳朵位置和倾斜角度，眼睛需要是3-4度的深蓝色，下巴和鼻子共线，嘴套需要饱满一些不宽不窄，满足以上几点的猫爸猫妈，他们的小猫应该不会太差。</p>
+<h2 id="养猫计划-养前的准备"><a href="#养猫计划-养前的准备" class="headerlink" title="养猫计划-养前的准备"></a>养猫计划-养前的准备</h2><p>这也说明了养猫是一件需要花费相当多精力和时间的事情，需要对他负起责任来，如果只是想玩一下午猫那不如去猫咖，说起来我在养狗的时候就感受到了，现在我爸我妈都需要在家带带狗，稍不注意狗狗就跑丢了，上次跑丢了好久在一个收养所找到的，找回来时候又脏又臭，而且狗狗本身也吃了不少苦，回来吃了一大顿。</p>
+<p>虽然猫不如狗粘人，但是既然想要把它当作自己的一个家庭成员就需要好好对待他，是吧，所以说我觉得我需要判断自己是否满足养猫的先决条件，如果不满足我应该如何准备才能把这个条件达到。</p>
+<h3 id="稳定的长期住所"><a href="#稳定的长期住所" class="headerlink" title="稳定的长期住所"></a>稳定的长期住所</h3><p>首先养猫可能有20年的时间跨度，我今年21，还没有毕业，说什么也不适合，我自己还没有安定下来之前，去买小猫来养是非常不负责任的行为。</p>
+<p>22年毕业后，我在杭州开始工作，在我计划跳槽之前应该是比较稳定的工作地点。npy的话，也在杭州工作，实习期间我跟他住在一起，那么如果毕业之后我正式入职这里，至少有三年的时间是一定在杭州稳定工作的。</p>
+<p>我考虑过，我前期攒的钱，想要用在以后去读研深造的，但是如果我手里的钱不去投资买房，房价上涨带来的影响是不可预估的，并且一旦买房，我就需要背负上房贷，工作就不可能断掉，此时我只能选择在职研究生。</p>
+<p>我的研究生学历选择必须具备以下条件：1、时间跨度不能太长，必须是高度集中的，但是相应地，我必须辞职投入深造；2、如果有必要出国，时间跨度小是硬性条件，国内研究生的话时间跨度的条件可以放宽一年；3、学费或者是其他费用，我需要在工作前三年时间内尽快积累出来，以我一年30w（目前offer没正式下来，还不知道多钱一年）能存下25w-20w为例，考虑升职因素，我前三年工作应该是可以存下85-100w（TAT，好不容易省下来又要花掉吗）</p>
+<p>那么npy这段时间应该也可以存下74w左右，加上婆家的40-50w（45w来算），阿姨的30w补助,共计存款234w，这些钱在杭州足够买下一个660w的房子，这个价位的房子应该是120平左右的吧,有了房子我就可以养猫了，但是不要忘记了我还有一个必须要做的事情，就是拿到研究生学历。我今年选择放弃保研不是说我就真的不读研了，我是一定要读我想要读的学校的研究生啊！</p>
+<p>好像是凑够了首付，但是一旦买了房子，我就不能离开职位了！但是我的研究生学历是我发誓我一定要拿到的东西，那么为了能够拿到他，必须有买房和读研不能有太大干扰的计划。</p>
+<p>我需要能够预留读研时间内所还贷款的需要的钱，另外还需要这段时间的生活费用以及拿到学历之后找工作时间期间的预备金.所以我需要制定一个研究生学历计划，需要全面了解这些政策，和我以后的发展方向，再考虑如何能够把这些钱提前赚到。感觉这个养猫计划里说不完了…请移步隔壁留学计划</p>
+<p>不能再摸鱼了，先工作，其他事情有空在想。</p>
+]]></content>
+      <tags>
+        <tag>cat</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>利用Travis——CI部署成功则发送邮件提醒</title>
     <url>/2021/09/26/%E5%88%A9%E7%94%A8Travis%E2%80%94%E2%80%94CI%E9%83%A8%E7%BD%B2%E6%88%90%E5%8A%9F%E5%88%99%E5%8F%91%E9%80%81%E9%82%AE%E4%BB%B6%E6%8F%90%E9%86%92/</url>
     <content><![CDATA[<h2 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h2><p>之前做了对博客推送至wangpei72.github.io仓库之后自动渲染部署的CI设置，但是设置是否成功却需要我自己去进一步确认，那么已经自动化到这一步了，我们为了能够将自动化进行到底，我决定再让CI把通知我的事情也做好。</p>
@@ -334,12 +442,14 @@
 <figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="comment">#!/usr/bin/pyhton</span></span><br><span class="line"><span class="comment"># -*- coding: UTF-8 -*-</span></span><br><span class="line"><span class="keyword">import</span> time</span><br><span class="line"><span class="keyword">import</span> smtplib</span><br><span class="line"><span class="keyword">from</span> email.mime.text <span class="keyword">import</span> MIMEText</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">sendEmail</span>(<span class="params">message</span>):</span></span><br><span class="line">    msg_from = <span class="string">&#x27;koukoustar@qq.com&#x27;</span>  <span class="comment"># 发送方邮箱</span></span><br><span class="line">    passwd = <span class="string">&#x27;SECRET&#x27;</span>  <span class="comment"># 发送方邮箱的授权码 这个要到qq邮箱配置</span></span><br><span class="line">    msg_to = <span class="string">&#x27;koukoustar@qq.com&#x27;</span>  <span class="comment"># 收件人邮箱</span></span><br><span class="line">    subject = <span class="string">&quot;TravisCI部署成功提示&quot;</span>  <span class="comment"># 主题</span></span><br><span class="line">    msg = MIMEText(message, <span class="string">&#x27;plain&#x27;</span>, <span class="string">&#x27;utf-8&#x27;</span>)</span><br><span class="line">    msg[<span class="string">&#x27;Subject&#x27;</span>] = subject</span><br><span class="line">    msg[<span class="string">&#x27;From&#x27;</span>] = msg_from</span><br><span class="line">    msg[<span class="string">&#x27;To&#x27;</span>] = msg_to</span><br><span class="line">    <span class="keyword">try</span>:</span><br><span class="line">        s = smtplib.SMTP_SSL(<span class="string">&quot;smtp.qq.com&quot;</span>, <span class="number">465</span>)  <span class="comment"># 邮件服务器及端口号</span></span><br><span class="line">        s.login(msg_from, passwd)</span><br><span class="line">        s.sendmail(msg_from, msg_to, msg.as_string())</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">&#x27;[&#x27;</span> + <span class="built_in">str</span>(time.strftime(<span class="string">&#x27;%Y-%m-%d %H:%M:%S&#x27;</span>, time.localtime(time.time()))) + <span class="string">&quot;]邮件发送成功,邮件内容：&quot;</span> + message)</span><br><span class="line">    <span class="keyword">except</span> s.SMTPException:</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">&#x27;[&#x27;</span> + <span class="built_in">str</span>(time.strftime(<span class="string">&#x27;%Y-%m-%d %H:%M:%S&#x27;</span>, time.localtime(time.time()))) + <span class="string">&quot;]邮件发送失败,邮件内容：&quot;</span> + message)</span><br><span class="line">    <span class="keyword">finally</span>:</span><br><span class="line">        s.quit()</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">&quot;__main__&quot;</span>:</span><br><span class="line">    my_msg = <span class="string">&quot;如果你看到这封邮件，表明Travis CI于&quot;</span> + <span class="built_in">str</span>(time.strftime(<span class="string">&#x27;%Y-%m-%d %H:%M:%S&#x27;</span>, time.localtime(time.time()))) + <span class="string">&quot; 的部署成功，可以登陆https://koukoustar.cn 查看最新文章～&quot;</span></span><br><span class="line">    sendEmail(my_msg)</span><br></pre></td></tr></table></figure>
 
 <h2 id="脚本本地测试"><a href="#脚本本地测试" class="headerlink" title="脚本本地测试"></a>脚本本地测试</h2><p>上面的python脚本运行一下，我就在邮箱中收到了该邮件：</p>
-<p><img src="/1.jpg"></p>
+<p><img src="/2021/09/26/%E5%88%A9%E7%94%A8Travis%E2%80%94%E2%80%94CI%E9%83%A8%E7%BD%B2%E6%88%90%E5%8A%9F%E5%88%99%E5%8F%91%E9%80%81%E9%82%AE%E4%BB%B6%E6%8F%90%E9%86%92/1.png"></p>
 <h2 id="将脚本放在Travis-CI执行"><a href="#将脚本放在Travis-CI执行" class="headerlink" title="将脚本放在Travis CI执行"></a>将脚本放在Travis CI执行</h2><p>如果你之前有读过这篇文章<a href="https://koukoustar.cn/2021/09/18/%E7%BB%93%E5%90%88TravisCI%E8%87%AA%E5%8A%A8%E9%83%A8%E7%BD%B2Next%E4%B8%BB%E9%A2%98%E7%9A%84Hexo%E5%8D%9A%E5%AE%A2/">link</a>, 那么你应该知道Travis CI现在的工作状况。</p>
 <p>我们在原先的yml文件上做一些补充，首先需要先把上述的脚本<code>emailSender.py</code>放置到.travis.yml文件的同级目录下。</p>
 <figure class="highlight yml"><table><tr><td class="code"><pre><span class="line"><span class="attr">after_script:</span></span><br><span class="line">  <span class="bullet">-</span> <span class="string">chmod</span> <span class="string">+x</span> <span class="string">emailSender.py</span></span><br><span class="line">  <span class="bullet">-</span> <span class="string">pip</span> <span class="string">install</span> <span class="string">time</span></span><br><span class="line">  <span class="bullet">-</span> <span class="string">pip</span> <span class="string">install</span> <span class="string">smtplib</span></span><br><span class="line">  <span class="bullet">-</span> <span class="string">python</span> <span class="string">emailSender.py</span></span><br></pre></td></tr></table></figure>
 
-<h2 id="CI测试"><a href="#CI测试" class="headerlink" title="CI测试"></a>CI测试</h2><p>现在我们将所有的改动提交和推送到远程，观察一下Travis CI的运行结果</p>
+<h2 id="CI测试"><a href="#CI测试" class="headerlink" title="CI测试"></a>CI测试</h2><p>现在我们将所有的改动提交和推送到远程，观察一下Travis CI的运行结果.发现忘记先配置python环境了，导致持续集成构建没成功，调整后完整的.travis.yml文件如下：</p>
+<figure class="highlight yml"><table><tr><td class="code"><pre><span class="line"><span class="attr">language:</span> <span class="string">node_js</span> </span><br><span class="line"><span class="attr">node_js:</span></span><br><span class="line">  <span class="bullet">-</span> <span class="number">12</span>  <span class="comment"># 使用 nodejs LTS v12</span></span><br><span class="line"><span class="attr">python:</span></span><br><span class="line">  <span class="bullet">-</span> <span class="string">&quot;3.7&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="attr">branches:</span></span><br><span class="line">  <span class="attr">only:</span></span><br><span class="line">    <span class="bullet">-</span> <span class="string">source</span> <span class="comment"># 只监控 source 的 branch</span></span><br><span class="line"><span class="attr">cache:</span></span><br><span class="line">  <span class="attr">directories:</span></span><br><span class="line">    <span class="bullet">-</span> <span class="string">node_modules</span> <span class="comment"># 缓存 node_modules 加快构建速度</span></span><br><span class="line">    <span class="bullet">-</span> <span class="string">pip</span></span><br><span class="line"><span class="attr">before_install:</span></span><br><span class="line">  <span class="bullet">-</span> <span class="string">export</span> <span class="string">TZ=&#x27;Asia/Shanghai&#x27;</span>    </span><br><span class="line"><span class="attr">before_script:</span> <span class="comment">## 根据你所用的主题和自定义的不同，这里会有所不同</span></span><br><span class="line">  <span class="bullet">-</span> <span class="string">npm</span> <span class="string">install</span> <span class="string">-g</span> <span class="string">hexo-cli</span> <span class="comment"># 在 CI 环境内安装 Hexo</span></span><br><span class="line">  <span class="bullet">-</span> <span class="string">git</span> <span class="string">clone</span> <span class="string">https://github.com/next-theme/hexo-theme-next.git</span> <span class="string">themes/next</span></span><br><span class="line">  <span class="bullet">-</span> <span class="string">npm</span> <span class="string">install</span> <span class="comment"># 在根目录安装站点需要的依赖 </span></span><br><span class="line"><span class="attr">script:</span> </span><br><span class="line">  <span class="bullet">-</span> <span class="string">hexo</span> <span class="string">clean</span></span><br><span class="line">  <span class="bullet">-</span> <span class="string">hexo</span> <span class="string">generate</span> <span class="comment"># generate static files</span></span><br><span class="line"><span class="attr">deploy:</span> <span class="comment"># 根据个人情况，这里会有所不同</span></span><br><span class="line">  <span class="attr">provider:</span> <span class="string">pages</span></span><br><span class="line">  <span class="attr">skip_cleanup:</span> <span class="literal">true</span> <span class="comment"># 构建完成后不清除</span></span><br><span class="line">  <span class="attr">token:</span> <span class="string">$GH_TOKEN</span> <span class="comment"># 你刚刚设置的 token</span></span><br><span class="line">  <span class="attr">keep_history:</span> <span class="literal">true</span> <span class="comment"># 保存历史</span></span><br><span class="line">  <span class="attr">fqdn:</span> <span class="string">koukoustar.cn</span> <span class="comment"># 自定义域名，使用 username.github.io 可删除</span></span><br><span class="line">  <span class="attr">on:</span></span><br><span class="line">    <span class="attr">branch:</span> <span class="string">source</span> <span class="comment"># hexo 站点源文件所在的 branch</span></span><br><span class="line">  <span class="attr">local_dir:</span> <span class="string">public</span> </span><br><span class="line">  <span class="attr">target_branch:</span> <span class="string">gh-pages</span> <span class="comment"># 存放生成站点文件的 branch</span></span><br><span class="line"><span class="attr">after_script:</span></span><br><span class="line">  <span class="bullet">-</span> <span class="string">chmod</span> <span class="string">+x</span> <span class="string">emailSender.py</span></span><br><span class="line">  <span class="bullet">-</span> <span class="string">pip3</span> <span class="string">install</span> <span class="string">time</span></span><br><span class="line">  <span class="bullet">-</span> <span class="string">pip3</span> <span class="string">install</span> <span class="string">smtplib</span></span><br><span class="line">  <span class="bullet">-</span> <span class="string">python</span> <span class="string">emailSender.py</span></span><br><span class="line"><span class="attr">env:</span></span><br><span class="line">    <span class="attr">global:</span></span><br><span class="line">        <span class="bullet">-</span> <span class="attr">GH_REF:</span> <span class="string">github.com/wangpei72/wangpei72.github.io.git</span> <span class="comment">#设置GH_REF，注意更改yourname</span></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
 ]]></content>
       <tags>
         <tag>TravisCI</tag>
@@ -353,7 +463,9 @@
   <entry>
     <title>毕设选题分析</title>
     <url>/2021/09/25/%E6%AF%95%E8%AE%BE%E9%80%89%E9%A2%98%E5%88%86%E6%9E%90/</url>
-    <content><![CDATA[<span id="more"></span>
+    <content><![CDATA[<h2 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h2><p>10月要选题了，六个题目选一个，现在还不确定选哪个，所以先搜查一下准备一些问题联系老师。</p>
+<p>最后决定选第二个题目</p>
+<span id="more"></span>
 
 <p>十月初就要选题了，联系了导师之后，现在可以被选的题目包括：</p>
 <p>智能软件的故障定位和自动修复<br>智能软件的测试用例自动生成和优化<br>基于覆盖率的智能软件评价方法<br>基于模糊技术的语法树变异技术研究<br>基于深度学习的软件漏洞定位和修复<br>基于不确定性的案例智能选择方法</p>
@@ -476,6 +588,18 @@
 ]]></content>
       <tags>
         <tag>毕设</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>留学计划1.0</title>
+    <url>/2021/09/26/%E7%95%99%E5%AD%A6%E8%AE%A1%E5%88%921-0/</url>
+    <content><![CDATA[<h2 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h2><p>我发誓要拿到的东西就一定要拿到。</p>
+<span id="more"></span>
+
+<h2 id="Step1-查阅经验帖"><a href="#Step1-查阅经验帖" class="headerlink" title="Step1-查阅经验帖"></a>Step1-查阅经验帖</h2><p><a href="https://www.zhihu.com/question/293572778">申请国外研究生-新加坡国立本科的一个博主例子</a></p>
+]]></content>
+      <tags>
+        <tag>留学</tag>
       </tags>
   </entry>
   <entry>
