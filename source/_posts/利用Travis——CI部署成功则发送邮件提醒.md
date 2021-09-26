@@ -99,5 +99,49 @@ after_script:
 
 ## CI测试
 
-现在我们将所有的改动提交和推送到远程，观察一下Travis CI的运行结果
+现在我们将所有的改动提交和推送到远程，观察一下Travis CI的运行结果.发现忘记先配置python环境了，导致持续集成构建没成功，调整后完整的.travis.yml文件如下：
+
+```yml
+language: node_js 
+node_js:
+  - 12  # 使用 nodejs LTS v12
+python:
+  - "3.7"
+
+branches:
+  only:
+    - source # 只监控 source 的 branch
+cache:
+  directories:
+    - node_modules # 缓存 node_modules 加快构建速度
+    - pip
+before_install:
+  - export TZ='Asia/Shanghai'    
+before_script: ## 根据你所用的主题和自定义的不同，这里会有所不同
+  - npm install -g hexo-cli # 在 CI 环境内安装 Hexo
+  - git clone https://github.com/next-theme/hexo-theme-next.git themes/next
+  - npm install # 在根目录安装站点需要的依赖 
+script: 
+  - hexo clean
+  - hexo generate # generate static files
+deploy: # 根据个人情况，这里会有所不同
+  provider: pages
+  skip_cleanup: true # 构建完成后不清除
+  token: $GH_TOKEN # 你刚刚设置的 token
+  keep_history: true # 保存历史
+  fqdn: koukoustar.cn # 自定义域名，使用 username.github.io 可删除
+  on:
+    branch: source # hexo 站点源文件所在的 branch
+  local_dir: public 
+  target_branch: gh-pages # 存放生成站点文件的 branch
+after_script:
+  - chmod +x emailSender.py
+  - pip3 install time
+  - pip3 install smtplib
+  - python emailSender.py
+env:
+    global:
+        - GH_REF: github.com/wangpei72/wangpei72.github.io.git #设置GH_REF，注意更改yourname
+
+```
 
