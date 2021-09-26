@@ -160,3 +160,4 @@ adb shell cmd appops set your-package-name android:legacy_storage default
 
 - FileProvider：https://developer.android.google.cn/training/secure-file-sharing/setup-sharing
 - 分区存储：https://developer.android.google.cn/training/data-storage#scoped-storage
+
