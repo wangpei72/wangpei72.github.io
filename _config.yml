@@ -131,4 +131,10 @@ theme_config:
     # YouTube: https://youtube.com/yourname || fab fa-youtube
     #Instagram: https://instagram.com/yourname || fab fa-instagram
     #Skype: skype:yourname?call|chat || fab fa-skype  
-
+  avatar:
+    # Replace the default image and set the url here.
+    url: /images/avatar.gif
+    # If true, the avatar will be dispalyed in circle.
+    rounded: false
+    # If true, the avatar will be rotated with the cursor.
+    rotated: true
