@@ -170,3 +170,11 @@ theme_config:
     # If you don't care about security in leancloud counter and just want to use it directly
     # (without hexo-leancloud-counter-security plugin), set `security` to `false`.
     security: false
+  powered: false
+  post_meta:
+    item_text: true
+    created_at: true
+    updated_at:
+      enable: true
+      another_day: true
+    categories: true
