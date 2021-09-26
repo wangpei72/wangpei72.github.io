@@ -1,18 +1,24 @@
 language: node_js 
 node_js:
   - 12  # 使用 nodejs LTS v12
+python:
+  - "3.7"
+
 branches:
   only:
     - source # 只监控 source 的 branch
 cache:
   directories:
     - node_modules # 缓存 node_modules 加快构建速度
+    - pip
 before_install:
   - export TZ='Asia/Shanghai'    
 before_script: ## 根据你所用的主题和自定义的不同，这里会有所不同
   - npm install -g hexo-cli # 在 CI 环境内安装 Hexo
   - git clone https://github.com/next-theme/hexo-theme-next.git themes/next
   - npm install # 在根目录安装站点需要的依赖 
+  - pip install time
+  - pip install smtplib
 script: 
   - hexo clean
   - hexo generate # generate static files
@@ -28,8 +34,6 @@ deploy: # 根据个人情况，这里会有所不同
   target_branch: gh-pages # 存放生成站点文件的 branch
 after_script:
   - chmod +x emailSender.py
-  - pip install time
-  - pip install smtplib
   - python emailSender.py
 env:
     global:
