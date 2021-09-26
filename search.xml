@@ -1,6 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <search>
   <entry>
+    <title>Android分区存储适配工作学习调研</title>
+    <url>/2021/09/26/Android%E5%88%86%E5%8C%BA%E5%AD%98%E5%82%A8%E9%80%82%E9%85%8D%E5%B7%A5%E4%BD%9C%E5%AD%A6%E4%B9%A0%E8%B0%83%E7%A0%94/</url>
+    <content><![CDATA[<h2 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h2><p>当一个应用从Android SDK Level 10升级到11时，就涉及到适配的问题，而根据谷歌官方文档，可以知道10-&gt;11的变更范围。</p>
+<p>变更范围中的重点有一项是强制执行分区存储，我们知道分区存储也就是安卓设备在存储上引入了沙盒机制，应用不能够访问其他应用的私有目录，但是可以无权限访问自己的私有目录和公共的媒体文件目录。</p>
+]]></content>
+      <tags>
+        <tag>Android</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>COLMAP论文阅读笔记-sfm算法</title>
     <url>/2021/05/28/COLMAP%E8%AE%BA%E6%96%87%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0-sfm%E7%AE%97%E6%B3%95/</url>
     <content><![CDATA[<h1 id="structure-from-motion-revisited"><a href="#structure-from-motion-revisited" class="headerlink" title="structure from motion  revisited"></a>structure from motion  revisited</h1><p>Sfm是对三维重建算法的统称，incremental sfm则表示他是增量式的，在鲁棒性准确性方面有巨大进步；但是灵活性、完整<br>性以及可伸缩性仍然是打破技术壁垒的关键问题。论文后半部分讲述完整的重建流程。sfm 是一系列不同角度拍摄的图像的<br>投影来重建3的结构的过程。                                    </p>
@@ -302,6 +312,38 @@
     <url>/2021/09/18/next%E4%B8%BB%E9%A2%98%E7%BE%8E%E5%8C%96%E8%AE%B0%E5%BD%95/</url>
     <content><![CDATA[<h2 id="现状"><a href="#现状" class="headerlink" title="现状"></a>现状</h2><p>很丑，很平凡</p>
 ]]></content>
+  </entry>
+  <entry>
+    <title>利用Travis——CI部署成功则发送邮件提醒</title>
+    <url>/2021/09/26/%E5%88%A9%E7%94%A8Travis%E2%80%94%E2%80%94CI%E9%83%A8%E7%BD%B2%E6%88%90%E5%8A%9F%E5%88%99%E5%8F%91%E9%80%81%E9%82%AE%E4%BB%B6%E6%8F%90%E9%86%92/</url>
+    <content><![CDATA[<h2 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h2><p>之前做了对博客推送至wangpei72.github.io仓库之后自动渲染部署的CI设置，但是设置是否成功却需要我自己去进一步确认，那么已经自动化到这一步了，我们为了能够将自动化进行到底，我决定再让CI把通知我的事情也做好。</p>
+<span id="more"></span>
+
+<h2 id="构造email"><a href="#构造email" class="headerlink" title="构造email"></a>构造email</h2><p>下面的一段介绍来自廖雪峰的官方网站</p>
+<p>SMTP是发送邮件的协议，Python内置对SMTP的支持，可以发送纯文本邮件、HTML邮件以及带附件的邮件。</p>
+<p>Python对SMTP支持有<code>smtplib</code>和<code>email</code>两个模块，<code>email</code>负责构造邮件，<code>smtplib</code>负责发送邮件。</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">from</span> email.mime.text <span class="keyword">import</span> MIMEText</span><br><span class="line">msg = MIMEText(<span class="string">&#x27;hello, send by Python...&#x27;</span>, <span class="string">&#x27;plain&#x27;</span>, <span class="string">&#x27;utf-8&#x27;</span>)</span><br></pre></td></tr></table></figure>
+
+<p>注意到构造<code>MIMEText</code>对象时，第一个参数就是邮件正文，第二个参数是MIME的subtype，传入<code>&#39;plain&#39;</code>表示纯文本，最终的MIME就是<code>&#39;text/plain&#39;</code>，最后一定要用<code>utf-8</code>编码保证多语言兼容性。还可以以字典的方式调整对邮件的配置:</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">msg[<span class="string">&#x27;Subject&#x27;</span>] = subject</span><br><span class="line">msg[<span class="string">&#x27;From&#x27;</span>] = msg_from</span><br><span class="line">msg[<span class="string">&#x27;To&#x27;</span>] = msg_to</span><br></pre></td></tr></table></figure>
+
+<h2 id="发送email"><a href="#发送email" class="headerlink" title="发送email"></a>发送email</h2><p>构造完邮件之后，接下来可以发送email，如果我构造的邮件基于qq邮箱发送，那么就可以指定邮件服务器是输入qq邮箱的服务器域名</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> smtplib</span><br><span class="line">s = smtplib.SMTP_SSL(<span class="string">&quot;smtp.qq.com&quot;</span>, <span class="number">465</span>)  <span class="comment"># 邮件服务器及端口号</span></span><br><span class="line">s.login(msg_from, passwd)</span><br><span class="line">s.sendmail(msg_from, msg_to, msg.as_string())</span><br></pre></td></tr></table></figure>
+
+<p>最后完整的发送邮件脚本是这样子的：</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="comment">#!/usr/bin/pyhton</span></span><br><span class="line"><span class="comment"># -*- coding: UTF-8 -*-</span></span><br><span class="line"><span class="keyword">import</span> time</span><br><span class="line"><span class="keyword">import</span> smtplib</span><br><span class="line"><span class="keyword">from</span> email.mime.text <span class="keyword">import</span> MIMEText</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">sendEmail</span>(<span class="params">message</span>):</span></span><br><span class="line">    msg_from = <span class="string">&#x27;koukoustar@qq.com&#x27;</span>  <span class="comment"># 发送方邮箱</span></span><br><span class="line">    passwd = <span class="string">&#x27;SECRET&#x27;</span>  <span class="comment"># 发送方邮箱的授权码 这个要到qq邮箱配置</span></span><br><span class="line">    msg_to = <span class="string">&#x27;koukoustar@qq.com&#x27;</span>  <span class="comment"># 收件人邮箱</span></span><br><span class="line">    subject = <span class="string">&quot;TravisCI部署成功提示&quot;</span>  <span class="comment"># 主题</span></span><br><span class="line">    msg = MIMEText(message, <span class="string">&#x27;plain&#x27;</span>, <span class="string">&#x27;utf-8&#x27;</span>)</span><br><span class="line">    msg[<span class="string">&#x27;Subject&#x27;</span>] = subject</span><br><span class="line">    msg[<span class="string">&#x27;From&#x27;</span>] = msg_from</span><br><span class="line">    msg[<span class="string">&#x27;To&#x27;</span>] = msg_to</span><br><span class="line">    <span class="keyword">try</span>:</span><br><span class="line">        s = smtplib.SMTP_SSL(<span class="string">&quot;smtp.qq.com&quot;</span>, <span class="number">465</span>)  <span class="comment"># 邮件服务器及端口号</span></span><br><span class="line">        s.login(msg_from, passwd)</span><br><span class="line">        s.sendmail(msg_from, msg_to, msg.as_string())</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">&#x27;[&#x27;</span> + <span class="built_in">str</span>(time.strftime(<span class="string">&#x27;%Y-%m-%d %H:%M:%S&#x27;</span>, time.localtime(time.time()))) + <span class="string">&quot;]邮件发送成功,邮件内容：&quot;</span> + message)</span><br><span class="line">    <span class="keyword">except</span> s.SMTPException:</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">&#x27;[&#x27;</span> + <span class="built_in">str</span>(time.strftime(<span class="string">&#x27;%Y-%m-%d %H:%M:%S&#x27;</span>, time.localtime(time.time()))) + <span class="string">&quot;]邮件发送失败,邮件内容：&quot;</span> + message)</span><br><span class="line">    <span class="keyword">finally</span>:</span><br><span class="line">        s.quit()</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">&quot;__main__&quot;</span>:</span><br><span class="line">    my_msg = <span class="string">&quot;如果你看到这封邮件，表明Travis CI于&quot;</span> + <span class="built_in">str</span>(time.strftime(<span class="string">&#x27;%Y-%m-%d %H:%M:%S&#x27;</span>, time.localtime(time.time()))) + <span class="string">&quot; 的部署成功，可以登陆https://koukoustar.cn 查看最新文章～&quot;</span></span><br><span class="line">    sendEmail(my_msg)</span><br></pre></td></tr></table></figure>
+
+<h2 id="脚本本地测试"><a href="#脚本本地测试" class="headerlink" title="脚本本地测试"></a>脚本本地测试</h2><p>上面的python脚本运行一下，我就在邮箱中收到了该邮件：</p>
+<p><img src="/1.jpg"></p>
+<h2 id="将脚本放在Travis-CI执行"><a href="#将脚本放在Travis-CI执行" class="headerlink" title="将脚本放在Travis CI执行"></a>将脚本放在Travis CI执行</h2><p>如果你之前有读过这篇文章<a href="https://koukoustar.cn/2021/09/18/%E7%BB%93%E5%90%88TravisCI%E8%87%AA%E5%8A%A8%E9%83%A8%E7%BD%B2Next%E4%B8%BB%E9%A2%98%E7%9A%84Hexo%E5%8D%9A%E5%AE%A2/">link</a>, 那么你应该知道Travis CI现在的工作状况。</p>
+<p>我们在原先的yml文件上做一些补充，首先需要先把上述的脚本<code>emailSender.py</code>放置到.travis.yml文件的同级目录下。</p>
+<figure class="highlight yml"><table><tr><td class="code"><pre><span class="line"><span class="attr">after_script:</span></span><br><span class="line">  <span class="bullet">-</span> <span class="string">chmod</span> <span class="string">+x</span> <span class="string">emailSender.py</span></span><br><span class="line">  <span class="bullet">-</span> <span class="string">pip</span> <span class="string">install</span> <span class="string">time</span></span><br><span class="line">  <span class="bullet">-</span> <span class="string">pip</span> <span class="string">install</span> <span class="string">smtplib</span></span><br><span class="line">  <span class="bullet">-</span> <span class="string">python</span> <span class="string">emailSender.py</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="CI测试"><a href="#CI测试" class="headerlink" title="CI测试"></a>CI测试</h2><p>现在我们将所有的改动提交和推送到远程，观察一下Travis CI的运行结果</p>
+]]></content>
+      <tags>
+        <tag>TravisCI</tag>
+      </tags>
   </entry>
   <entry>
     <title>学习网络库SDK</title>
