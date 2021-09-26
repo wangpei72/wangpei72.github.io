@@ -39,4 +39,26 @@ private Cursor queryImages() {
 
 所有涉及访问图片文件的代码部分，都需要调用上述接口以增加对Content api的支持。
 
-可以看到Activity实例拥有一个`ContentResolver`的实例对象能够对以Uri方式定义的资源进行访问。
+可以看到Activity实例拥有一个`ContentResolver`的实例对象能够对以Uri方式定义的资源进行访问,在这里调用query方法时需要提供5个参数，其中需要给出一个string数组 `PROJECTIONS`,他表示什么？用于存储一个媒体资源文件的类型和数据信息的结构化数据吗？这目前是我的猜测。
+
+同时查询时需要提供`Pair<String, String[]>`类型的selects，该对象获取逻辑由`getSelects()`获取
+
+为什么是这样设计的？我们先对比一下该函数的抽象方法：
+
+```java
+// 查询数据；
+query(Uri, String[], String, String[], String)；
+```
+
+看到这里，应该不难理解为什么selects是一个Pair类型的了吧，这是由函数接口决定的。
+
+### 理论要点
+
+- Android 10及以上文件存储机制修改成了沙盒模式
+- APP只能访问自己目录下的文件和公共媒体文件
+
+- 对于Android10一下的系统，还是使用老的文件存储方式
+
+> 适配分区存储的时候，需要兼容Android 10系统版本以下的内容，通过SDK_VERSION区分
+
+- 如果
