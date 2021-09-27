@@ -139,9 +139,9 @@ theme_config:
     # If true, the avatar will be rotated with the cursor.
     rotated: true
   # scheme: Muse
-  #scheme: Mist
-  #scheme: Pisces
-  scheme: Gemini
+  scheme: Mist
+  # scheme: Pisces
+  # scheme: Gemini
   language: zh-Hans
   menu:
   home: / 
@@ -170,7 +170,21 @@ theme_config:
     # If you don't care about security in leancloud counter and just want to use it directly
     # (without hexo-leancloud-counter-security plugin), set `security` to `false`.
     security: false
-  powered: false
+
+  footer:  
+    since: 2021
+    icon:
+    # Icon name in Font Awesome. See: https://fontawesome.com/icons
+      name: star
+      # If you want to animate the icon, set it to true.
+      animated: false
+      # Change the color of icon, using Hex Code.
+      color: "#ff0000"
+    # If not defined, `author` from Hexo `_config.yml` will be used.
+    copyright: koukoustar
+    powered: true
+    
+  
   post_meta:
     item_text: true
     created_at: true
