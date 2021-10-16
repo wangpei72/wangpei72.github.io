@@ -612,9 +612,68 @@
       </tags>
   </entry>
   <entry>
+    <title>十分钟配置好一台MacBookPro</title>
+    <url>/2021/10/16/%E5%8D%81%E5%88%86%E9%92%9F%E9%85%8D%E7%BD%AE%E5%A5%BD%E4%B8%80%E5%8F%B0MacBookPro/</url>
+    <content><![CDATA[<h2 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h2><p>考虑到我的mbp就要归还给公司了。有点心痛。因为mac用起来还是很爽的，我很喜欢这个键盘的手感，虽然他被吐槽了很多回，并且不出意外的话我可能是真的需要买一台MacBookAir回学校写毕设，因为这个键盘模式是真的非常熟悉了，如果换回到windows我怕自己适应回去太难受了，况且以后我工作之后一直会用的是mbp，那么，为了之后能够在Air上配置好现在的环境，写一篇小博客记录记录。</p>
+<span id="more"></span>
+
+<h2 id="日常必备工具"><a href="#日常必备工具" class="headerlink" title="日常必备工具"></a>日常必备工具</h2><ul>
+<li><p>Typora</p>
+<ul>
+<li>编辑md文件必备</li>
+</ul>
+</li>
+<li><p>ClashX</p>
+<ul>
+<li>科学上网</li>
+</ul>
+</li>
+<li><p>iTerm2</p>
+<p>附上配置文件：</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash"> If you come from bash you might have to change your <span class="variable">$PATH</span>.</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> <span class="built_in">export</span> PATH=<span class="variable">$HOME</span>/bin:/usr/<span class="built_in">local</span>/bin:<span class="variable">$PATH</span></span></span><br><span class="line">export PATH=&quot;$PATH:./node_modules/.bin&quot;</span><br><span class="line">export JAVA_HOME=&quot;/Library/Java/JavaVirtualMachines/jdk1.8.0_291.jdk/Contents/Home&quot;</span><br><span class="line">export MAVEN_HOME=/Users/wangpei/apache-maven-3.5.0 #修改成你放的路径</span><br><span class="line">export PATH=$PATH:$MAVEN_HOME/bin</span><br><span class="line"><span class="meta">#</span><span class="bash"> <span class="built_in">export</span> Path=<span class="variable">$PATH</span>:/Applications/Sublime Text.app/Contents/SharedSupport/bin</span></span><br><span class="line">alias python=&quot;/usr/local/bin/python3&quot;</span><br><span class="line"><span class="meta">#</span><span class="bash"><span class="built_in">alias</span> pip=<span class="string">&quot;/Library/Frameworks/Python.framework/Versions/3.9/bin/pip3&quot;</span></span></span><br><span class="line">export ANDROID_HOME=&quot;/Users/wangpei/Library/Android/sdk&quot;</span><br><span class="line">PATH=~/bin:$PATH</span><br><span class="line">PATH=$&#123;PATH&#125;:$&#123;JAVA_HOME&#125;/bin:$&#123;ANDROID_HOME&#125;/platform-tools:$&#123;ANDROID_HOME&#125;/tools:.</span><br><span class="line">export PATH</span><br><span class="line">CLASSPATH=$JAVA_HOME/lib/tools.jar:$JAVA_HOME/lib/dt.jar:.</span><br><span class="line">export CLASSPATH</span><br><span class="line">alias javac=&#x27;javac -J-Dfile.encoding=UTF-8 -encoding UTF-8&#x27;</span><br><span class="line">alias java=&#x27;java -Dfile.encoding=UTF-8&#x27;</span><br><span class="line">alias typora=&quot;open -a typora&quot;</span><br><span class="line"><span class="meta">#</span><span class="bash"> Path to your oh-my-zsh installation.</span></span><br><span class="line">export ZSH=&quot;/Users/wangpei/.oh-my-zsh&quot;</span><br><span class="line"><span class="meta">#</span><span class="bash"> <span class="built_in">alias</span> goproxy=<span class="string">&#x27;export http_proxy=http://127.0.0.1:7890 https_proxy=http://127.0.0.1:7890&#x27;</span></span></span><br><span class="line"><span class="meta">#</span><span class="bash"> <span class="built_in">alias</span> disproxy=<span class="string">&#x27;unset http_proxy https_proxy&#x27;</span></span></span><br><span class="line"><span class="meta">#</span><span class="bash"> <span class="built_in">export</span> http_proxy=http://127.0.0.1:7890</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> <span class="built_in">export</span> https_proxy=<span class="variable">$http_proxy</span></span></span><br><span class="line"></span><br><span class="line">ZSH_THEME=&quot;agnoster&quot;</span><br><span class="line"></span><br><span class="line">plugins=(</span><br><span class="line">        git</span><br><span class="line">        zsh-syntax-highlighting</span><br><span class="line">        zsh-autosuggestions</span><br><span class="line">)</span><br><span class="line"></span><br><span class="line">source $ZSH/oh-my-zsh.sh</span><br><span class="line"><span class="meta"></span></span><br><span class="line"><span class="meta">#</span><span class="bash"> User configuration</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">source ~/.oh-my-zsh/custom/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh</span><br><span class="line"></span><br></pre></td></tr></table></figure></li>
+<li><p>sublimetext，WPS</p>
+</li>
+<li><p>Adobe系列，见我的百度网盘</p>
+</li>
+<li><p>Chrome</p>
+</li>
+</ul>
+<h2 id="开发工具"><a href="#开发工具" class="headerlink" title="开发工具"></a>开发工具</h2><ul>
+<li><p>JDK8</p>
+</li>
+<li><p>AndroidSDK 一直到Level 30</p>
+</li>
+<li><p>Android Studio</p>
+</li>
+<li><p>Jetbrains全家桶（推荐Clion，Pycharm）</p>
+</li>
+<li><p>各类第三方库，例如：TensorFlow、Pytorch</p>
+</li>
+<li><p>Xcode</p>
+</li>
+<li><p>SourceTree，版本控制gui</p>
+</li>
+<li><p>Charles，抓包工具</p>
+</li>
+</ul>
+]]></content>
+  </entry>
+  <entry>
     <title>学习网络库SDK</title>
     <url>/2021/08/10/%E5%AD%A6%E4%B9%A0%E7%BD%91%E7%BB%9C%E5%BA%93SDK/</url>
     <content><![CDATA[]]></content>
+  </entry>
+  <entry>
+    <title>探究安卓存储机制中的uri</title>
+    <url>/2021/10/12/%E6%8E%A2%E7%A9%B6%E5%AE%89%E5%8D%93%E5%AD%98%E5%82%A8%E6%9C%BA%E5%88%B6%E4%B8%AD%E7%9A%84uri/</url>
+    <content><![CDATA[<h2 id="URI定义"><a href="#URI定义" class="headerlink" title="URI定义"></a>URI定义</h2><p>通用资源标志符（Universal Resource Identifier, 简称”URI”。</p>
+<p>本次工程中也用到ContentUris，ContentUris 类用于获取Uri路径后面的ID部分</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="comment">//为该Uri加上ID</span></span><br><span class="line">Uri uri = Uri.parse(<span class="string">&quot;content://com.yfz.Lesson/people&quot;</span>)  </span><br><span class="line">Uri resultUri = ContentUris.withAppendedId(uri, <span class="number">10</span>);  </span><br><span class="line"></span><br><span class="line"><span class="comment">//从uri获取id</span></span><br><span class="line">Uri uri = Uri.parse(<span class="string">&quot;content://com.yfz.Lesson/people/10&quot;</span>)  </span><br><span class="line"><span class="keyword">long</span> personid = ContentUris.parseId(uri);  </span><br></pre></td></tr></table></figure>
+
+<span id="more"></span>
+
+<h2 id="参考链接"><a href="#参考链接" class="headerlink" title="参考链接"></a>参考链接</h2><p><a href="https://www.jianshu.com/p/7690d93bb1a1">https://www.jianshu.com/p/7690d93bb1a1</a></p>
+]]></content>
   </entry>
   <entry>
     <title>毕设选题分析</title>
@@ -1622,7 +1681,7 @@
 <figure class="highlight java"><table><tr><td class="code"><pre><span class="line">mDefaultPath = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).getPath();</span><br><span class="line">mRootPath = Environment.getExternalStorageDirectory().getPath();<span class="comment">// 内部存储根目录</span></span><br></pre></td></tr></table></figure>
 
 <p>之后的代码逻辑都是基于上述两个变量<code>mDefaultPath</code> <code>mRootPath</code>来进行的，整体的流程被我梳理了一个函数调用栈，方便我在做适配的时候找到适合插手的地方。整个栈全部展示会显得冗余，所以栈中只保留最核心的函数，不显示一些无关紧要的函数，但是这并不代表在实际调用过程中函数并没有被调用。</p>
-<p><img src="/%E6%94%B9%E7%89%88%E5%89%8D%E8%B0%83%E7%94%A8%E6%A0%88.svg"></p>
+<p><img src="/2021/09/27/%E6%95%B4%E7%90%86%E5%88%86%E5%8C%BA%E5%AD%98%E5%82%A8%E9%80%82%E9%85%8D%E4%BF%AE%E6%94%B9%E4%BB%A3%E7%A0%81%E6%80%9D%E8%B7%AF/%E6%94%B9%E7%89%88%E5%89%8D%E8%B0%83%E7%94%A8%E6%A0%88.svg"></p>
 <p>大致的函数调用栈梳理出来之后对整个文件选择器能力的实现便有了一个整体的感知，代码修改起来也可以有的放矢。在做Target30适配方案调研时了解到访问安卓11的Document或者Download下的文件时需要使用SAF框架来打开。</p>
 <p>根据之前存储适配的思路，在原先的文件选择器逻辑中新增一层DataSource的抽象，并且根据目标平台的版本号来区分不同的处理方式，例如：在api level&lt; 29时，使用原先的逻辑；在api level &gt;29时使用saf框架的逻辑。</p>
 <p>代码架构的问题由抽象出的一层DataSource解决之后，涉及到核心能力的编码。SAF框架中需要在选择文件时，先唤起系统的文件选择器。现在根据师姐整理的最后版本，提炼出核心代码如下：</p>
@@ -1641,12 +1700,12 @@
 <li>要在<code>SystemFileExploreDataSource</code>类中调用一些其他类具有的通用逻辑时，可以将此类逻辑定义成static的，避免在不相干但是同时继承同一个父类的类中添加无用的方法实现</li>
 </ul>
 <p>纵观适配后的代码逻辑，可以整理成下图,可以看出现在的工作逻辑是：在唤起文件选择器后，获取对uri的query结果之后直接使用send的能力将选择的文件发送出去。</p>
-<p><img src="/%E6%94%B9%E7%89%88%E5%90%8E%E8%B0%83%E7%94%A8%E6%A0%88.svg"></p>
+<p><img src="/2021/09/27/%E6%95%B4%E7%90%86%E5%88%86%E5%8C%BA%E5%AD%98%E5%82%A8%E9%80%82%E9%85%8D%E4%BF%AE%E6%94%B9%E4%BB%A3%E7%A0%81%E6%80%9D%E8%B7%AF/%E6%94%B9%E7%89%88%E5%90%8E%E8%B0%83%E7%94%A8%E6%A0%88.svg"></p>
 <h1 id="提炼Image库代码修改思路"><a href="#提炼Image库代码修改思路" class="headerlink" title="提炼Image库代码修改思路"></a>提炼Image库代码修改思路</h1><p>学习完本节下面两节的部分之后，对分区存储造成影响的用例及解决方案、SAF、FileProvider等概念有了基本的了解之后，开始回顾Image库当时的代码修改情况。</p>
 <h3 id="代码扫描结果"><a href="#代码扫描结果" class="headerlink" title="代码扫描结果"></a>代码扫描结果</h3><p>涉及到文件存储API调用的代码行数结果如下：</p>
-<p><img src="/image-20210927201856026.png" alt="image-20210927201856026"></p>
+<p><img src="/2021/09/27/%E6%95%B4%E7%90%86%E5%88%86%E5%8C%BA%E5%AD%98%E5%82%A8%E9%80%82%E9%85%8D%E4%BF%AE%E6%94%B9%E4%BB%A3%E7%A0%81%E6%80%9D%E8%B7%AF/image-20210927201856026.png" alt="image-20210927201856026"></p>
 <h3 id="8-27-commit记录还原代码修改步骤"><a href="#8-27-commit记录还原代码修改步骤" class="headerlink" title="8.27 commit记录还原代码修改步骤"></a>8.27 commit记录还原代码修改步骤</h3><p>8.27的commit从图片选择器开始着手</p>
-<p><img src="/image-20210927202139716.png" alt="image-20210927202139716"></p>
+<p><img src="/2021/09/27/%E6%95%B4%E7%90%86%E5%88%86%E5%8C%BA%E5%AD%98%E5%82%A8%E9%80%82%E9%85%8D%E4%BF%AE%E6%94%B9%E4%BB%A3%E7%A0%81%E6%80%9D%E8%B7%AF/image-20210927202139716.png" alt="image-20210927202139716"></p>
 <p>需要先在清单文件中加权限：</p>
 <figure class="highlight xml"><table><tr><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">uses-permission</span> <span class="attr">android:name</span>=<span class="string">&quot;android.permission.READ_EXTERNAL_STORAGE&quot;</span>/&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">uses-permission</span> <span class="attr">android:name</span>=<span class="string">&quot;android.permission.WRITE_EXTERNAL_STORAGE&quot;</span>/&gt;</span></span><br></pre></td></tr></table></figure>
 
@@ -1675,7 +1734,7 @@
 <p>该类封装了安卓系统提供的Context，Build，Environment的一些逻辑，并且在调用<code>getExternalStoragePublicDirectory</code>这类场景做了分api版本的兼容处理</p>
 <p><strong>核心类 - ContentUriCompat</strong></p>
 <p>用来做appendId的功能封装</p>
-<h3 id="9-15-代码分层的重构"><a href="#9-15-代码分层的重构" class="headerlink" title="9.15 代码分层的重构"></a>9.15 代码分层的重构</h3><p><img src="/image-20210928172535553.png" alt="image-20210928172535553"></p>
+<h3 id="9-15-代码分层的重构"><a href="#9-15-代码分层的重构" class="headerlink" title="9.15 代码分层的重构"></a>9.15 代码分层的重构</h3><p><img src="/2021/09/27/%E6%95%B4%E7%90%86%E5%88%86%E5%8C%BA%E5%AD%98%E5%82%A8%E9%80%82%E9%85%8D%E4%BF%AE%E6%94%B9%E4%BB%A3%E7%A0%81%E6%80%9D%E8%B7%AF/image-20210928172535553.png" alt="image-20210928172535553"></p>
 <p>这条commit开始，Image库在包内新建了data目录，里面包括了model和source两个模块。</p>
 <p>model下的类表示数据元素，例如AlbumItem，ImageVideoItem分别表示相册的数据元素和图片视频的封面，他们包含了一些标签性质的信息例如时长，path</p>
 <p>source下的类主要是对数据源进行一层抽象，DataSource，以相册场景来说，datasource表示相册detail数据，获取详细数据的底层逻辑实际上就是</p>
@@ -1683,7 +1742,7 @@
 
 
 
-<p><img src="/image-20210928191433897.png" alt="image-20210928191433897"></p>
+<p><img src="/2021/09/27/%E6%95%B4%E7%90%86%E5%88%86%E5%8C%BA%E5%AD%98%E5%82%A8%E9%80%82%E9%85%8D%E4%BF%AE%E6%94%B9%E4%BB%A3%E7%A0%81%E6%80%9D%E8%B7%AF/image-20210928191433897.png" alt="image-20210928191433897"></p>
 <h1 id="谷歌官方给出的最佳实践"><a href="#谷歌官方给出的最佳实践" class="headerlink" title="谷歌官方给出的最佳实践"></a>谷歌官方给出的<a href="https://developer.android.com/training/data-storage/use-cases">最佳实践</a></h1><p>分区存储改变了应用在设备的外部存储设备中存储和访问文件的方式。迁移至支持分区存储，谷歌给出的最佳实践用例，且分为两类：处理媒体文件和处理非媒体文件。</p>
 <h2 id="处理媒体文件（视频、图片和音频文件）"><a href="#处理媒体文件（视频、图片和音频文件）" class="headerlink" title="处理媒体文件（视频、图片和音频文件）"></a>处理媒体文件（视频、图片和音频文件）</h2><h3 id="显示多个文件夹中的图片或者视频文件-各安卓版本一致"><a href="#显示多个文件夹中的图片或者视频文件-各安卓版本一致" class="headerlink" title="显示多个文件夹中的图片或者视频文件-各安卓版本一致"></a><strong>显示多个文件夹中的图片或者视频文件</strong>-各安卓版本一致</h3><p>​    使用 [<code>query()</code>](<a href="https://developer.android.com/reference/android/content/ContentResolver#query">https://developer.android.com/reference/android/content/ContentResolver#query</a>(android.net.Uri, java.lang.String[], java.lang.String, java.lang.String[], java.lang.String, android.os.CancellationSignal)) API <a href="https://developer.android.com/training/data-storage/shared/media#query-collection">查询媒体集合</a>。如需对媒体文件进行过滤或排序，请调整 <code>projection</code>、<code>selection</code>、<code>selectionArgs</code> 和 <code>sortOrder</code> 参数。</p>
 <p><img src="/2021/09/27/%E6%95%B4%E7%90%86%E5%88%86%E5%8C%BA%E5%AD%98%E5%82%A8%E9%80%82%E9%85%8D%E4%BF%AE%E6%94%B9%E4%BB%A3%E7%A0%81%E6%80%9D%E8%B7%AF/1.jpg"></p>
