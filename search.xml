@@ -1417,11 +1417,231 @@
       </tags>
   </entry>
   <entry>
+    <title>每日一题</title>
+    <url>/2021/05/24/%E6%AF%8F%E6%97%A5%E4%B8%80%E9%A2%98/</url>
+    <content><![CDATA[<h2 id="lc12-整数转罗马数字"><a href="#lc12-整数转罗马数字" class="headerlink" title="lc12 整数转罗马数字"></a><a href="https://leetcode-cn.com/problems/integer-to-roman/">lc12</a> 整数转罗马数字</h2><p>罗马数字有7个单字符号 又六个减法规则带料的符合符号，总共十三个，给出一个int转成罗马数字表示。</p>
+<p><img src="/images/image-20210514160844788.png" alt="image-20210514160844788"></p>
+<p>官方题解给出了关于数字140的例子：</p>
+<p><img src="/images/image-20210514160909592.png" alt="image-20210514160909592"></p>
+<p>确定罗马数字的规则是：对于罗马数字从左到右的每一位，选择尽可能大的符号值。对于 140，最大可以选择的符号值为 C=100。接下来，对于剩余的数字 40，最大可以选择的符号值为 XL=40。因此，140140 的对应的罗马数字为 CXL。</p>
+<span id="more"></span>
+
+<p>方法列表</p>
+<ol>
+<li><p>模拟</p>
+<p>表示一个给定的整数 num，我们寻找不超过 num 的最大符号值，将num 减去该符号值，然后继续寻找不超过num 的最大符号值，将该符号拼接在上一个找到的符号之后，循环直至 num 为 0。最后得到的字符串即为罗马数字表示。</p>
+</li>
+<li><p>硬编码数字</p>
+</li>
+</ol>
+<p>mycode：</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Solution</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> String <span class="title">intToRoman</span><span class="params">(<span class="keyword">int</span> num)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">int</span>[] values = &#123;<span class="number">1000</span>,<span class="number">900</span>,<span class="number">500</span>,<span class="number">400</span>,<span class="number">100</span>,<span class="number">90</span>,<span class="number">50</span>,<span class="number">40</span>,<span class="number">10</span>,<span class="number">9</span>,<span class="number">5</span>,<span class="number">4</span>,<span class="number">1</span>&#125;;</span><br><span class="line">        String[] symbols = &#123;<span class="string">&quot;M&quot;</span>, <span class="string">&quot;CM&quot;</span>,<span class="string">&quot;D&quot;</span>,<span class="string">&quot;CD&quot;</span>,<span class="string">&quot;C&quot;</span>,<span class="string">&quot;XC&quot;</span>,<span class="string">&quot;L&quot;</span>,<span class="string">&quot;XL&quot;</span>,<span class="string">&quot;X&quot;</span>,<span class="string">&quot;IX&quot;</span>,<span class="string">&quot;V&quot;</span>,<span class="string">&quot;IV&quot;</span>,<span class="string">&quot;I&quot;</span>&#125;;</span><br><span class="line">        StringBuffer sb = <span class="keyword">new</span> StringBuffer();</span><br><span class="line">        <span class="keyword">for</span>(<span class="keyword">int</span> i =<span class="number">0</span>;i &lt; values.length; i++)&#123;</span><br><span class="line">            <span class="keyword">int</span> v = values[i];</span><br><span class="line">            String s = symbols[i];</span><br><span class="line">            <span class="keyword">while</span>(num &gt;= v)&#123;</span><br><span class="line">                num -= v;</span><br><span class="line">                sb.append(s);</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">if</span>(num == <span class="number">0</span>)<span class="keyword">break</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> sb.toString();</span><br><span class="line">        </span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<h2 id="lc1035-不相交的线"><a href="#lc1035-不相交的线" class="headerlink" title="lc1035 不相交的线"></a><a href="https://leetcode-cn.com/problems/uncrossed-lines/">lc1035</a> 不相交的线</h2><p>两条独立的水平线上按给定的顺序写nums1 nums2</p>
+<p>绘制链接这两组数字中某两个的而直线，这些直线同时满足:</p>
+<p>nums1[i] == nums2[j]</p>
+<p>绘制的直线不予其他线相交</p>
+<p>请注意 连线及时在端点也不能相交 每个数字只能属于一条直线</p>
+<p><strong>返回可以绘制的最大连线数目</strong> </p>
+<p>2   5 1 2 5</p>
+<p>10 5 2 1 5 2</p>
+<p>1 3 7 1 7 5</p>
+<p>19 2 5 1</p>
+<p>先思考：两条连线如果相交那么表示的是？ i1&lt;i2和j1&lt;j2不能同时满足，这种情况下可能会导致两条连线相交.</p>
+<p>这题的思路可以用动态规划，首先，所有的线不相交的条件：假设一共绘制了k条直线，其中第x条直线链接nums1[$i_x$]和nums2[$j_x$]，有这两个数字相等 且这k对元素在两个数组中的相对顺序是一致的，因此这k对相等元素组成的序列是数组nums1和nums2的公共子序列，最长公共子序列——典型的二维动态规划问题。</p>
+<p>nums1 长度 m</p>
+<p>nums2 长度 n</p>
+<p>创建m+1行n+1列的二维数组dp，其中dp[i][j]表示表示nums1[0:i] nums2[0:j]的最长公共子序列的长度。</p>
+<p>考虑边界： i =0 时 nums1[0:i]空数组和任何数组的最长公共子序列的长度是0 dp [ 0 ][ j ] = 0;</p>
+<p>当j  = 0 时，nums2[0:j]为空 同理 dp[i][0] = 0</p>
+<p>当 i &gt; 0 且 j  &gt; 0时，考虑dp[ i ][ j ] 的计算：</p>
+<p>当nums1[i-1] = nums2[j-1]时，将这两个相同的元素称为公共元素，考虑nums1[0:i-1] nums2[0:j-1]的最长公共子序列，再增加一个元素，即可得到nums1[0:i]和nums2[0:j]的最长公共子序列，因此dp[i][j] = dp[i-1][j-1] +1</p>
+<p>当nums1[i-1]与nums2[j-1] 不相等，考虑0:i-1 0:j 的最长公共子序列和0：i 0：j-1的最长公共子序列 两者较大项即可</p>
+<p><img src="/images/image-20210521195544341.png" alt="image-20210521195544341"></p>
+<h2 id="lc810-黑板异或游戏"><a href="#lc810-黑板异或游戏" class="headerlink" title="lc810 黑板异或游戏"></a>lc810 黑板异或游戏</h2><p>黑板上写着一个非负整数数组 nums[i] 。Alice 和 Bob 轮流从黑板上擦掉一个数字，Alice 先手。如果擦除一个数字后，剩余的所有数字按位异或运算得出的结果等于 0 的话，当前玩家游戏失败。 (另外，如果只剩一个数字，按位异或运算得到它本身；如果无数字剩余，按位异或运算结果为 0。）</p>
+<p>并且，轮到某个玩家时，如果当前黑板上所有数字按位异或运算结果等于 0，这个玩家获胜。</p>
+<p>假设两个玩家每步都使用最优解，当且仅当 Alice 获胜时返回 true。</p>
+<p>解析：</p>
+<p>思考什么情况下Alice会获胜，当轮到某个玩家时，当前黑板上所有数字异或结果为0，此时该玩家获胜（因为上一个玩家失败），这个情况下Alice先手，也就是初始时抑或结果为0 A获胜</p>
+<p>下面讨论初始时黑白上所有数字异或结果不为0的情况</p>
+<p>由于两个人交替擦除数字，且每次都恰好擦除一个数字，因此对于这两人中的任意一人，其每次在擦除数字前，黑板上数字个数的奇偶性是相同的。</p>
+<p>从数组的奇偶性来讨论。如果nums的长度是偶数，先手Alice是否可能失败呢？</p>
+<p>假设Alice要失败的话，只有一种情况，无论擦除哪一个数字，剩余所有的数字的异或结果都等于0 而这是不可能的 给出证明：</p>
+<p>设数组nums长度n n为偶数 </p>
+<p><img src="/images/image-20210523193628449.png" alt="image-20210523193628449"></p>
+<p>擦除nums[i]之后：</p>
+<p><img src="/images/image-20210523193635351.png" alt="image-20210523193635351"></p>
+<p>等式两边同时异或nums[i]  （*）</p>
+<p><img src="/images/image-20210523193726189.png" alt="image-20210523193726189"></p>
+<p>若无论擦掉哪个数字，剩余的所有数字异或结果都等于0，即对于属于0，n的i 都有Si = 0</p>
+<p>因此对所有的Si异或结果也为0</p>
+<p><img src="/images/image-20210523193837639.png" alt="image-20210523193837639"></p>
+<p>将 *带入 并且根据异或运算的交换律和结合律化简</p>
+<p><img src="/images/image-20210523195814410.png" alt="image-20210523195814410"></p>
+<p>此公式第三行左边括号为n个S异或，由于n是偶数，因此n个S异或的结果为0</p>
+<p>S=0与实际情况S$\neq$0矛盾</p>
+<p>因此当数组的长度为偶数时，先手Alice总能找到一个数字，擦除这个数字之后剩余的所有数字异或结果不等于零。</p>
+<p>在Alice擦掉之后，BOb是奇数，擦一个，给A的一定还是偶数个，此时要么A获胜，要不A擦完后结果不为0，此时Alice一直不败。</p>
+<p>同理，如果数组长度为奇数时候，Alice擦除掉一个数字之后，留给Bob的是偶数，因此Bob必胜。</p>
+<p>因此Alice必胜的条件是以下两个条件中的至少一个得到满足：</p>
+<p>数组nums的全部元素的异或结果等于0；</p>
+<p>数组nums的长度是偶数。</p>
+<h2 id="lc1707-与数组中元素的最大异或值"><a href="#lc1707-与数组中元素的最大异或值" class="headerlink" title="lc1707 与数组中元素的最大异或值"></a><a href="https://leetcode-cn.com/problems/maximum-xor-with-an-element-from-array/">lc1707</a> 与数组中元素的最大异或值</h2><p>给我一个由非负整数组成的数组nums，另外有一个查询数组queries，其中q[i]=[xi,mi]</p>
+<p>第i个查询的答案是Xi和任何nums数组中不超过mi的元素按位异或得到的最大值，换句话说，答案是max(nums[j] XOR xi)其中所有j均满足nums[j] &lt;= mi.如果nums中所有元素都大于mi，那么最终答案为-1</p>
+<p>返回一个整数数组answer作为查询的答案，其中answer长度为queries的长度且元素一一对应</p>
+<p>这题思路在理解了字典树还是比较清晰的，但是具体的位运算实现细节就很魔鬼了。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Solution</span> </span>&#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">int</span>[] maximizeXor(<span class="keyword">int</span>[] nums, <span class="keyword">int</span>[][] queries) &#123;</span><br><span class="line">        Arrays.sort(nums);</span><br><span class="line">        <span class="keyword">int</span> numQ = queries.length;</span><br><span class="line">        <span class="keyword">int</span>[][] newQueries = <span class="keyword">new</span> <span class="keyword">int</span>[numQ][<span class="number">3</span>];</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; numQ; ++i) &#123;</span><br><span class="line">            newQueries[i][<span class="number">0</span>] = queries[i][<span class="number">0</span>];</span><br><span class="line">            newQueries[i][<span class="number">1</span>] = queries[i][<span class="number">1</span>];</span><br><span class="line">            newQueries[i][<span class="number">2</span>] = i;</span><br><span class="line">        &#125;</span><br><span class="line">        Arrays.sort(newQueries, <span class="keyword">new</span> Comparator&lt;<span class="keyword">int</span>[]&gt;() &#123;</span><br><span class="line">            <span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">compare</span><span class="params">(<span class="keyword">int</span>[] query1, <span class="keyword">int</span>[] query2)</span> </span>&#123;</span><br><span class="line">                <span class="keyword">return</span> query1[<span class="number">1</span>] - query2[<span class="number">1</span>];</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;);</span><br><span class="line"></span><br><span class="line">        <span class="keyword">int</span>[] ans = <span class="keyword">new</span> <span class="keyword">int</span>[numQ];</span><br><span class="line">        Trie trie = <span class="keyword">new</span> Trie();</span><br><span class="line">        <span class="keyword">int</span> idx = <span class="number">0</span>, n = nums.length;</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span>[] query : newQueries) &#123;</span><br><span class="line">            <span class="keyword">int</span> x = query[<span class="number">0</span>], m = query[<span class="number">1</span>], qid = query[<span class="number">2</span>];</span><br><span class="line">            <span class="keyword">while</span> (idx &lt; n &amp;&amp; nums[idx] &lt;= m) &#123;</span><br><span class="line">                trie.insert(nums[idx]);</span><br><span class="line">                ++idx;</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">if</span> (idx == <span class="number">0</span>) &#123; <span class="comment">// 字典树为空</span></span><br><span class="line">                ans[qid] = -<span class="number">1</span>;</span><br><span class="line">            &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                ans[qid] = trie.getMaxXor(x);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> ans;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Trie</span> </span>&#123;</span><br><span class="line">    <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">int</span> L = <span class="number">30</span>;</span><br><span class="line">    Trie[] children = <span class="keyword">new</span> Trie[<span class="number">2</span>];</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">insert</span><span class="params">(<span class="keyword">int</span> val)</span> </span>&#123;</span><br><span class="line">        Trie node = <span class="keyword">this</span>;</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i = L - <span class="number">1</span>; i &gt;= <span class="number">0</span>; --i) &#123;</span><br><span class="line">            <span class="keyword">int</span> bit = (val &gt;&gt; i) &amp; <span class="number">1</span>;</span><br><span class="line">            <span class="keyword">if</span> (node.children[bit] == <span class="keyword">null</span>) &#123;</span><br><span class="line">                node.children[bit] = <span class="keyword">new</span> Trie();</span><br><span class="line">            &#125;</span><br><span class="line">            node = node.children[bit];</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">getMaxXor</span><span class="params">(<span class="keyword">int</span> val)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">int</span> ans = <span class="number">0</span>;</span><br><span class="line">        Trie node = <span class="keyword">this</span>;</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i = L - <span class="number">1</span>; i &gt;= <span class="number">0</span>; --i) &#123;</span><br><span class="line">            <span class="keyword">int</span> bit = (val &gt;&gt; i) &amp; <span class="number">1</span>;</span><br><span class="line">            <span class="keyword">if</span> (node.children[bit ^ <span class="number">1</span>] != <span class="keyword">null</span>) &#123;</span><br><span class="line">                ans |= <span class="number">1</span> &lt;&lt; i;</span><br><span class="line">                bit ^= <span class="number">1</span>;</span><br><span class="line">            &#125;</span><br><span class="line">            node = node.children[bit];</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> ans;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>此题的铺垫——前缀树</p>
+<h2 id="lc208-实现Trie"><a href="#lc208-实现Trie" class="headerlink" title="lc208 实现Trie"></a><a href="https://leetcode-cn.com/problems/implement-trie-prefix-tree/">lc208</a> 实现Trie</h2><p>前缀树 一种树形的数据结构，用于高校的存储检索字符串数据集中的键，这一数据结构应用场景很多例如自动补完和拼写检查。</p>
+<p>请你实现 Trie 类：</p>
+<p>Trie() 初始化前缀树对象。<br>void insert(String word) 向前缀树中插入字符串 word 。<br>boolean search(String word) 如果字符串 word 在前缀树中，返回 true（即，在检索之前已经插入）；否则，返回 false 。<br>boolean startsWith(String prefix) 如果之前已经插入的字符串 word 的前缀之一为 prefix ，返回 true ；否则，返回 false 。</p>
+<p>Trie，又称前缀树或字典树，是一棵有根树，其每个节点包含以下字段：</p>
+<ul>
+<li>指向子节点的指针数组 children。对于本题而言，数组长度为 26，即小写英文字母的数量。此时 children[0] 对应小写字母 aa，children[1] 对应小写字母 b，…，children[25] 对应小写字母 z。</li>
+<li>布尔字段isEnd，表示该节点是否为字符串的结尾。</li>
+</ul>
+<h2 id="lc664-奇怪的打印机"><a href="#lc664-奇怪的打印机" class="headerlink" title="lc664 奇怪的打印机"></a><a href="https://leetcode-cn.com/problems/strange-printer/">lc664</a> 奇怪的打印机</h2><p>题目描述：一个打印机每次纸打印相同字符的序列，每次可以在任意位置开始和结束打印一串序列并且覆盖之前的符号。给我一个字符串s，求该打印机能够打印出该符号串所需的最小打印次数。</p>
+<p>定义 f[l][r] 为将 [l, r][l,r] 这一段打印成目标结果所消耗的最小打印次数。</p>
+<p>不失一般性考虑 f[l][r] 该如何转移：</p>
+<p>只打印 l 这个位置，此时 f[l][r] = f[l + 1][r] + 1<br>不只打印 l 这个位置，而是从 l 打印到 k（需要确保首位相同 s[l] = s[k]）：f[l][r] = f[l][k - 1] + f[k + 1][r], l &lt; k &lt;= r<br>其中状态转移方程中的情况 22 需要说明一下：由于我们只确保 s[l] = s[k]，并不确保 [l, k][l,k] 之间的字符相同，根据我们基本分析可知，s[k] 这个点可由打印 s[l]s[l] 的时候一同打印，因此本身 s[k] 并不独立消耗打印次数，所以这时候 [l, k][l,k] 这一段的最小打印次数应该取f[l][k−1]，而不是 f[l][k]。</p>
+<p>最终的 f[l][r] 为上述所有方案中取min。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Solution</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">strangePrinter</span><span class="params">(String s)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">int</span> n = s.length();</span><br><span class="line">        <span class="keyword">int</span>[][] f = <span class="keyword">new</span> <span class="keyword">int</span>[n + <span class="number">1</span>][n + <span class="number">1</span>];</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> len = <span class="number">1</span>; len &lt;= n; len++) &#123;</span><br><span class="line">            <span class="keyword">for</span> (<span class="keyword">int</span> l = <span class="number">0</span>; l + len - <span class="number">1</span> &lt; n; l++) &#123;</span><br><span class="line">                <span class="keyword">int</span> r = l + len - <span class="number">1</span>;</span><br><span class="line">                f[l][r] = f[l + <span class="number">1</span>][r] + <span class="number">1</span>;</span><br><span class="line">                <span class="keyword">for</span> (<span class="keyword">int</span> k = l + <span class="number">1</span>; k &lt;= r; k++) &#123;</span><br><span class="line">                    <span class="keyword">if</span> (s.charAt(l) == s.charAt(k)) &#123;</span><br><span class="line">                        f[l][r] = Math.min(f[l][r], f[l][k - <span class="number">1</span>] + f[k + <span class="number">1</span>][r]);</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> f[<span class="number">0</span>][n - <span class="number">1</span>];</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h2 id="lc1787-使所有区间的异或结果为零"><a href="#lc1787-使所有区间的异或结果为零" class="headerlink" title="lc1787 使所有区间的异或结果为零"></a><a href="https://leetcode-cn.com/problems/make-the-xor-of-all-segments-equal-to-zero/">lc1787</a> 使所有区间的异或结果为零</h2><p><strong>题目描述：</strong></p>
+<p>给你一个整数数组 nums 和一个整数 k 。区间 [left, right]（left &lt;= right）的异或结果是对下标位于 left 和 right（包括 left 和 right ）之间所有元素进行 XOR 运算的结果：nums[left] XOR nums[left+1] XOR … XOR nums[right] 。</p>
+<p>返回数组中 要更改的最小元素数 ，以使所有长度为 k 的区间异或结果等于零。</p>
+<p><strong>示例 1：</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">输入：nums = [1,2,0,3,0], k = 1</span><br><span class="line">输出：3</span><br><span class="line">解释：将数组 [1,2,0,3,0] 修改为 [0,0,0,0,0]</span><br></pre></td></tr></table></figure>
+
+<p><strong>示例 2：</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">输入：nums = [3,4,5,2,1,7,3,4,7], k = 3</span><br><span class="line">输出：3</span><br><span class="line">解释：将数组 [3,4,5,2,1,7,3,4,7] 修改为 [3,4,7,3,4,7,3,4,7]</span><br></pre></td></tr></table></figure>
+
+<p><strong>示例 3：</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">输入：nums = [1,2,4,1,2,5,1,2,6], k = 3</span><br><span class="line">输出：3</span><br><span class="line">解释：将数组[1,2,4,1,2,5,1,2,6] 修改为 [1,2,3,1,2,3,1,2,3]</span><br></pre></td></tr></table></figure>
+
+
+
+<p><strong>官方解题思路：</strong></p>
+<p>有空可以考虑看看<a href="https://leetcode-cn.com/problems/make-the-xor-of-all-segments-equal-to-zero/solution/gong-shui-san-xie-chou-xiang-cheng-er-we-ww79/">三叶姐姐的题解</a>。</p>
+<p>涉及到**最大，最小之类的问题，我现在已经能够敏锐地察觉到动规解法。官方题解就是动规，设nums长度为n。</p>
+<p>为了动规能够找到状态的转移条件，需要分析这个数组被修改之后应该具有的性质。</p>
+<p>由于任意长度为 <em>k</em> 的区间异或结果等于 0，那么对于任意的 <em>i</em>，有：</p>
+<p><img src="/2021/05/24/%E6%AF%8F%E6%97%A5%E4%B8%80%E9%A2%98/1.jpg"></p>
+<p>和</p>
+<p><img src="/2021/05/24/%E6%AF%8F%E6%97%A5%E4%B8%80%E9%A2%98/2.jpg"></p>
+<p>根据a^b ^ b = a的异或运算性质，联立上述两式，可得</p>
+<p><img src="/2021/05/24/%E6%AF%8F%E6%97%A5%E4%B8%80%E9%A2%98/3.jpg"></p>
+<p>等价于nums[i] = nums[i+k]:重要结论——nums修改之后是一个以k为周期的数组，对任意[0,n-k)的i，有上式成立。</p>
+<p>将数组下标对k取模分成k个组，每个组内元素必须要相等。并且这k个组对应的元素的异或和为0，即：</p>
+<p><img src="/2021/05/24/%E6%AF%8F%E6%97%A5%E4%B8%80%E9%A2%98/4.jpg"></p>
+<p>对于第 i个组，我们可以使用哈希映射来存储该组内的元素以及每个元素出现的次数，这样一来，我们就可以尝试使用动态规划来解决本题了。设 f(i,mask) 表示我们已经处理了第 0, 1, …,i 个组，并且这些组对应元素的异或和：</p>
+<p><img src="/2021/05/24/%E6%AF%8F%E6%97%A5%E4%B8%80%E9%A2%98/5.jpg"></p>
+<p>作为mask的前提下，这些组<strong>总计</strong>最少需要修改的元素个数。进行状态转移时，我们可以枚举第i组被修改成为哪个数，假设修改成了x，那么0,1,…,i-1组对应的元素异或和即为mask^x,可得状态转移方程：</p>
+<p><img src="/2021/05/24/%E6%AF%8F%E6%97%A5%E4%B8%80%E9%A2%98/6.jpg"></p>
+<p>其中size(i)表示第i组里元素个数，count(i,x)表示第i组里元素x的次数，他们的值都可以通过hash映射得到，该转移方程的意义为：如果我们选择将第 i 组全部修改为 x，那么有 count(i,x) 个数是无需修改的，这样就需要修改 size(i)−count(i,x) 次。（还是能理解的过来的）</p>
+<p>由于x的上限导致该方程的时间复杂度数量级很高，因此需要优化。</p>
+<p>首先 size(<em>i</em>) 是与 <em>x</em> 无关的常量，我们可以将其移出最小值的限制，即：</p>
+<p><img src="/2021/05/24/%E6%AF%8F%E6%97%A5%E4%B8%80%E9%A2%98/7.jpg"></p>
+<p>由于我们需要求的是「最小值」，因此在状态转移方程中添加若干大于等于「最小值」的项，对最终的答案不会产生影响。</p>
+<p>考虑 count(<em>i</em>,<em>x</em>) 这一项，如果 <em>x</em> 没有在哈希表中出现，那么这一项的值为 0方程：</p>
+<p><img src="/2021/05/24/%E6%AF%8F%E6%97%A5%E4%B8%80%E9%A2%98/8.jpg" alt="(1)"></p>
+<p>否则这一项的值大于 0。即：</p>
+<p><img src="/2021/05/24/%E6%AF%8F%E6%97%A5%E4%B8%80%E9%A2%98/9.jpg" alt="(2)"></p>
+<p>(2)项严格小于(1),如果在方程中加(1)不会对结果产生影响。因此我们可以将状态转移方程变化为：</p>
+<p><img src="/2021/05/24/%E6%AF%8F%E6%97%A5%E4%B8%80%E9%A2%98/10.jpg"></p>
+<p><img src="/2021/05/24/%E6%AF%8F%E6%97%A5%E4%B8%80%E9%A2%98/11.jpg"></p>
+<p><img src="/2021/05/24/%E6%AF%8F%E6%97%A5%E4%B8%80%E9%A2%98/12.jpg"></p>
+<p><em>t</em>2 就是所有状态 f*(*i−1,..) 中的最小值。</p>
+<p>最终的答案取f(k-1,0)。</p>
+<p>设计细节：</p>
+<p>由于 f(i, ..) 只会从 f(i-1, ..) 转移而来，因此我们可以使用两个长度为 2^{10}的一维数组代替二维数组，交替地进行状态转移，减少空间复杂度。此外，当i=0 时，f(−1,..) 都是需要特殊考虑的边界条件。由于 f(−1,..) 表示没有考虑任何组时的异或和，因此该异或和一定为 0，即 f(-1, 0) = 0。其它的状态都是不合法的状态，我们可以将它们赋予一个极大值 ∞。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Solution</span> </span>&#123;</span><br><span class="line">    <span class="comment">// x 的范围为 [0, 2^10)</span></span><br><span class="line">    <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">int</span> MAXX = <span class="number">1</span> &lt;&lt; <span class="number">10</span>;</span><br><span class="line">    <span class="comment">// 极大值，为了防止整数溢出选择 INT_MAX / 2</span></span><br><span class="line">    <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">int</span> INFTY = Integer.MAX_VALUE / <span class="number">2</span>;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">minChanges</span><span class="params">(<span class="keyword">int</span>[] nums, <span class="keyword">int</span> k)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">int</span> n = nums.length;</span><br><span class="line">        <span class="keyword">int</span>[] f = <span class="keyword">new</span> <span class="keyword">int</span>[MAXX];</span><br><span class="line">        Arrays.fill(f, INFTY);</span><br><span class="line">        <span class="comment">// 边界条件 f(-1,0)=0</span></span><br><span class="line">        f[<span class="number">0</span>] = <span class="number">0</span>;</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; k; ++i) &#123;</span><br><span class="line">            <span class="comment">// 第 i 个组的哈希映射</span></span><br><span class="line">            Map&lt;Integer, Integer&gt; cnt = <span class="keyword">new</span> HashMap&lt;Integer, Integer&gt;();</span><br><span class="line">            <span class="keyword">int</span> size = <span class="number">0</span>;</span><br><span class="line">            <span class="keyword">for</span> (<span class="keyword">int</span> j = i; j &lt; n; j += k) &#123;</span><br><span class="line">                cnt.put(nums[j], cnt.getOrDefault(nums[j], <span class="number">0</span>) + <span class="number">1</span>);</span><br><span class="line">                ++size;</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            <span class="comment">// 求出 t2</span></span><br><span class="line">            <span class="keyword">int</span> t2min = Arrays.stream(f).min().getAsInt();</span><br><span class="line"></span><br><span class="line">            <span class="keyword">int</span>[] g = <span class="keyword">new</span> <span class="keyword">int</span>[MAXX];</span><br><span class="line">            Arrays.fill(g, t2min);</span><br><span class="line">            <span class="keyword">for</span> (<span class="keyword">int</span> mask = <span class="number">0</span>; mask &lt; MAXX; ++mask) &#123;</span><br><span class="line">                <span class="comment">// t1 则需要枚举 x 才能求出</span></span><br><span class="line">                <span class="keyword">for</span> (Map.Entry&lt;Integer, Integer&gt; entry : cnt.entrySet()) &#123;</span><br><span class="line">                    <span class="keyword">int</span> x = entry.getKey(), countx = entry.getValue();</span><br><span class="line">                    g[mask] = Math.min(g[mask], f[mask ^ x] - countx);</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">            </span><br><span class="line">            <span class="comment">// 别忘了加上 size</span></span><br><span class="line">            <span class="keyword">for</span> (<span class="keyword">int</span> j = <span class="number">0</span>; j &lt; MAXX; ++j) &#123;</span><br><span class="line">                g[j] += size;</span><br><span class="line">            &#125;</span><br><span class="line">            f = g;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> f[<span class="number">0</span>];</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="1c1190-反转每对括号间的子串"><a href="#1c1190-反转每对括号间的子串" class="headerlink" title="1c1190 反转每对括号间的子串"></a><a href="https://leetcode-cn.com/problems/reverse-substrings-between-each-pair-of-parentheses">1c1190</a> 反转每对括号间的子串</h2><p><strong>题目描述：</strong></p>
+<p>给出一个字符串 s（仅含有小写英文字母和括号）。</p>
+<p>请你按照从括号内到外的顺序，逐层反转每对匹配括号中的字符串，并返回最终的结果。</p>
+<p>注意，您的结果中不应包含任何括号。</p>
+<p><strong>示例 1：</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">输入：s = &quot;(abcd)&quot;</span><br><span class="line">输出：&quot;dcba&quot;</span><br></pre></td></tr></table></figure>
+
+<p><strong>示例 2：</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">输入：s = &quot;(u(love)i)&quot;</span><br><span class="line">输出：&quot;iloveu&quot;</span><br></pre></td></tr></table></figure>
+
+<p><strong>示例 3：</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">输入：s = &quot;(ed(et(oc))el)&quot;</span><br><span class="line">输出：&quot;leetcode&quot;</span><br></pre></td></tr></table></figure>
+
+<p><strong>题解</strong>：</p>
+<p>官方题解方法一用栈结构，通过辅助变量str来保存小写英文字母，判断遍历时是左括号还是右括号来确定如何对字符串进行操作。</p>
+<p>是基础思路，建议有空闲去读一读三叶的双端队列做法，数组模拟那个，空间复杂度更小。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> String <span class="title">myreverse</span><span class="params">(String s)</span></span>&#123;</span><br><span class="line">       Deque&lt;String&gt; stack = <span class="keyword">new</span> LinkedList&lt;&gt;();</span><br><span class="line">       StringBuilder sb = <span class="keyword">new</span> StringBuilder();</span><br><span class="line">       <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; s.length(); i++) &#123;</span><br><span class="line">           <span class="keyword">char</span> ch = s.charAt(i);</span><br><span class="line">           <span class="keyword">if</span>(ch == <span class="string">&#x27;(&#x27;</span>)&#123;</span><br><span class="line">               stack.push(sb.toString());</span><br><span class="line">               sb.setLength(<span class="number">0</span>);</span><br><span class="line">           &#125;</span><br><span class="line">           <span class="keyword">else</span> <span class="keyword">if</span>(ch == <span class="string">&#x27;)&#x27;</span>)&#123;</span><br><span class="line">               sb.reverse();</span><br><span class="line">               sb.insert(<span class="number">0</span>,stack.pop());</span><br><span class="line">           &#125;</span><br><span class="line">           <span class="keyword">else</span> &#123;</span><br><span class="line">               sb.append(ch);</span><br><span class="line">           &#125;</span><br><span class="line">       &#125;</span><br><span class="line">       <span class="keyword">return</span> sb.toString();</span><br><span class="line">   &#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="1c461-汉明距离"><a href="#1c461-汉明距离" class="headerlink" title="1c461 汉明距离"></a><a href="https://leetcode-cn.com/problems/hamming-distance/">1c461</a> 汉明距离</h2><p><strong>题目描述：</strong></p>
+<p>两个整数之间的<a href="https://baike.baidu.com/item/%E6%B1%89%E6%98%8E%E8%B7%9D%E7%A6%BB">汉明距离</a>指的是这两个数字对应二进制位不同的位置的数目。</p>
+<p>给出两个整数 <code>x</code> 和 <code>y</code>，计算它们之间的汉明距离。</p>
+<p>示例:</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">输入: x = 1, y = 4</span><br><span class="line"></span><br><span class="line">输出: 2</span><br><span class="line"></span><br><span class="line">解释:</span><br><span class="line">1   (0 0 0 1)</span><br><span class="line">4   (0 1 0 0)</span><br><span class="line">       ↑   ↑</span><br><span class="line"></span><br><span class="line">上面的箭头指出了对应二进制位不同的位置。</span><br></pre></td></tr></table></figure>
+
+<p><strong>题解：</strong></p>
+<p>今天是简单题，但是不容小觑。“不同为1，相同为0”的异或运算，感觉很适合求解这道题。</p>
+<p><img src="/2021/05/24/%E6%AF%8F%E6%97%A5%E4%B8%80%E9%A2%98/13.jpg"></p>
+<p>计算 xx 和 yy 之间的汉明距离，可以先计算 x \oplus yx⊕y，然后统计结果中等于 11 的位数。</p>
+<p>现在，原始问题转换为位计数问题。位计数有多种思路，将在下面的方法中介绍。大多数编程语言都内置了计算二进制表达中 11 的数量的函数。在工程中，我们应该直接使用内置函数。比如c++中__builtin_popcount函数，java Integer的函数bitCount。</p>
+<p>其他的位计数可以由移位实现，先介绍使用位运算中移位的操作实现位计数功能的方法。</p>
+<p>具体地，记 s = x⊕y，我们可以不断地检查 s的最低位，如果最低位为 1，那么令计数器加一，然后我们令 s 整体右移一位，这样 s 的最低位将被舍去，原本的次低位就变成了新的最低位。我们重复这个过程直到 s=0 为止。这样计数器中就累计了 s 的二进制表示中 1 的数量。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Solution</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">hammingDistance</span><span class="params">(<span class="keyword">int</span> x, <span class="keyword">int</span> y)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">int</span> s = x ^ y, ret = <span class="number">0</span>;</span><br><span class="line">        <span class="keyword">while</span> (s != <span class="number">0</span>) &#123;</span><br><span class="line">            ret += s &amp; <span class="number">1</span>;</span><br><span class="line">            s &gt;&gt;= <span class="number">1</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> ret;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h2 id="lc477-汉明距离总和-2021-05-28-中等"><a href="#lc477-汉明距离总和-2021-05-28-中等" class="headerlink" title="lc477 汉明距离总和 2021.05.28 中等"></a><a href="https://leetcode-cn.com/problems/total-hamming-distance/">lc477</a> 汉明距离总和 2021.05.28 中等</h2><p><strong>题目描述：</strong></p>
+<p>两个整数的 <a href="https://baike.baidu.com/item/%E6%B1%89%E6%98%8E%E8%B7%9D%E7%A6%BB/475174?fr=aladdin">汉明距离</a> 指的是这两个数字的二进制数对应位不同的数量。</p>
+<p>计算一个数组中，任意两个数之间汉明距离的总和。</p>
+<p>示例:</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">输入: 4, 14, 2</span><br><span class="line"></span><br><span class="line">输出: 6</span><br><span class="line"></span><br><span class="line">解释: 在二进制表示中，4表示为0100，14表示为1110，2表示为0010。（这样表示是为了体现后四位之间关系）</span><br><span class="line">所以答案为：</span><br><span class="line">HammingDistance(4, 14) + HammingDistance(4, 2) + HammingDistance(14, 2) = 2 + 2 + 2 = 6.</span><br><span class="line"></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p><strong>题解：</strong></p>
+<p>我们知道，汉明距离为两数二进制表示中不同位的个数，同时每位的统计是相互独立的。</p>
+<p>即最终的答案为 $\sum^{31}_{x=0}cal(x)$ ，其中calc 函数为求得所有数二进制表示中的某一位 x所产生的不同位的个数。</p>
+<p>关于这个函数如何求解，事实上，对于nums[i],我们只关心nums中有多少个数的第x位和他不同，并不关心具体是哪些数字。</p>
+<p>我们可以建立两个集合s0,s1,分别统计出nums中所有数的第x位中0和1的个数，集合中的每次计数代表了nums中的某一元素，根据所在集合的不同代表了其在x位的值是0还是1，那么要找到nums中有多少位数与某一个数的第x位不同，只需要读取另一个集合的元素个数即可。这期间时间复杂度O(1),要求第x位所有不同数的对数的个数，乘法原理，将两者个数相乘即可。</p>
+<p><strong>code:</strong></p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Solution</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">totalHammingDistance</span><span class="params">(<span class="keyword">int</span>[] nums)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">int</span> ans = <span class="number">0</span>;</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> x = <span class="number">31</span>; x &gt;= <span class="number">0</span>; x--) &#123;</span><br><span class="line">            <span class="keyword">int</span> s0 = <span class="number">0</span>, s1 = <span class="number">0</span>;</span><br><span class="line">            <span class="keyword">for</span> (<span class="keyword">int</span> u : nums) &#123;</span><br><span class="line">                <span class="keyword">if</span> (((u &gt;&gt; x) &amp; <span class="number">1</span>) == <span class="number">1</span>) &#123;</span><br><span class="line">                    s1++;</span><br><span class="line">                &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                    s0++;</span><br><span class="line">                &#125;  </span><br><span class="line">            &#125;</span><br><span class="line">            ans += s0 * s1;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> ans;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+]]></content>
+      <tags>
+        <tag>leetcodeEveryDay</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>整理分区存储适配修改代码思路</title>
     <url>/2021/09/27/%E6%95%B4%E7%90%86%E5%88%86%E5%8C%BA%E5%AD%98%E5%82%A8%E9%80%82%E9%85%8D%E4%BF%AE%E6%94%B9%E4%BB%A3%E7%A0%81%E6%80%9D%E8%B7%AF/</url>
     <content><![CDATA[<h1 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h1><p>Target30项目中，需要做的一个重要适配部分就是分区存储。为了成功完成对文件选择器的适配改造，现在想要借鉴Image库对图片选择器的修改以及一些有用的文档，提炼出一个可以用来修改文件选择器的适配思路。</p>
 <span id="more"></span>
 
+<h1 id="后记-总结复盘"><a href="#后记-总结复盘" class="headerlink" title="后记-总结复盘"></a>后记-总结复盘</h1><p>本次任务涉及到的Hermes模块在原先提供文件选择器的能力时，思路是直接从Environment获取设备外部存储的路径来获取。可以看到相关的代码片段如下：</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">mDefaultPath = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).getPath();</span><br><span class="line">mRootPath = Environment.getExternalStorageDirectory().getPath();<span class="comment">// 内部存储根目录</span></span><br></pre></td></tr></table></figure>
+
+<p>之后的代码逻辑都是基于上述两个变量<code>mDefaultPath</code> <code>mRootPath</code>来进行的，整体的流程被我梳理了一个函数调用栈，方便我在做适配的时候找到适合插手的地方。整个栈全部展示会显得冗余，所以栈中只保留最核心的函数，不显示一些无关紧要的函数，但是这并不代表在实际调用过程中函数并没有被调用。</p>
+<p><img src="/Users/wangpei/Documents/%E6%94%B9%E7%89%88%E5%89%8D%E8%B0%83%E7%94%A8%E6%A0%88.svg"></p>
+<p>大致的函数调用栈梳理出来之后对整个文件选择器能力的实现便有了一个整体的感知，代码修改起来也可以有的放矢。在做Target30适配方案调研时了解到访问安卓11的Document或者Download下的文件时需要使用SAF框架来打开。</p>
+<p>根据之前存储适配的思路，在原先的文件选择器逻辑中新增一层DataSource的抽象，并且根据目标平台的版本号来区分不同的处理方式，例如：在api level&lt; 29时，使用原先的逻辑；在api level &gt;29时使用saf框架的逻辑。</p>
+<p>代码架构的问题由抽象出的一层DataSource解决之后，涉及到核心能力的编码。SAF框架中需要在选择文件时，先唤起系统的文件选择器。现在根据师姐整理的最后版本，提炼出核心代码如下：</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">startSystemDocumentExplorerForResult</span><span class="params">(Activity activity, <span class="keyword">int</span> requestCode)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (Build.VERSION.SDK_INT &gt;= Build.VERSION_CODES.Q) &#123;</span><br><span class="line">            <span class="keyword">try</span> &#123;</span><br><span class="line">                Intent intent = <span class="keyword">new</span> Intent(Intent.ACTION_OPEN_DOCUMENT);</span><br><span class="line">                intent.addCategory(Intent.CATEGORY_OPENABLE);</span><br><span class="line">                intent.setType(<span class="string">&quot;*/*&quot;</span>);</span><br><span class="line"><span class="comment">//            intent.putExtra(DocumentsContract.EXTRA_INITIAL_URI, pickerInitialUri);</span></span><br><span class="line">                intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION|Intent.FLAG_GRANT_WRITE_URI_PERMISSION);</span><br><span class="line">                activity.startActivityForResult(intent, requestCode);</span><br><span class="line">                <span class="keyword">return</span> <span class="keyword">true</span>;</span><br><span class="line">            &#125; <span class="keyword">catch</span> (ActivityNotFoundException exception) &#123;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">false</span>;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="meta">@Override</span></span><br><span class="line"><span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">onCreate</span><span class="params">(Bundle savedInstanceState)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">super</span>.onCreate(savedInstanceState);</span><br><span class="line"></span><br><span class="line">        <span class="comment">//打开系统的文件浏览器，Target SDK升级到30后，自定义的文件流器进行文件的选择容易漏数据，因此直接尝试唤起系统的文件浏览器进行文件选择</span></span><br><span class="line">        <span class="keyword">if</span> (Build.VERSION.SDK_INT &gt;= Build.VERSION_CODES.Q) &#123;</span><br><span class="line">            <span class="keyword">this</span>.mFileExplorerDataSoure = SystemFileExplorerDataSource.buildInstance();</span><br><span class="line">            <span class="keyword">if</span> (<span class="keyword">this</span>.mFileExplorerDataSoure.startSystemDocumentExplorerForResult(<span class="keyword">this</span>, OPEN_DOCUMENT_REQUEST_CODE)) &#123;</span><br><span class="line">                <span class="keyword">return</span>;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        ...</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+
+<p>之后是在对应的Context容器中重现回调函数：</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">onActivityResult</span><span class="params">(<span class="keyword">int</span> requestCode, <span class="keyword">int</span> resultCode, Intent data)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (isDestroyed()) &#123;</span><br><span class="line">            <span class="keyword">return</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">if</span>(mFileExplorerDataSoure != <span class="keyword">null</span> &amp;&amp; requestCode == OPEN_DOCUMENT_REQUEST_CODE) &#123;</span><br><span class="line">            <span class="keyword">final</span> Uri filePath = data == <span class="keyword">null</span> ? <span class="keyword">null</span> : data.getData();</span><br><span class="line">            <span class="keyword">if</span> (filePath != <span class="keyword">null</span> &amp;&amp; resultCode ==Activity.RESULT_OK) &#123;</span><br><span class="line">                Async.on(<span class="keyword">new</span> Job&lt;ArrayList&lt;FileChooserItem&gt;&gt;() &#123;</span><br><span class="line">                    <span class="meta">@RequiresApi(api = Build.VERSION_CODES.Q)</span></span><br><span class="line">                    <span class="meta">@Override</span></span><br><span class="line">                    <span class="function"><span class="keyword">public</span> ArrayList&lt;FileChooserItem&gt; <span class="title">doJob</span><span class="params">()</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">                        <span class="keyword">return</span> mFileExplorerDataSoure.query(FileChooserActivity.<span class="keyword">this</span>, filePath);</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;).error(<span class="keyword">new</span> Error() &#123;</span><br><span class="line">                    <span class="meta">@Override</span></span><br><span class="line">                    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">error</span><span class="params">(Exception e)</span> </span>&#123;</span><br><span class="line">                        FileChooserActivity.<span class="keyword">this</span>.finish();</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;).success(<span class="keyword">new</span> Success&lt;ArrayList&lt;FileChooserItem&gt;&gt;() &#123;</span><br><span class="line">                    <span class="meta">@Override</span></span><br><span class="line">                    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">result</span><span class="params">(ArrayList&lt;FileChooserItem&gt; fileChooserItems)</span> </span>&#123;</span><br><span class="line">                        FileChooserActivity.<span class="keyword">this</span>.send(fileChooserItems);</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;).fireDbAsync();</span><br><span class="line">            &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                <span class="keyword">this</span>.finish();</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">return</span>;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">super</span>.onActivityResult(requestCode, resultCode, data);</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+
+<p>仔细阅读了师姐整理的代码后，着重分析了该处理方式中值得我学习的细节</p>
+<ul>
+<li>SAF的框架写在Activity内，并且将该部分逻辑单独封装成一个类<code>SystemFileExploreDataSource</code>,在context的<code>onCreate()</code>调用时进行初始化；</li>
+<li>涉及<code>startActivityForResult</code>的函数返回结果设置成Boolean形式来对函数是否调用进行判断</li>
+<li>回调函数<code>onActivityResult</code>的代码处理失败时的情况，调用activity的finish()函数来销毁页面</li>
+<li>要在<code>SystemFileExploreDataSource</code>类中调用一些其他类具有的通用逻辑时，可以将此类逻辑定义成static的，避免在不相干但是同时继承同一个父类的类中添加无用的方法实现</li>
+</ul>
+<p>纵观适配后的代码逻辑，可以整理成下图,可以看出现在的工作逻辑是：在唤起文件选择器后，获取对uri的query结果之后直接使用send的能力将选择的文件发送出去。</p>
+<p><img src="/Users/wangpei/Documents/%E6%94%B9%E7%89%88%E5%90%8E%E8%B0%83%E7%94%A8%E6%A0%88.svg"></p>
 <h1 id="提炼Image库代码修改思路"><a href="#提炼Image库代码修改思路" class="headerlink" title="提炼Image库代码修改思路"></a>提炼Image库代码修改思路</h1><p>学习完本节下面两节的部分之后，对分区存储造成影响的用例及解决方案、SAF、FileProvider等概念有了基本的了解之后，开始回顾Image库当时的代码修改情况。</p>
 <h3 id="代码扫描结果"><a href="#代码扫描结果" class="headerlink" title="代码扫描结果"></a>代码扫描结果</h3><p>涉及到文件存储API调用的代码行数结果如下：</p>
 <p>![image-20210927201856026](/Users/wangpei/Library/Application Support/typora-user-images/image-20210927201856026.png)</p>
@@ -1620,201 +1840,5 @@
 <figure class="highlight java"><table><tr><td class="code"><pre><span class="line">content:<span class="comment">//com.example.myapp.fileprovider/myimages/default_image.jpg</span></span><br></pre></td></tr></table></figure>
 
 ]]></content>
-  </entry>
-  <entry>
-    <title>每日一题</title>
-    <url>/2021/05/24/%E6%AF%8F%E6%97%A5%E4%B8%80%E9%A2%98/</url>
-    <content><![CDATA[<h2 id="lc12-整数转罗马数字"><a href="#lc12-整数转罗马数字" class="headerlink" title="lc12 整数转罗马数字"></a><a href="https://leetcode-cn.com/problems/integer-to-roman/">lc12</a> 整数转罗马数字</h2><p>罗马数字有7个单字符号 又六个减法规则带料的符合符号，总共十三个，给出一个int转成罗马数字表示。</p>
-<p><img src="/images/image-20210514160844788.png" alt="image-20210514160844788"></p>
-<p>官方题解给出了关于数字140的例子：</p>
-<p><img src="/images/image-20210514160909592.png" alt="image-20210514160909592"></p>
-<p>确定罗马数字的规则是：对于罗马数字从左到右的每一位，选择尽可能大的符号值。对于 140，最大可以选择的符号值为 C=100。接下来，对于剩余的数字 40，最大可以选择的符号值为 XL=40。因此，140140 的对应的罗马数字为 CXL。</p>
-<span id="more"></span>
-
-<p>方法列表</p>
-<ol>
-<li><p>模拟</p>
-<p>表示一个给定的整数 num，我们寻找不超过 num 的最大符号值，将num 减去该符号值，然后继续寻找不超过num 的最大符号值，将该符号拼接在上一个找到的符号之后，循环直至 num 为 0。最后得到的字符串即为罗马数字表示。</p>
-</li>
-<li><p>硬编码数字</p>
-</li>
-</ol>
-<p>mycode：</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Solution</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> String <span class="title">intToRoman</span><span class="params">(<span class="keyword">int</span> num)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">int</span>[] values = &#123;<span class="number">1000</span>,<span class="number">900</span>,<span class="number">500</span>,<span class="number">400</span>,<span class="number">100</span>,<span class="number">90</span>,<span class="number">50</span>,<span class="number">40</span>,<span class="number">10</span>,<span class="number">9</span>,<span class="number">5</span>,<span class="number">4</span>,<span class="number">1</span>&#125;;</span><br><span class="line">        String[] symbols = &#123;<span class="string">&quot;M&quot;</span>, <span class="string">&quot;CM&quot;</span>,<span class="string">&quot;D&quot;</span>,<span class="string">&quot;CD&quot;</span>,<span class="string">&quot;C&quot;</span>,<span class="string">&quot;XC&quot;</span>,<span class="string">&quot;L&quot;</span>,<span class="string">&quot;XL&quot;</span>,<span class="string">&quot;X&quot;</span>,<span class="string">&quot;IX&quot;</span>,<span class="string">&quot;V&quot;</span>,<span class="string">&quot;IV&quot;</span>,<span class="string">&quot;I&quot;</span>&#125;;</span><br><span class="line">        StringBuffer sb = <span class="keyword">new</span> StringBuffer();</span><br><span class="line">        <span class="keyword">for</span>(<span class="keyword">int</span> i =<span class="number">0</span>;i &lt; values.length; i++)&#123;</span><br><span class="line">            <span class="keyword">int</span> v = values[i];</span><br><span class="line">            String s = symbols[i];</span><br><span class="line">            <span class="keyword">while</span>(num &gt;= v)&#123;</span><br><span class="line">                num -= v;</span><br><span class="line">                sb.append(s);</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">if</span>(num == <span class="number">0</span>)<span class="keyword">break</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> sb.toString();</span><br><span class="line">        </span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-
-
-<h2 id="lc1035-不相交的线"><a href="#lc1035-不相交的线" class="headerlink" title="lc1035 不相交的线"></a><a href="https://leetcode-cn.com/problems/uncrossed-lines/">lc1035</a> 不相交的线</h2><p>两条独立的水平线上按给定的顺序写nums1 nums2</p>
-<p>绘制链接这两组数字中某两个的而直线，这些直线同时满足:</p>
-<p>nums1[i] == nums2[j]</p>
-<p>绘制的直线不予其他线相交</p>
-<p>请注意 连线及时在端点也不能相交 每个数字只能属于一条直线</p>
-<p><strong>返回可以绘制的最大连线数目</strong> </p>
-<p>2   5 1 2 5</p>
-<p>10 5 2 1 5 2</p>
-<p>1 3 7 1 7 5</p>
-<p>19 2 5 1</p>
-<p>先思考：两条连线如果相交那么表示的是？ i1&lt;i2和j1&lt;j2不能同时满足，这种情况下可能会导致两条连线相交.</p>
-<p>这题的思路可以用动态规划，首先，所有的线不相交的条件：假设一共绘制了k条直线，其中第x条直线链接nums1[$i_x$]和nums2[$j_x$]，有这两个数字相等 且这k对元素在两个数组中的相对顺序是一致的，因此这k对相等元素组成的序列是数组nums1和nums2的公共子序列，最长公共子序列——典型的二维动态规划问题。</p>
-<p>nums1 长度 m</p>
-<p>nums2 长度 n</p>
-<p>创建m+1行n+1列的二维数组dp，其中dp[i][j]表示表示nums1[0:i] nums2[0:j]的最长公共子序列的长度。</p>
-<p>考虑边界： i =0 时 nums1[0:i]空数组和任何数组的最长公共子序列的长度是0 dp [ 0 ][ j ] = 0;</p>
-<p>当j  = 0 时，nums2[0:j]为空 同理 dp[i][0] = 0</p>
-<p>当 i &gt; 0 且 j  &gt; 0时，考虑dp[ i ][ j ] 的计算：</p>
-<p>当nums1[i-1] = nums2[j-1]时，将这两个相同的元素称为公共元素，考虑nums1[0:i-1] nums2[0:j-1]的最长公共子序列，再增加一个元素，即可得到nums1[0:i]和nums2[0:j]的最长公共子序列，因此dp[i][j] = dp[i-1][j-1] +1</p>
-<p>当nums1[i-1]与nums2[j-1] 不相等，考虑0:i-1 0:j 的最长公共子序列和0：i 0：j-1的最长公共子序列 两者较大项即可</p>
-<p><img src="/images/image-20210521195544341.png" alt="image-20210521195544341"></p>
-<h2 id="lc810-黑板异或游戏"><a href="#lc810-黑板异或游戏" class="headerlink" title="lc810 黑板异或游戏"></a>lc810 黑板异或游戏</h2><p>黑板上写着一个非负整数数组 nums[i] 。Alice 和 Bob 轮流从黑板上擦掉一个数字，Alice 先手。如果擦除一个数字后，剩余的所有数字按位异或运算得出的结果等于 0 的话，当前玩家游戏失败。 (另外，如果只剩一个数字，按位异或运算得到它本身；如果无数字剩余，按位异或运算结果为 0。）</p>
-<p>并且，轮到某个玩家时，如果当前黑板上所有数字按位异或运算结果等于 0，这个玩家获胜。</p>
-<p>假设两个玩家每步都使用最优解，当且仅当 Alice 获胜时返回 true。</p>
-<p>解析：</p>
-<p>思考什么情况下Alice会获胜，当轮到某个玩家时，当前黑板上所有数字异或结果为0，此时该玩家获胜（因为上一个玩家失败），这个情况下Alice先手，也就是初始时抑或结果为0 A获胜</p>
-<p>下面讨论初始时黑白上所有数字异或结果不为0的情况</p>
-<p>由于两个人交替擦除数字，且每次都恰好擦除一个数字，因此对于这两人中的任意一人，其每次在擦除数字前，黑板上数字个数的奇偶性是相同的。</p>
-<p>从数组的奇偶性来讨论。如果nums的长度是偶数，先手Alice是否可能失败呢？</p>
-<p>假设Alice要失败的话，只有一种情况，无论擦除哪一个数字，剩余所有的数字的异或结果都等于0 而这是不可能的 给出证明：</p>
-<p>设数组nums长度n n为偶数 </p>
-<p><img src="/images/image-20210523193628449.png" alt="image-20210523193628449"></p>
-<p>擦除nums[i]之后：</p>
-<p><img src="/images/image-20210523193635351.png" alt="image-20210523193635351"></p>
-<p>等式两边同时异或nums[i]  （*）</p>
-<p><img src="/images/image-20210523193726189.png" alt="image-20210523193726189"></p>
-<p>若无论擦掉哪个数字，剩余的所有数字异或结果都等于0，即对于属于0，n的i 都有Si = 0</p>
-<p>因此对所有的Si异或结果也为0</p>
-<p><img src="/images/image-20210523193837639.png" alt="image-20210523193837639"></p>
-<p>将 *带入 并且根据异或运算的交换律和结合律化简</p>
-<p><img src="/images/image-20210523195814410.png" alt="image-20210523195814410"></p>
-<p>此公式第三行左边括号为n个S异或，由于n是偶数，因此n个S异或的结果为0</p>
-<p>S=0与实际情况S$\neq$0矛盾</p>
-<p>因此当数组的长度为偶数时，先手Alice总能找到一个数字，擦除这个数字之后剩余的所有数字异或结果不等于零。</p>
-<p>在Alice擦掉之后，BOb是奇数，擦一个，给A的一定还是偶数个，此时要么A获胜，要不A擦完后结果不为0，此时Alice一直不败。</p>
-<p>同理，如果数组长度为奇数时候，Alice擦除掉一个数字之后，留给Bob的是偶数，因此Bob必胜。</p>
-<p>因此Alice必胜的条件是以下两个条件中的至少一个得到满足：</p>
-<p>数组nums的全部元素的异或结果等于0；</p>
-<p>数组nums的长度是偶数。</p>
-<h2 id="lc1707-与数组中元素的最大异或值"><a href="#lc1707-与数组中元素的最大异或值" class="headerlink" title="lc1707 与数组中元素的最大异或值"></a><a href="https://leetcode-cn.com/problems/maximum-xor-with-an-element-from-array/">lc1707</a> 与数组中元素的最大异或值</h2><p>给我一个由非负整数组成的数组nums，另外有一个查询数组queries，其中q[i]=[xi,mi]</p>
-<p>第i个查询的答案是Xi和任何nums数组中不超过mi的元素按位异或得到的最大值，换句话说，答案是max(nums[j] XOR xi)其中所有j均满足nums[j] &lt;= mi.如果nums中所有元素都大于mi，那么最终答案为-1</p>
-<p>返回一个整数数组answer作为查询的答案，其中answer长度为queries的长度且元素一一对应</p>
-<p>这题思路在理解了字典树还是比较清晰的，但是具体的位运算实现细节就很魔鬼了。</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Solution</span> </span>&#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">int</span>[] maximizeXor(<span class="keyword">int</span>[] nums, <span class="keyword">int</span>[][] queries) &#123;</span><br><span class="line">        Arrays.sort(nums);</span><br><span class="line">        <span class="keyword">int</span> numQ = queries.length;</span><br><span class="line">        <span class="keyword">int</span>[][] newQueries = <span class="keyword">new</span> <span class="keyword">int</span>[numQ][<span class="number">3</span>];</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; numQ; ++i) &#123;</span><br><span class="line">            newQueries[i][<span class="number">0</span>] = queries[i][<span class="number">0</span>];</span><br><span class="line">            newQueries[i][<span class="number">1</span>] = queries[i][<span class="number">1</span>];</span><br><span class="line">            newQueries[i][<span class="number">2</span>] = i;</span><br><span class="line">        &#125;</span><br><span class="line">        Arrays.sort(newQueries, <span class="keyword">new</span> Comparator&lt;<span class="keyword">int</span>[]&gt;() &#123;</span><br><span class="line">            <span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">compare</span><span class="params">(<span class="keyword">int</span>[] query1, <span class="keyword">int</span>[] query2)</span> </span>&#123;</span><br><span class="line">                <span class="keyword">return</span> query1[<span class="number">1</span>] - query2[<span class="number">1</span>];</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;);</span><br><span class="line"></span><br><span class="line">        <span class="keyword">int</span>[] ans = <span class="keyword">new</span> <span class="keyword">int</span>[numQ];</span><br><span class="line">        Trie trie = <span class="keyword">new</span> Trie();</span><br><span class="line">        <span class="keyword">int</span> idx = <span class="number">0</span>, n = nums.length;</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span>[] query : newQueries) &#123;</span><br><span class="line">            <span class="keyword">int</span> x = query[<span class="number">0</span>], m = query[<span class="number">1</span>], qid = query[<span class="number">2</span>];</span><br><span class="line">            <span class="keyword">while</span> (idx &lt; n &amp;&amp; nums[idx] &lt;= m) &#123;</span><br><span class="line">                trie.insert(nums[idx]);</span><br><span class="line">                ++idx;</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">if</span> (idx == <span class="number">0</span>) &#123; <span class="comment">// 字典树为空</span></span><br><span class="line">                ans[qid] = -<span class="number">1</span>;</span><br><span class="line">            &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                ans[qid] = trie.getMaxXor(x);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> ans;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Trie</span> </span>&#123;</span><br><span class="line">    <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">int</span> L = <span class="number">30</span>;</span><br><span class="line">    Trie[] children = <span class="keyword">new</span> Trie[<span class="number">2</span>];</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">insert</span><span class="params">(<span class="keyword">int</span> val)</span> </span>&#123;</span><br><span class="line">        Trie node = <span class="keyword">this</span>;</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i = L - <span class="number">1</span>; i &gt;= <span class="number">0</span>; --i) &#123;</span><br><span class="line">            <span class="keyword">int</span> bit = (val &gt;&gt; i) &amp; <span class="number">1</span>;</span><br><span class="line">            <span class="keyword">if</span> (node.children[bit] == <span class="keyword">null</span>) &#123;</span><br><span class="line">                node.children[bit] = <span class="keyword">new</span> Trie();</span><br><span class="line">            &#125;</span><br><span class="line">            node = node.children[bit];</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">getMaxXor</span><span class="params">(<span class="keyword">int</span> val)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">int</span> ans = <span class="number">0</span>;</span><br><span class="line">        Trie node = <span class="keyword">this</span>;</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i = L - <span class="number">1</span>; i &gt;= <span class="number">0</span>; --i) &#123;</span><br><span class="line">            <span class="keyword">int</span> bit = (val &gt;&gt; i) &amp; <span class="number">1</span>;</span><br><span class="line">            <span class="keyword">if</span> (node.children[bit ^ <span class="number">1</span>] != <span class="keyword">null</span>) &#123;</span><br><span class="line">                ans |= <span class="number">1</span> &lt;&lt; i;</span><br><span class="line">                bit ^= <span class="number">1</span>;</span><br><span class="line">            &#125;</span><br><span class="line">            node = node.children[bit];</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> ans;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-<p>此题的铺垫——前缀树</p>
-<h2 id="lc208-实现Trie"><a href="#lc208-实现Trie" class="headerlink" title="lc208 实现Trie"></a><a href="https://leetcode-cn.com/problems/implement-trie-prefix-tree/">lc208</a> 实现Trie</h2><p>前缀树 一种树形的数据结构，用于高校的存储检索字符串数据集中的键，这一数据结构应用场景很多例如自动补完和拼写检查。</p>
-<p>请你实现 Trie 类：</p>
-<p>Trie() 初始化前缀树对象。<br>void insert(String word) 向前缀树中插入字符串 word 。<br>boolean search(String word) 如果字符串 word 在前缀树中，返回 true（即，在检索之前已经插入）；否则，返回 false 。<br>boolean startsWith(String prefix) 如果之前已经插入的字符串 word 的前缀之一为 prefix ，返回 true ；否则，返回 false 。</p>
-<p>Trie，又称前缀树或字典树，是一棵有根树，其每个节点包含以下字段：</p>
-<ul>
-<li>指向子节点的指针数组 children。对于本题而言，数组长度为 26，即小写英文字母的数量。此时 children[0] 对应小写字母 aa，children[1] 对应小写字母 b，…，children[25] 对应小写字母 z。</li>
-<li>布尔字段isEnd，表示该节点是否为字符串的结尾。</li>
-</ul>
-<h2 id="lc664-奇怪的打印机"><a href="#lc664-奇怪的打印机" class="headerlink" title="lc664 奇怪的打印机"></a><a href="https://leetcode-cn.com/problems/strange-printer/">lc664</a> 奇怪的打印机</h2><p>题目描述：一个打印机每次纸打印相同字符的序列，每次可以在任意位置开始和结束打印一串序列并且覆盖之前的符号。给我一个字符串s，求该打印机能够打印出该符号串所需的最小打印次数。</p>
-<p>定义 f[l][r] 为将 [l, r][l,r] 这一段打印成目标结果所消耗的最小打印次数。</p>
-<p>不失一般性考虑 f[l][r] 该如何转移：</p>
-<p>只打印 l 这个位置，此时 f[l][r] = f[l + 1][r] + 1<br>不只打印 l 这个位置，而是从 l 打印到 k（需要确保首位相同 s[l] = s[k]）：f[l][r] = f[l][k - 1] + f[k + 1][r], l &lt; k &lt;= r<br>其中状态转移方程中的情况 22 需要说明一下：由于我们只确保 s[l] = s[k]，并不确保 [l, k][l,k] 之间的字符相同，根据我们基本分析可知，s[k] 这个点可由打印 s[l]s[l] 的时候一同打印，因此本身 s[k] 并不独立消耗打印次数，所以这时候 [l, k][l,k] 这一段的最小打印次数应该取f[l][k−1]，而不是 f[l][k]。</p>
-<p>最终的 f[l][r] 为上述所有方案中取min。</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Solution</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">strangePrinter</span><span class="params">(String s)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">int</span> n = s.length();</span><br><span class="line">        <span class="keyword">int</span>[][] f = <span class="keyword">new</span> <span class="keyword">int</span>[n + <span class="number">1</span>][n + <span class="number">1</span>];</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> len = <span class="number">1</span>; len &lt;= n; len++) &#123;</span><br><span class="line">            <span class="keyword">for</span> (<span class="keyword">int</span> l = <span class="number">0</span>; l + len - <span class="number">1</span> &lt; n; l++) &#123;</span><br><span class="line">                <span class="keyword">int</span> r = l + len - <span class="number">1</span>;</span><br><span class="line">                f[l][r] = f[l + <span class="number">1</span>][r] + <span class="number">1</span>;</span><br><span class="line">                <span class="keyword">for</span> (<span class="keyword">int</span> k = l + <span class="number">1</span>; k &lt;= r; k++) &#123;</span><br><span class="line">                    <span class="keyword">if</span> (s.charAt(l) == s.charAt(k)) &#123;</span><br><span class="line">                        f[l][r] = Math.min(f[l][r], f[l][k - <span class="number">1</span>] + f[k + <span class="number">1</span>][r]);</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> f[<span class="number">0</span>][n - <span class="number">1</span>];</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-<h2 id="lc1787-使所有区间的异或结果为零"><a href="#lc1787-使所有区间的异或结果为零" class="headerlink" title="lc1787 使所有区间的异或结果为零"></a><a href="https://leetcode-cn.com/problems/make-the-xor-of-all-segments-equal-to-zero/">lc1787</a> 使所有区间的异或结果为零</h2><p><strong>题目描述：</strong></p>
-<p>给你一个整数数组 nums 和一个整数 k 。区间 [left, right]（left &lt;= right）的异或结果是对下标位于 left 和 right（包括 left 和 right ）之间所有元素进行 XOR 运算的结果：nums[left] XOR nums[left+1] XOR … XOR nums[right] 。</p>
-<p>返回数组中 要更改的最小元素数 ，以使所有长度为 k 的区间异或结果等于零。</p>
-<p><strong>示例 1：</strong></p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">输入：nums = [1,2,0,3,0], k = 1</span><br><span class="line">输出：3</span><br><span class="line">解释：将数组 [1,2,0,3,0] 修改为 [0,0,0,0,0]</span><br></pre></td></tr></table></figure>
-
-<p><strong>示例 2：</strong></p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">输入：nums = [3,4,5,2,1,7,3,4,7], k = 3</span><br><span class="line">输出：3</span><br><span class="line">解释：将数组 [3,4,5,2,1,7,3,4,7] 修改为 [3,4,7,3,4,7,3,4,7]</span><br></pre></td></tr></table></figure>
-
-<p><strong>示例 3：</strong></p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">输入：nums = [1,2,4,1,2,5,1,2,6], k = 3</span><br><span class="line">输出：3</span><br><span class="line">解释：将数组[1,2,4,1,2,5,1,2,6] 修改为 [1,2,3,1,2,3,1,2,3]</span><br></pre></td></tr></table></figure>
-
-
-
-<p><strong>官方解题思路：</strong></p>
-<p>有空可以考虑看看<a href="https://leetcode-cn.com/problems/make-the-xor-of-all-segments-equal-to-zero/solution/gong-shui-san-xie-chou-xiang-cheng-er-we-ww79/">三叶姐姐的题解</a>。</p>
-<p>涉及到**最大，最小之类的问题，我现在已经能够敏锐地察觉到动规解法。官方题解就是动规，设nums长度为n。</p>
-<p>为了动规能够找到状态的转移条件，需要分析这个数组被修改之后应该具有的性质。</p>
-<p>由于任意长度为 <em>k</em> 的区间异或结果等于 0，那么对于任意的 <em>i</em>，有：</p>
-<p><img src="/2021/05/24/%E6%AF%8F%E6%97%A5%E4%B8%80%E9%A2%98/1.jpg"></p>
-<p>和</p>
-<p><img src="/2021/05/24/%E6%AF%8F%E6%97%A5%E4%B8%80%E9%A2%98/2.jpg"></p>
-<p>根据a^b ^ b = a的异或运算性质，联立上述两式，可得</p>
-<p><img src="/2021/05/24/%E6%AF%8F%E6%97%A5%E4%B8%80%E9%A2%98/3.jpg"></p>
-<p>等价于nums[i] = nums[i+k]:重要结论——nums修改之后是一个以k为周期的数组，对任意[0,n-k)的i，有上式成立。</p>
-<p>将数组下标对k取模分成k个组，每个组内元素必须要相等。并且这k个组对应的元素的异或和为0，即：</p>
-<p><img src="/2021/05/24/%E6%AF%8F%E6%97%A5%E4%B8%80%E9%A2%98/4.jpg"></p>
-<p>对于第 i个组，我们可以使用哈希映射来存储该组内的元素以及每个元素出现的次数，这样一来，我们就可以尝试使用动态规划来解决本题了。设 f(i,mask) 表示我们已经处理了第 0, 1, …,i 个组，并且这些组对应元素的异或和：</p>
-<p><img src="/2021/05/24/%E6%AF%8F%E6%97%A5%E4%B8%80%E9%A2%98/5.jpg"></p>
-<p>作为mask的前提下，这些组<strong>总计</strong>最少需要修改的元素个数。进行状态转移时，我们可以枚举第i组被修改成为哪个数，假设修改成了x，那么0,1,…,i-1组对应的元素异或和即为mask^x,可得状态转移方程：</p>
-<p><img src="/2021/05/24/%E6%AF%8F%E6%97%A5%E4%B8%80%E9%A2%98/6.jpg"></p>
-<p>其中size(i)表示第i组里元素个数，count(i,x)表示第i组里元素x的次数，他们的值都可以通过hash映射得到，该转移方程的意义为：如果我们选择将第 i 组全部修改为 x，那么有 count(i,x) 个数是无需修改的，这样就需要修改 size(i)−count(i,x) 次。（还是能理解的过来的）</p>
-<p>由于x的上限导致该方程的时间复杂度数量级很高，因此需要优化。</p>
-<p>首先 size(<em>i</em>) 是与 <em>x</em> 无关的常量，我们可以将其移出最小值的限制，即：</p>
-<p><img src="/2021/05/24/%E6%AF%8F%E6%97%A5%E4%B8%80%E9%A2%98/7.jpg"></p>
-<p>由于我们需要求的是「最小值」，因此在状态转移方程中添加若干大于等于「最小值」的项，对最终的答案不会产生影响。</p>
-<p>考虑 count(<em>i</em>,<em>x</em>) 这一项，如果 <em>x</em> 没有在哈希表中出现，那么这一项的值为 0方程：</p>
-<p><img src="/2021/05/24/%E6%AF%8F%E6%97%A5%E4%B8%80%E9%A2%98/8.jpg" alt="(1)"></p>
-<p>否则这一项的值大于 0。即：</p>
-<p><img src="/2021/05/24/%E6%AF%8F%E6%97%A5%E4%B8%80%E9%A2%98/9.jpg" alt="(2)"></p>
-<p>(2)项严格小于(1),如果在方程中加(1)不会对结果产生影响。因此我们可以将状态转移方程变化为：</p>
-<p><img src="/2021/05/24/%E6%AF%8F%E6%97%A5%E4%B8%80%E9%A2%98/10.jpg"></p>
-<p><img src="/2021/05/24/%E6%AF%8F%E6%97%A5%E4%B8%80%E9%A2%98/11.jpg"></p>
-<p><img src="/2021/05/24/%E6%AF%8F%E6%97%A5%E4%B8%80%E9%A2%98/12.jpg"></p>
-<p><em>t</em>2 就是所有状态 f*(*i−1,..) 中的最小值。</p>
-<p>最终的答案取f(k-1,0)。</p>
-<p>设计细节：</p>
-<p>由于 f(i, ..) 只会从 f(i-1, ..) 转移而来，因此我们可以使用两个长度为 2^{10}的一维数组代替二维数组，交替地进行状态转移，减少空间复杂度。此外，当i=0 时，f(−1,..) 都是需要特殊考虑的边界条件。由于 f(−1,..) 表示没有考虑任何组时的异或和，因此该异或和一定为 0，即 f(-1, 0) = 0。其它的状态都是不合法的状态，我们可以将它们赋予一个极大值 ∞。</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Solution</span> </span>&#123;</span><br><span class="line">    <span class="comment">// x 的范围为 [0, 2^10)</span></span><br><span class="line">    <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">int</span> MAXX = <span class="number">1</span> &lt;&lt; <span class="number">10</span>;</span><br><span class="line">    <span class="comment">// 极大值，为了防止整数溢出选择 INT_MAX / 2</span></span><br><span class="line">    <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">int</span> INFTY = Integer.MAX_VALUE / <span class="number">2</span>;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">minChanges</span><span class="params">(<span class="keyword">int</span>[] nums, <span class="keyword">int</span> k)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">int</span> n = nums.length;</span><br><span class="line">        <span class="keyword">int</span>[] f = <span class="keyword">new</span> <span class="keyword">int</span>[MAXX];</span><br><span class="line">        Arrays.fill(f, INFTY);</span><br><span class="line">        <span class="comment">// 边界条件 f(-1,0)=0</span></span><br><span class="line">        f[<span class="number">0</span>] = <span class="number">0</span>;</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; k; ++i) &#123;</span><br><span class="line">            <span class="comment">// 第 i 个组的哈希映射</span></span><br><span class="line">            Map&lt;Integer, Integer&gt; cnt = <span class="keyword">new</span> HashMap&lt;Integer, Integer&gt;();</span><br><span class="line">            <span class="keyword">int</span> size = <span class="number">0</span>;</span><br><span class="line">            <span class="keyword">for</span> (<span class="keyword">int</span> j = i; j &lt; n; j += k) &#123;</span><br><span class="line">                cnt.put(nums[j], cnt.getOrDefault(nums[j], <span class="number">0</span>) + <span class="number">1</span>);</span><br><span class="line">                ++size;</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            <span class="comment">// 求出 t2</span></span><br><span class="line">            <span class="keyword">int</span> t2min = Arrays.stream(f).min().getAsInt();</span><br><span class="line"></span><br><span class="line">            <span class="keyword">int</span>[] g = <span class="keyword">new</span> <span class="keyword">int</span>[MAXX];</span><br><span class="line">            Arrays.fill(g, t2min);</span><br><span class="line">            <span class="keyword">for</span> (<span class="keyword">int</span> mask = <span class="number">0</span>; mask &lt; MAXX; ++mask) &#123;</span><br><span class="line">                <span class="comment">// t1 则需要枚举 x 才能求出</span></span><br><span class="line">                <span class="keyword">for</span> (Map.Entry&lt;Integer, Integer&gt; entry : cnt.entrySet()) &#123;</span><br><span class="line">                    <span class="keyword">int</span> x = entry.getKey(), countx = entry.getValue();</span><br><span class="line">                    g[mask] = Math.min(g[mask], f[mask ^ x] - countx);</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">            </span><br><span class="line">            <span class="comment">// 别忘了加上 size</span></span><br><span class="line">            <span class="keyword">for</span> (<span class="keyword">int</span> j = <span class="number">0</span>; j &lt; MAXX; ++j) &#123;</span><br><span class="line">                g[j] += size;</span><br><span class="line">            &#125;</span><br><span class="line">            f = g;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> f[<span class="number">0</span>];</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h2 id="1c1190-反转每对括号间的子串"><a href="#1c1190-反转每对括号间的子串" class="headerlink" title="1c1190 反转每对括号间的子串"></a><a href="https://leetcode-cn.com/problems/reverse-substrings-between-each-pair-of-parentheses">1c1190</a> 反转每对括号间的子串</h2><p><strong>题目描述：</strong></p>
-<p>给出一个字符串 s（仅含有小写英文字母和括号）。</p>
-<p>请你按照从括号内到外的顺序，逐层反转每对匹配括号中的字符串，并返回最终的结果。</p>
-<p>注意，您的结果中不应包含任何括号。</p>
-<p><strong>示例 1：</strong></p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">输入：s = &quot;(abcd)&quot;</span><br><span class="line">输出：&quot;dcba&quot;</span><br></pre></td></tr></table></figure>
-
-<p><strong>示例 2：</strong></p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">输入：s = &quot;(u(love)i)&quot;</span><br><span class="line">输出：&quot;iloveu&quot;</span><br></pre></td></tr></table></figure>
-
-<p><strong>示例 3：</strong></p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">输入：s = &quot;(ed(et(oc))el)&quot;</span><br><span class="line">输出：&quot;leetcode&quot;</span><br></pre></td></tr></table></figure>
-
-<p><strong>题解</strong>：</p>
-<p>官方题解方法一用栈结构，通过辅助变量str来保存小写英文字母，判断遍历时是左括号还是右括号来确定如何对字符串进行操作。</p>
-<p>是基础思路，建议有空闲去读一读三叶的双端队列做法，数组模拟那个，空间复杂度更小。</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> String <span class="title">myreverse</span><span class="params">(String s)</span></span>&#123;</span><br><span class="line">       Deque&lt;String&gt; stack = <span class="keyword">new</span> LinkedList&lt;&gt;();</span><br><span class="line">       StringBuilder sb = <span class="keyword">new</span> StringBuilder();</span><br><span class="line">       <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; s.length(); i++) &#123;</span><br><span class="line">           <span class="keyword">char</span> ch = s.charAt(i);</span><br><span class="line">           <span class="keyword">if</span>(ch == <span class="string">&#x27;(&#x27;</span>)&#123;</span><br><span class="line">               stack.push(sb.toString());</span><br><span class="line">               sb.setLength(<span class="number">0</span>);</span><br><span class="line">           &#125;</span><br><span class="line">           <span class="keyword">else</span> <span class="keyword">if</span>(ch == <span class="string">&#x27;)&#x27;</span>)&#123;</span><br><span class="line">               sb.reverse();</span><br><span class="line">               sb.insert(<span class="number">0</span>,stack.pop());</span><br><span class="line">           &#125;</span><br><span class="line">           <span class="keyword">else</span> &#123;</span><br><span class="line">               sb.append(ch);</span><br><span class="line">           &#125;</span><br><span class="line">       &#125;</span><br><span class="line">       <span class="keyword">return</span> sb.toString();</span><br><span class="line">   &#125;</span><br></pre></td></tr></table></figure>
-
-<h2 id="1c461-汉明距离"><a href="#1c461-汉明距离" class="headerlink" title="1c461 汉明距离"></a><a href="https://leetcode-cn.com/problems/hamming-distance/">1c461</a> 汉明距离</h2><p><strong>题目描述：</strong></p>
-<p>两个整数之间的<a href="https://baike.baidu.com/item/%E6%B1%89%E6%98%8E%E8%B7%9D%E7%A6%BB">汉明距离</a>指的是这两个数字对应二进制位不同的位置的数目。</p>
-<p>给出两个整数 <code>x</code> 和 <code>y</code>，计算它们之间的汉明距离。</p>
-<p>示例:</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">输入: x = 1, y = 4</span><br><span class="line"></span><br><span class="line">输出: 2</span><br><span class="line"></span><br><span class="line">解释:</span><br><span class="line">1   (0 0 0 1)</span><br><span class="line">4   (0 1 0 0)</span><br><span class="line">       ↑   ↑</span><br><span class="line"></span><br><span class="line">上面的箭头指出了对应二进制位不同的位置。</span><br></pre></td></tr></table></figure>
-
-<p><strong>题解：</strong></p>
-<p>今天是简单题，但是不容小觑。“不同为1，相同为0”的异或运算，感觉很适合求解这道题。</p>
-<p><img src="/2021/05/24/%E6%AF%8F%E6%97%A5%E4%B8%80%E9%A2%98/13.jpg"></p>
-<p>计算 xx 和 yy 之间的汉明距离，可以先计算 x \oplus yx⊕y，然后统计结果中等于 11 的位数。</p>
-<p>现在，原始问题转换为位计数问题。位计数有多种思路，将在下面的方法中介绍。大多数编程语言都内置了计算二进制表达中 11 的数量的函数。在工程中，我们应该直接使用内置函数。比如c++中__builtin_popcount函数，java Integer的函数bitCount。</p>
-<p>其他的位计数可以由移位实现，先介绍使用位运算中移位的操作实现位计数功能的方法。</p>
-<p>具体地，记 s = x⊕y，我们可以不断地检查 s的最低位，如果最低位为 1，那么令计数器加一，然后我们令 s 整体右移一位，这样 s 的最低位将被舍去，原本的次低位就变成了新的最低位。我们重复这个过程直到 s=0 为止。这样计数器中就累计了 s 的二进制表示中 1 的数量。</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Solution</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">hammingDistance</span><span class="params">(<span class="keyword">int</span> x, <span class="keyword">int</span> y)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">int</span> s = x ^ y, ret = <span class="number">0</span>;</span><br><span class="line">        <span class="keyword">while</span> (s != <span class="number">0</span>) &#123;</span><br><span class="line">            ret += s &amp; <span class="number">1</span>;</span><br><span class="line">            s &gt;&gt;= <span class="number">1</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> ret;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-<h2 id="lc477-汉明距离总和-2021-05-28-中等"><a href="#lc477-汉明距离总和-2021-05-28-中等" class="headerlink" title="lc477 汉明距离总和 2021.05.28 中等"></a><a href="https://leetcode-cn.com/problems/total-hamming-distance/">lc477</a> 汉明距离总和 2021.05.28 中等</h2><p><strong>题目描述：</strong></p>
-<p>两个整数的 <a href="https://baike.baidu.com/item/%E6%B1%89%E6%98%8E%E8%B7%9D%E7%A6%BB/475174?fr=aladdin">汉明距离</a> 指的是这两个数字的二进制数对应位不同的数量。</p>
-<p>计算一个数组中，任意两个数之间汉明距离的总和。</p>
-<p>示例:</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">输入: 4, 14, 2</span><br><span class="line"></span><br><span class="line">输出: 6</span><br><span class="line"></span><br><span class="line">解释: 在二进制表示中，4表示为0100，14表示为1110，2表示为0010。（这样表示是为了体现后四位之间关系）</span><br><span class="line">所以答案为：</span><br><span class="line">HammingDistance(4, 14) + HammingDistance(4, 2) + HammingDistance(14, 2) = 2 + 2 + 2 = 6.</span><br><span class="line"></span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-<p><strong>题解：</strong></p>
-<p>我们知道，汉明距离为两数二进制表示中不同位的个数，同时每位的统计是相互独立的。</p>
-<p>即最终的答案为 $\sum^{31}_{x=0}cal(x)$ ，其中calc 函数为求得所有数二进制表示中的某一位 x所产生的不同位的个数。</p>
-<p>关于这个函数如何求解，事实上，对于nums[i],我们只关心nums中有多少个数的第x位和他不同，并不关心具体是哪些数字。</p>
-<p>我们可以建立两个集合s0,s1,分别统计出nums中所有数的第x位中0和1的个数，集合中的每次计数代表了nums中的某一元素，根据所在集合的不同代表了其在x位的值是0还是1，那么要找到nums中有多少位数与某一个数的第x位不同，只需要读取另一个集合的元素个数即可。这期间时间复杂度O(1),要求第x位所有不同数的对数的个数，乘法原理，将两者个数相乘即可。</p>
-<p><strong>code:</strong></p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Solution</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">totalHammingDistance</span><span class="params">(<span class="keyword">int</span>[] nums)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">int</span> ans = <span class="number">0</span>;</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> x = <span class="number">31</span>; x &gt;= <span class="number">0</span>; x--) &#123;</span><br><span class="line">            <span class="keyword">int</span> s0 = <span class="number">0</span>, s1 = <span class="number">0</span>;</span><br><span class="line">            <span class="keyword">for</span> (<span class="keyword">int</span> u : nums) &#123;</span><br><span class="line">                <span class="keyword">if</span> (((u &gt;&gt; x) &amp; <span class="number">1</span>) == <span class="number">1</span>) &#123;</span><br><span class="line">                    s1++;</span><br><span class="line">                &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                    s0++;</span><br><span class="line">                &#125;  </span><br><span class="line">            &#125;</span><br><span class="line">            ans += s0 * s1;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> ans;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-]]></content>
-      <tags>
-        <tag>leetcodeEveryDay</tag>
-      </tags>
   </entry>
 </search>
