@@ -653,9 +653,12 @@
 </li>
 <li><p>SourceTree，版本控制gui</p>
 </li>
-<li><p>Charles，抓包工具</p>
+<li><p>Charles，抓包工具,注意要安装的证书</p>
 </li>
 </ul>
+<h2 id="git相关配置"><a href="#git相关配置" class="headerlink" title="git相关配置"></a>git相关配置</h2><p>走ssh协议时，一台公钥访问多个站点，例如github，gitlab时需要注意配置一下ssh，在<code>～/.ssh/config</code>文件中配置如下：</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">Host *</span><br><span class="line">  AddKeysToAgent yes</span><br><span class="line">  UseKeychain yes</span><br><span class="line">  PreferredAuthentications publickey</span><br><span class="line">  IdentityFile ~/.ssh/id_rsa</span><br></pre></td></tr></table></figure>
+
 ]]></content>
   </entry>
   <entry>
