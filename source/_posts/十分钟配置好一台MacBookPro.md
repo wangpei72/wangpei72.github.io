@@ -83,5 +83,17 @@ tags:
 - Xcode
 
 - SourceTree，版本控制gui
-- Charles，抓包工具
+- Charles，抓包工具,注意要安装的证书
+
+## git相关配置
+
+走ssh协议时，一台公钥访问多个站点，例如github，gitlab时需要注意配置一下ssh，在`～/.ssh/config`文件中配置如下：
+
+```shell
+Host *
+  AddKeysToAgent yes
+  UseKeychain yes
+  PreferredAuthentications publickey
+  IdentityFile ~/.ssh/id_rsa
+```
 
