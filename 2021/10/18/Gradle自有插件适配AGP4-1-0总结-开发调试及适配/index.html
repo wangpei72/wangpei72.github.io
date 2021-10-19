@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.15.4/css/all.min.css" integrity="sha256-mUZM63G8m73Mcidfrv5E+Y61y7a12O5mW4ezU3bxqW4=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/animate.css@3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"koukoustar.cn","root":"/","images":"/images","scheme":"Mist","darkmode":false,"version":"8.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":false,"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"}}</script><script src="/js/config.js"></script>
+<meta name="description" content="总览本篇文章旨在总结近两周（2021.09.06-09.16）以来对两个gradle自有插件升级AGP版本后适配工作中用到的知识、思路、手段等。 总结主要分为两方面，一是上手gradle插件中开发调试等实操性的方法，二是对gradle构建体系的基础知识归纳。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Gradle自有插件适配AGP4.1.0总结-开发调试及适配">
+<meta property="og:url" content="http://koukoustar.cn/2021/10/18/Gradle%E8%87%AA%E6%9C%89%E6%8F%92%E4%BB%B6%E9%80%82%E9%85%8DAGP4-1-0%E6%80%BB%E7%BB%93-%E5%BC%80%E5%8F%91%E8%B0%83%E8%AF%95%E5%8F%8A%E9%80%82%E9%85%8D/index.html">
+<meta property="og:site_name" content="Welcome to koukouStar&#39;s Blog">
+<meta property="og:description" content="总览本篇文章旨在总结近两周（2021.09.06-09.16）以来对两个gradle自有插件升级AGP版本后适配工作中用到的知识、思路、手段等。 总结主要分为两方面，一是上手gradle插件中开发调试等实操性的方法，二是对gradle构建体系的基础知识归纳。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://koukoustar.cn/2021/10/18/Gradle%E8%87%AA%E6%9C%89%E6%8F%92%E4%BB%B6%E9%80%82%E9%85%8DAGP4-1-0%E6%80%BB%E7%BB%93-%E5%BC%80%E5%8F%91%E8%B0%83%E8%AF%95%E5%8F%8A%E9%80%82%E9%85%8D/1.gif">
+<meta property="article:published_time" content="2021-10-18T03:09:00.000Z">
+<meta property="article:modified_time" content="2021-10-19T06:07:44.029Z">
+<meta property="article:author" content="koukoustar">
+<meta property="article:tag" content="Android-gradle-plugin">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://koukoustar.cn/2021/10/18/Gradle%E8%87%AA%E6%9C%89%E6%8F%92%E4%BB%B6%E9%80%82%E9%85%8DAGP4-1-0%E6%80%BB%E7%BB%93-%E5%BC%80%E5%8F%91%E8%B0%83%E8%AF%95%E5%8F%8A%E9%80%82%E9%85%8D/1.gif">
+
+
+<link rel="canonical" href="http://koukoustar.cn/2021/10/18/Gradle%E8%87%AA%E6%9C%89%E6%8F%92%E4%BB%B6%E9%80%82%E9%85%8DAGP4-1-0%E6%80%BB%E7%BB%93-%E5%BC%80%E5%8F%91%E8%B0%83%E8%AF%95%E5%8F%8A%E9%80%82%E9%85%8D/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"http://koukoustar.cn/2021/10/18/Gradle%E8%87%AA%E6%9C%89%E6%8F%92%E4%BB%B6%E9%80%82%E9%85%8DAGP4-1-0%E6%80%BB%E7%BB%93-%E5%BC%80%E5%8F%91%E8%B0%83%E8%AF%95%E5%8F%8A%E9%80%82%E9%85%8D/","path":"2021/10/18/Gradle自有插件适配AGP4-1-0总结-开发调试及适配/","title":"Gradle自有插件适配AGP4.1.0总结-开发调试及适配"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>Gradle自有插件适配AGP4.1.0总结-开发调试及适配 | Welcome to koukouStar's Blog</title>
+  
+
+  <script src="/js/third-party/analytics/baidu-analytics.js"></script>
+  <script async src="https://hm.baidu.com/hm.js?ecb87535d9cf17e94cd6ba19cd63b06f"></script>
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <h1 class="site-title">Welcome to koukouStar's Blog</h1>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+
+
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%80%BB%E8%A7%88"><span class="nav-number">1.</span> <span class="nav-text">总览</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%8F%92%E4%BB%B6%E9%80%82%E9%85%8D%E9%97%AE%E9%A2%98-%E6%8E%92%E6%9F%A5%E6%80%9D%E8%B7%AF"><span class="nav-number">2.</span> <span class="nav-text">插件适配问题-排查思路</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#gradle%E6%8F%92%E4%BB%B6%E8%B0%83%E8%AF%95%E6%96%B9%E6%B3%95-Dorg-gradle-debug%E5%8F%82%E6%95%B0"><span class="nav-number">3.</span> <span class="nav-text">gradle插件调试方法-Dorg.gradle.debug参数</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Gradle%E6%9E%84%E5%BB%BA%E4%BD%93%E7%B3%BBvs-Maven"><span class="nav-number">4.</span> <span class="nav-text">Gradle构建体系vs Maven</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#gradle%E7%9A%84%E7%81%B5%E6%B4%BB%E6%80%A7"><span class="nav-number">4.1.</span> <span class="nav-text">gradle的灵活性</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#gradle%E7%9A%84%E6%80%A7%E8%83%BD%E8%A1%A8%E7%8E%B0"><span class="nav-number">4.2.</span> <span class="nav-text">gradle的性能表现</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#gradle%E7%9A%84%E4%BE%9D%E8%B5%96%E7%AE%A1%E7%90%86"><span class="nav-number">4.3.</span> <span class="nav-text">gradle的依赖管理</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Gradle%E6%8F%92%E4%BB%B6%E5%BC%80%E5%8F%91"><span class="nav-number">5.</span> <span class="nav-text">Gradle插件开发</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%85%8D%E7%BD%AE%E6%8F%92%E4%BB%B6"><span class="nav-number">5.1.</span> <span class="nav-text">配置插件</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%8B%AC%E7%AB%8B%E5%B7%A5%E7%A8%8B%E7%9A%84%E6%8F%92%E4%BB%B6"><span class="nav-number">5.2.</span> <span class="nav-text">独立工程的插件</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BD%BF%E7%94%A8%E7%8B%AC%E7%AB%8B%E5%B7%A5%E7%A8%8B%E5%BD%A2%E5%BC%8F%E5%8F%91%E5%B8%83%E7%9A%84%E6%8F%92%E4%BB%B6"><span class="nav-number">5.3.</span> <span class="nav-text">使用独立工程形式发布的插件</span></a></li></ol></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author site-overview-item animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="koukoustar"
+      src="/images/avatar.gif">
+  <p class="site-author-name" itemprop="name">koukoustar</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap site-overview-item animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">19</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-tags">
+        <span class="site-state-item-count">8</span>
+        <span class="site-state-item-name">标签</span>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author site-overview-item animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/wangpei72" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;wangpei72" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:wpkkstr@gmail.com" title="E-Mail → mailto:wpkkstr@gmail.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://weibo.com/u/6624315543" title="Weibo → https:&#x2F;&#x2F;weibo.com&#x2F;u&#x2F;6624315543" rel="noopener" target="_blank"><i class="fab fa-weibo fa-fw"></i>Weibo</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://plus.google.com/wpkkstr" title="Google → https:&#x2F;&#x2F;plus.google.com&#x2F;wpkkstr" rel="noopener" target="_blank"><i class="fab fa-google fa-fw"></i>Google</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://twitter.com/koukoustar3" title="Twitter → https:&#x2F;&#x2F;twitter.com&#x2F;koukoustar3" rel="noopener" target="_blank"><i class="fab fa-twitter fa-fw"></i>Twitter</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://www.facebook.com/pei.wang.1466126" title="FB Page → https:&#x2F;&#x2F;www.facebook.com&#x2F;pei.wang.1466126" rel="noopener" target="_blank"><i class="fab fa-facebook fa-fw"></i>FB Page</a>
+      </span>
+  </div>
+
+
+
+        </div>
+      </div>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://koukoustar.cn/2021/10/18/Gradle%E8%87%AA%E6%9C%89%E6%8F%92%E4%BB%B6%E9%80%82%E9%85%8DAGP4-1-0%E6%80%BB%E7%BB%93-%E5%BC%80%E5%8F%91%E8%B0%83%E8%AF%95%E5%8F%8A%E9%80%82%E9%85%8D/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="koukoustar">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Welcome to koukouStar's Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Gradle自有插件适配AGP4.1.0总结-开发调试及适配
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2021-10-18 11:09:00" itemprop="dateCreated datePublished" datetime="2021-10-18T11:09:00+08:00">2021-10-18</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2021-10-19 14:07:44" itemprop="dateModified" datetime="2021-10-19T14:07:44+08:00">2021-10-19</time>
+      </span>
+
+  
+    <span id="/2021/10/18/Gradle%E8%87%AA%E6%9C%89%E6%8F%92%E4%BB%B6%E9%80%82%E9%85%8DAGP4-1-0%E6%80%BB%E7%BB%93-%E5%BC%80%E5%8F%91%E8%B0%83%E8%AF%95%E5%8F%8A%E9%80%82%E9%85%8D/" class="post-meta-item leancloud_visitors" data-flag-title="Gradle自有插件适配AGP4.1.0总结-开发调试及适配" title="阅读次数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-eye"></i>
+      </span>
+      <span class="post-meta-item-text">阅读次数：</span>
+      <span class="leancloud-visitors-count"></span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <h2 id="总览"><a href="#总览" class="headerlink" title="总览"></a>总览</h2><p>本篇文章旨在总结近两周（2021.09.06-09.16）以来对两个gradle自有插件升级AGP版本后适配工作中用到的知识、思路、手段等。</p>
+<p>总结主要分为两方面，一是上手gradle插件中开发调试等实操性的方法，二是对gradle构建体系的基础知识归纳。</p>
+<span id="more"></span>
+
+<h2 id="插件适配问题-排查思路"><a href="#插件适配问题-排查思路" class="headerlink" title="插件适配问题-排查思路"></a>插件适配问题-排查思路</h2><p>结合实际工作中的插件适配工作，整理出在升级AGP版本这类背景下适配一个插件的通用思路：</p>
+<p>1、升级配置，进行编译和相应任务在原来生效的项目下的执行；</p>
+<p>2、观察能否正常编译，不能的话收集报错信息，定位出问题的位置；</p>
+<p>3、降级回到原来的环境下，在关键位置打上断点，进行调试，拿到正常工作条件下的debug信息；</p>
+<p>4、升级配置，修改出错的地方，进行api调用的调整，确保先编译通过；</p>
+<p>5、根据降级拿到的正常debug信息，测试修改后的代码debug信息能否替代之前的；</p>
+<p>6、根据原先的操作模式测试修改后的版本功能是否恢复。</p>
+<h2 id="gradle插件调试方法-Dorg-gradle-debug参数"><a href="#gradle插件调试方法-Dorg-gradle-debug参数" class="headerlink" title="gradle插件调试方法-Dorg.gradle.debug参数"></a>gradle插件调试方法-Dorg.gradle.debug参数</h2><p>gradle插件工程和安卓工程的调试模式不同，安卓应用可以在运行时进行debug，而gradle插件的工作是发生在工程构建（包含了编译）时期，那么gradle插件开发调试的方式该如何进行呢？</p>
+<p>可以通过以下方式：先了解一个参数，Dorg.gradle.debug，通过<code>gradle help -Dorg.gradle.debug=true</code></p>
+<p>将 org.gradle.debug 属性设置为“true”，然后将远程调试器连接到端口 5005，您可以在 Gradle 构建本身中设置断点和调试 buildSrc 和独立工程的插件。</p>
+<p>具体在idea里的操作可以参照下面这个gif。</p>
+<p>所以在执行一个debug之前，先运行这样一个命令:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">./gradlew :app:clean -Dorg.gradle.debuug=true --no-daemon</span><br></pre></td></tr></table></figure>
+
+<p>上述命令表示执行使用插件的工程app模块的clean任务并且打开debug模式，不使用守护进程，执行该命令后进程会卡住，直到remote debug进程attach，才会进入IDLE状态继续执行，之后稍等一段时间就可以拿到参数信息，正常进行断点调试。</p>
+<p>在这个过程中需要额外注意，使用的插件的jar包字节码和当前源码的版本要一致，否则debug过程中有些变量拿不到，所以如果使用的是本地maven repo，一定要在debug之前先uplodaArchives到本地之后在去调试，或者确保使用插件的工程app找到的是最新构建的插件的路径（例如插件工程build/libs/下的jar包）.</p>
+<p><img src="/2021/10/18/Gradle%E8%87%AA%E6%9C%89%E6%8F%92%E4%BB%B6%E9%80%82%E9%85%8DAGP4-1-0%E6%80%BB%E7%BB%93-%E5%BC%80%E5%8F%91%E8%B0%83%E8%AF%95%E5%8F%8A%E9%80%82%E9%85%8D/1.gif"></p>
+<h2 id="Gradle构建体系vs-Maven"><a href="#Gradle构建体系vs-Maven" class="headerlink" title="Gradle构建体系vs Maven"></a>Gradle构建体系vs Maven</h2><p>首先要区分开两个概念:Gradle和Android Gradle Plugin。</p>
+<p>Gradle是开源构建自动化工具，特点是灵活性和性能兼具，足以构建几乎所有类型的软件；文章标题中提到的是Android Gradle Plugin，它是google开发的、基于Gradle的，用于添加专用于构建Android应用的功能，可以说他是专门为android应用定制的gradle构建插件，并且是一个单独的软件库，其版本和gradle的版本相对应，例如4.1.0的AGP对应于gradle6.6。</p>
+<blockquote>
+<p>最新的AGP7.0对应的Gradle版本也是7.0，而上一个版本的AGP是4.2.0，对应gradle是6.7.1，AGP从7.0开始版本号就开始以DSL(gradle)的版本号为基准，这就是为什么AGP直接从4.*直接跳到了7</p>
+</blockquote>
+<h3 id="gradle的灵活性"><a href="#gradle的灵活性" class="headerlink" title="gradle的灵活性"></a>gradle的灵活性</h3><p>安卓指定gradle作为官方构建工具，不是因为build脚本是code，而是Gradle 的建模方式可以以最基本的方式进行扩展，Gradle 的模型还允许它用于使用 C/C++ 进行原生开发，并且可以扩展以覆盖任何生态系统。</p>
+<h3 id="gradle的性能表现"><a href="#gradle的性能表现" class="headerlink" title="gradle的性能表现"></a>gradle的性能表现</h3><p>缩短构建时间是加快交付的最直接手段之一。gradle也好，maven也好，都采用了一定形式的并行项目构建和并行以依赖解析。最大的区别是 Gradle 的工作避免和增量机制。使 Gradle 比 Maven 快得多的前 3 个特性是：</p>
+<ol>
+<li><p>增量机制（工作避免的手段）：Gradle 通过跟踪任务的输入和输出并仅运行必要的内容来避免工作，并且仅在可能的情况下处理更改的文件。</p>
+</li>
+<li><p>build cache：重用使用相同输入的任何其他 Gradle 构建的构建输出，包括在机器之间。</p>
+</li>
+<li><p>gradle daemon守护进程：使构建信息在内存中保持“热”状态的长期进程。</p>
+</li>
+</ol>
+<p>以上特性使得gradle在几乎所有场景的构建任务下都比maven快至少两倍以上。</p>
+<h3 id="gradle的依赖管理"><a href="#gradle的依赖管理" class="headerlink" title="gradle的依赖管理"></a>gradle的依赖管理</h3><p>gradle和maven两个构建系统都提供了从可配置存储库解析依赖项的内置功能。两者都能够在本地缓存依赖项并并行下载它们。作为库使用者，Maven 允许覆盖依赖项，但只能按版本覆盖。gradle提供了可定制的依赖选择和替换规则，这些规则可以声明一次并在项目范围内处理不需要的依赖。这种替换机制使 Gradle 能够一起构建多个源项目以创建复合构建。</p>
+<p>Gradle 允许自定义依赖范围（Scope），从而提供更好的建模和更快的构建。</p>
+<p>Maven 依赖冲突解决以最短路径工作，该路径受声明顺序的影响。Gradle 会完全解决冲突，选择图中找到的依赖项的最高版本。此外，使用 Gradle，您可以将版本声明为严格的，这允许它们优先于传递版本，从而允许降级依赖项。</p>
+<p>作为库生产者，Gradle 允许生产者声明 <code>api</code> 和 <code>implementation</code> 依赖项，以防止不需要的库泄漏到使用者的类路径中。Maven 允许发布者通过可选的依赖项提供元数据，但仅作为文档提供。 Gradle 完全支持功能变体（variants）和可选的依赖项。有关gradle的变体选择可以看一下这篇对官方文档的转载：<a target="_blank" rel="noopener" href="https://yuque.antfin-inc.com/nb/hatxv2/cgg6kp">https://yuque.antfin-inc.com/nb/hatxv2/cgg6kp</a></p>
+<h2 id="Gradle插件开发"><a href="#Gradle插件开发" class="headerlink" title="Gradle插件开发"></a>Gradle插件开发</h2><p>gradle plugin的开发，在这里做总结之前也有阅读和记录一篇粗略的笔记，就在本篇文章的同级目录下。</p>
+<p>可以使用groovy，kotlin或java来实现gradle插件，gradle插件最终将被编译为字节码。</p>
+<p>概括起来包括三种packaging形式的插件开发：直接写在构建脚本中、buildSrc形式的工程结构、单独的工程</p>
+<p>实现插件的本质是写一个实现Plugin接口的实现类，当插件被应用到一个工程的时候，gradle会为plugin class创建一个实例并且调用实例的apply()方法，并且当前project的对象将作为参数传递给方法，使得plugin可以按照需求用以配置这个工程。</p>
+<p>一个直接写在构建脚本里的gradle插件的例子：</p>
+<figure class="highlight groovy"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">apply <span class="attr">plugin:</span> GreetingPlugin</span><br><span class="line"><span class="keyword">abstract</span> <span class="class"><span class="keyword">class</span> <span class="title">GreetingPluginExtension</span> &#123;</span></span><br><span class="line">    <span class="keyword">abstract</span> Property&lt;String&gt; getMessage()</span><br><span class="line"></span><br><span class="line">    GreetingPluginExtension() &#123;</span><br><span class="line">        message.convention(<span class="string">&#x27;Hello from GreetingPlugin&#x27;</span>)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">GreetingPlugin</span> <span class="keyword">implements</span> <span class="title">Plugin</span>&lt;<span class="title">Project</span>&gt; &#123;</span></span><br><span class="line">    <span class="meta">@java</span>.lang.Override</span><br><span class="line">    <span class="keyword">void</span> apply(Project project) &#123;</span><br><span class="line">        <span class="keyword">def</span> extension = project.extensions.create(<span class="string">&#x27;greeting&#x27;</span>, GreetingPluginExtension)</span><br><span class="line">        project.task(<span class="string">&#x27;hello&#x27;</span>)&#123;</span><br><span class="line">            doLast &#123;</span><br><span class="line">                println extension.message.get()</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">greeting.message = <span class="string">&#x27;hi from Gradle&#x27;</span></span><br></pre></td></tr></table></figure>
+
+<p>hello的task可以<code>gradle -q hello</code>的方法执行。</p>
+<h3 id="配置插件"><a href="#配置插件" class="headerlink" title="配置插件"></a>配置插件</h3><p>大多数插件为构建脚本和其他插件提供了一些配置选项，用于自定义插件的工作方式。plugin可以使用extension对象来配置插件本身，project对象提供了ExtensionContainer对象，它包含了该project应用的所有的设置和属性。你可以添加一个extension对象到这个container中来为你的plugin提供配置。extension只是一个具有代表配置的 Java Bean 属性的对象。</p>
+<h3 id="独立工程的插件"><a href="#独立工程的插件" class="headerlink" title="独立工程的插件"></a>独立工程的插件</h3><p>我们修复的两个插件都是独立工程的插件，此类插件可以发布并且被公用，工程本身就是一个java工程，最终产出一个jar，它包含了插件的classse。</p>
+<blockquote>
+<p>最简单的打包发布插件的方式使用<a target="_blank" rel="noopener" href="https://docs.gradle.org/current/userguide/java_gradle_plugin.html#java_gradle_plugin">java gradle plugin开发插件</a>，这个插件帮助你自动应用plugin，添加gradleapi（）依赖至api配置，生成结果jar文件中被需要的插件描述子并且配置发布时候需要plugin marker artifact（<code>plugin.id:plugin.id.gradle.plugin:plugin.version</code>）</p>
+</blockquote>
+<p>如果没有使用上述插件来发布插件，这个发布将会缺少pma，而这又是被需要的，用一定位插件，所以推荐在使用该插件的工程的settings.gradle中添加一个resolutionStrategy{}到pluginManagement{}中：</p>
+<figure class="highlight groovy"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">resolutionStrategy &#123;</span><br><span class="line">       eachPlugin &#123;</span><br><span class="line">           <span class="keyword">if</span> (requested.id.namespace == <span class="string">&#x27;org.example&#x27;</span>) &#123;</span><br><span class="line">               useModule(<span class="string">&quot;org.example:custom-plugin:$&#123;requested.version&#125;&quot;</span>)</span><br><span class="line">           &#125;</span><br><span class="line">       &#125;</span><br><span class="line">   &#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="使用独立工程形式发布的插件"><a href="#使用独立工程形式发布的插件" class="headerlink" title="使用独立工程形式发布的插件"></a>使用独立工程形式发布的插件</h3><p>先在settings.gradle中的pluginManagement{}闭包中添加mave的repo url：</p>
+<figure class="highlight groovy"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// settings.gradle</span></span><br><span class="line">pluginManagement &#123;</span><br><span class="line">    repositories &#123;</span><br><span class="line">        maven &#123;</span><br><span class="line">            url = uri(repoLocation)</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>在build.gradle中plugins闭包中添加id和version：</p>
+<figure class="highlight groovy"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">plugins &#123;</span><br><span class="line">    id <span class="string">&#x27;org.example.greeting&#x27;</span> version <span class="string">&#x27;1.0-SNAPSHOT&#x27;</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/Android-gradle-plugin/" rel="tag"># Android-gradle-plugin</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2021/10/16/%E6%97%A5%E8%AF%AD%E5%AD%A6%E4%B9%A0%E8%AE%A1%E5%88%92/" rel="prev" title="日语学习计划">
+                  <i class="fa fa-chevron-left"></i> 日语学习计划
+                </a>
+            </div>
+            <div class="post-nav-item">
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+
+<div class="copyright">
+  &copy; 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="star"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">koukoustar</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/mist/" rel="noopener" target="_blank">NexT.Mist</a> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <script src="https://cdn.jsdelivr.net/npm/animejs@3.2.1/lib/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/schemes/muse.js"></script><script src="/js/next-boot.js"></script>
+
+  
+
+
+
+
+
+  
+
+
+  <script class="next-config" data-name="leancloud_visitors" type="application/json">{"enable":true,"app_id":"hpvFBiv00KI5T4MJlJ0X4kGs-9Nh9j0Va","app_key":"NM6BCuXqe6i2mac04S6y733a","server_url":null,"security":false}</script>
+  <script src="/js/third-party/statistics/lean-analytics.js"></script>
+
+
+
+</body>
+</html>
